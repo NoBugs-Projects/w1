@@ -1,0 +1,74 @@
+name: Run tests
+
+on:
+  workflow_call:
+    inputs:
+      package:
+        description: api | ui
+        required: true
+        type: string
+      browser:
+        description: chrome | firefox
+        type: string
+
+jobs:
+  validate-checkstyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Validate Checkstyle
+        run: ./mvnw validate
+
+  run-tests:
+    needs: validate-checkstyle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Teamcity setup
+        uses: ./.github/actions/teamcity-setup
+
+      - name: Set up browser config property
+        if: inputs.browser
+        run: sed -i "s/^browser=.*/browser=${{ inputs.browser }}/" src/main/resources/config.properties
+
+      - name: Run tests
+        run: ./mvnw test -P ${{ inputs.package }}
+
+      # Создание репорта с покрытием API тестов, основанного на Swagger. Документация: https://github.com/viclovsky/swagger-coverage
+      # Обязательно добавить SwaggerCoverageRestAssured фильтр во все реквесты, как в Specifications.reqBuilder
+      - name: Run Swagger coverage
+        # Запускается только для API тестов
+        if: always() && inputs.package == 'api'
+        run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://$HOST:8111/app/rest/swagger.json -i target/swagger-coverage-output
+
+      # Swagger coverage репорт сохраняется в артефакты GitHub Actions прогона
+      - name: Save Swagger coverage
+        uses: actions/upload-artifact@v4
+        if: always() && inputs.package == 'api'
+        with:
+          name: swagger-coverage
+          path: swagger-coverage-report.html
+
+      # Сохраняем allure-results в артефакты, чтобы опубликовать результаты всех прогонов вместе в main.yml/report
+      - name: Save Allure results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ inputs.browser && format('{0}-{1}', inputs.package, inputs.browser) || inputs.package }}
+          path: target/allure-results

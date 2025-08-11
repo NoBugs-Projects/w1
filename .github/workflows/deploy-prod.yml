@@ -1,0 +1,17 @@
+name: Deploy to production
+
+on: workflow_call
+
+# Примерные степы деплоя бэкенда и фронтенда на прод
+jobs:
+  deploy-prod-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy backend to production
+        run: echo Происходит деплой бэкенда на прод
+
+  deploy-prod-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy frontend to production
+        run: echo Происходит деплой фронтенда на прод

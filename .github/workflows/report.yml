@@ -1,0 +1,82 @@
+name: Report
+
+on:
+  workflow_call:
+    inputs:
+      parent_run_number:
+        required: false
+        type: string
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository to get access to the index.html file
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Выкачиваем все артефакты в одну директорию для формирования одного общего репорта
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: allure-results
+          merge-multiple: true
+
+      # Следующие 3 степа на сохранение Allure репортов с историей и публикацию их в GitHub Pages.
+      # Необходимо ознакомиться с документацией: https://allurereport.org/docs/integrations-github/,
+      # так как есть степы, которые необходимо выполнить вручную в настройках репозитория, чтобы публикация работала корректно.
+      # Рекомендованные степы для создания пустой ветки gh-pages, используемой для публикации репортов: https://gist.github.com/ramnathv/2227408?permalink_comment_id=2915143#gistcomment-2915143
+      - name: Load test report history
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Build test report
+        uses: simple-elf/allure-report-action@v1.9
+        with:
+          gh_pages: gh-pages
+          allure_history: allure-history
+          allure_results: allure-results
+
+      - name: Build Swagger coverage report
+        run: |
+          cat allure-results/swagger-coverage-report.html
+          if [ -f allure-results/swagger-coverage-report.html ]; then
+            sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/ || echo "Failed to copy swagger report"
+          fi
+
+      - name: Copy Allure report to managed directory
+        run: |
+          if [ -f allure-history/index.html ]; then
+            sudo cp allure-history/${{ github.run_number }}/index.html allure-history/${{ github.run_number }}/allure-report.html || echo "Failed to copy Allure report to managed directory"
+            echo "Allure report copied to managed directory"
+            cat allure-history/${{ github.run_number }}/allure-report.html
+          else
+            echo "No Allure report found to copy"
+          fi
+
+      - name: Extract metrics and generate dashboard
+        run: |
+          # Copy logo to allure-history directory
+          if [ -f .github/report/logo_icon.png ]; then
+            sudo cp .github/report/logo_icon.png allure-history/${{ github.run_number }}/ || echo "Failed to copy logo"
+          fi
+          # Copy any CSS files from .github/report/
+          if [ -f .github/report/*.css ]; then
+            sudo cp .github/report/*.css allure-history/${{ github.run_number }}/ || echo "Failed to copy CSS files"
+          fi
+          # Execute extract-metrics.sh script
+          chmod +x .github/scripts/extract-metrics.sh
+          .github/scripts/extract-metrics.sh allure-history/${{ github.run_number }}/ allure-history/${{ github.run_number }}/ allure-history/${{ github.run_number }}
+          sudo cat allure-history/${{ github.run_number }}/index.html
+          sudo ls -R allure-history/${{ github.run_number }}/
+          echo "Metrics extracted and dashboard generated"
+
+      - name: Publish test report
+        uses: peaceiris/actions-gh-pages@v3
+        #        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
