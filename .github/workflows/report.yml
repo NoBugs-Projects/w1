@@ -62,10 +62,10 @@ jobs:
           if [ -f .github/report/logo_icon.png ]; then
             sudo cp .github/report/logo_icon.png allure-history/${{ github.run_number }}/ || echo "Failed to copy logo"
           fi
-          # Copy any CSS files from .github/report/
-          if [ -f .github/report/*.css ]; then
-            sudo cp .github/report/*.css allure-history/${{ github.run_number }}/ || echo "Failed to copy CSS files"
-          fi
+#          # Copy any CSS files from .github/report/
+#          if [ -f .github/report/*.css ]; then
+#            sudo cp .github/report/*.css allure-history/${{ github.run_number }}/ || echo "Failed to copy CSS files"
+#          fi
           # Execute extract-metrics.sh script
           chmod +x .github/scripts/extract-metrics.sh
           .github/scripts/extract-metrics.sh allure-history/${{ github.run_number }}/ allure-history/${{ github.run_number }}/ allure-history/${{ github.run_number }}
