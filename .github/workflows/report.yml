@@ -48,6 +48,7 @@ jobs:
 
       - name: Copy Allure report to managed directory
         run: |
+          sudo ls -R allure-history
           if [ -f allure-history/index.html ]; then
             sudo cp allure-history/${{ github.run_number }}/index.html allure-history/${{ github.run_number }}/allure-report.html || echo "Failed to copy Allure report to managed directory"
             echo "Allure report copied to managed directory"
