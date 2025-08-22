@@ -51,22 +51,18 @@ jobs:
 #          fi
 
       - name: Add Swagger coverage to published site
-        shell: bash
         run: |
-          set -euo pipefail
-          DEST="gh-pages/w1/${{ github.run_number }}/swagger-coverage-report"
+          DEST="gh-pages/${{ github.run_number }}/swagger-coverage-report"
           mkdir -p "$DEST"
-          if [ -f "allure-results/swagger-coverage-report.html" ]; then
-            cp "allure-results/swagger-coverage-report.html" "$DEST/index.html"
-          else
-            echo "No swagger-coverage-report.html in allure-results"; ls -la allure-results || true
-          fi
+          cp allure-results/swagger-coverage-report.html "$DEST/index.html"
+          
           cd gh-pages
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add .
           git commit -m "Add Swagger for run ${{ github.run_number }}" || echo "Nothing to commit"
           git push
+
 
       - name: Extract metrics and generate dashboard
         run: |
