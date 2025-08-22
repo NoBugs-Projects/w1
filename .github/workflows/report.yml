@@ -39,6 +39,17 @@ jobs:
           allure_history: allure-history
           allure_results: allure-results
 
+      - name: Copy Allure files to managed directory
+        run: |
+          if [ -f allure-history/${{ github.run_number }}/index.html ]; then
+            sudo mkdir allure-history/${{ github.run_number }}/allure-report
+            sudo mv -r allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/allure-report/ || echo "Failed to copy Allure files to managed directory"
+            echo "Allure files copied to managed directory"
+            sudo ls allure-history/${{ github.run_number }}/allure-report
+          else
+            echo "No Allure files found to copy"
+          fi
+
       - name: Copy Swagger coverage report
         run: |
           if [ -f allure-results/swagger-coverage-report.html ]; then
@@ -46,17 +57,6 @@ jobs:
             sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/swagger-coverage-report/index.html || echo "Failed to copy swagger report"
           fi
           sudo ls allure-history/${{ github.run_number }}/swagger-coverage-report
-
-      - name: Copy Allure files to managed directory
-        run: |
-          if [ -f allure-history/${{ github.run_number }}/index.html ]; then
-            sudo mkdir allure-history/${{ github.run_number }}/allure-report
-            sudo cp -r allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/allure-report/ || echo "Failed to copy Allure files to managed directory"
-            echo "Allure files copied to managed directory"
-            sudo ls allure-history/${{ github.run_number }}/allure-report
-          else
-            echo "No Allure files found to copy"
-          fi
 
       - name: Extract metrics and generate dashboard
         run: |
@@ -70,7 +70,6 @@ jobs:
           # Execute extract-metrics.sh script
           chmod +x .github/scripts/extract-metrics.sh
           .github/scripts/extract-metrics.sh allure-history/${{ github.run_number }}/ allure-history/${{ github.run_number }}/ allure-history/${{ github.run_number }}
-          sudo ls -R allure-history/${{ github.run_number }}/
           echo "Metrics extracted and dashboard generated"
 
       - name: Publish test report
