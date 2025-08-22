@@ -39,11 +39,11 @@ jobs:
           allure_history: allure-history
           allure_results: allure-results
 
-      - name: Copy Allure files to managed directory
+      - name: Copy Allure report
         run: |
           if [ -f allure-history/${{ github.run_number }}/index.html ]; then
             sudo mkdir allure-history/${{ github.run_number }}/allure-report
-            sudo mv -r allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/allure-report/ || echo "Failed to copy Allure files to managed directory"
+            sudo mv allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/allure-report/ || echo "Failed to copy Allure files to managed directory"
             echo "Allure files copied to managed directory"
             sudo ls allure-history/${{ github.run_number }}/allure-report
           else
