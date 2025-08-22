@@ -32,6 +32,13 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
+      - name: Build test report
+        uses: simple-elf/allure-report-action@v1.9
+        with:
+          gh_pages: gh-pages
+          allure_history: allure-history
+          allure_results: allure-results
+
       - name: Copy Allure report
         run: |
           if [ -f allure-history/${{ github.run_number }}/index.html ]; then
@@ -60,12 +67,6 @@ jobs:
           .github/scripts/extract-metrics.sh allure-history/${{ github.run_number }}/allure-report/ allure-history/${{ github.run_number }}/swagger-coverage-report/ allure-history/${{ github.run_number }}
           echo "Metrics extracted and dashboard generated"
 
-      - name: Build test report
-        uses: simple-elf/allure-report-action@v1.9
-        with:
-          gh_pages: gh-pages
-          allure_history: allure-history
-          allure_results: allure-results
 
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
