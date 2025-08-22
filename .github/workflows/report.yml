@@ -39,16 +39,34 @@ jobs:
           allure_history: allure-history
           allure_results: allure-results
 
-      - name: Copy Allure report
+#      - name: Copy Allure report
+#        run: |
+#          if [ -f allure-history/${{ github.run_number }}/index.html ]; then
+#            sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/ || echo "Failed to copy swagger report"
+#            sudo mkdir allure-history/${{ github.run_number }}/report
+#            sudo mv allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/report/ || echo "Failed to copy Allure files to managed directory"
+#            echo "Report files copied to managed directory"
+#          else
+#            echo "No Allure files found to copy"
+#          fi
+
+      - name: Add Swagger coverage to published site
+        shell: bash
         run: |
-          if [ -f allure-history/${{ github.run_number }}/index.html ]; then
-            sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/ || echo "Failed to copy swagger report"
-            sudo mkdir allure-history/${{ github.run_number }}/report
-            sudo mv allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/report/ || echo "Failed to copy Allure files to managed directory"
-            echo "Report files copied to managed directory"
+          set -euo pipefail
+          DEST="gh-pages/w1/${{ github.run_number }}/swagger-coverage-report"
+          mkdir -p "$DEST"
+          if [ -f "allure-results/swagger-coverage-report.html" ]; then
+            cp "allure-results/swagger-coverage-report.html" "$DEST/index.html"
           else
-            echo "No Allure files found to copy"
+            echo "No swagger-coverage-report.html in allure-results"; ls -la allure-results || true
           fi
+          cd gh-pages
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Add Swagger for run ${{ github.run_number }}" || echo "Nothing to commit"
+          git push
 
       - name: Extract metrics and generate dashboard
         run: |
