@@ -14,18 +14,18 @@ jobs:
       contents: write
 
     steps:
-      # 1) Source repo (to get scripts, .github, etc.)
+      # 1) Repo (scripts, workflow files, etc.)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) Download test artifacts -> allure-results/
+      # 2) Test artifacts -> allure-results/
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: allure-results
           merge-multiple: true
 
-      # 3) Checkout gh-pages (published site working tree)
+      # 3) Published site working tree
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
@@ -36,17 +36,19 @@ jobs:
       - name: Build Allure (no auto push)
         uses: simple-elf/allure-report-action@v1.9
         with:
-          gh_pages: gh-pages                  # where the SPA will be written
-          allure_history: allure-history      # history cache dir (local workspace)
-          allure_results: allure-results      # input results
-          keep_reports: true                  # <— crucial: do not push
+          gh_pages: gh-pages
+          allure_history: allure-history
+          allure_results: allure-results
+          keep_reports: true
 
-      # 5) Add Swagger coverage HTML next to the run folder
+      # 5) Add Swagger next to the run folder
       - name: Add Swagger coverage to published site
         shell: bash
         run: |
           set -euo pipefail
-          RUN="${{ github.run_number }}"
+          RUN="${{ inputs.parent_run_number }}"
+          if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
+
           DEST="gh-pages/${RUN}/swagger-coverage-report"
           mkdir -p "$DEST"
 
@@ -57,35 +59,45 @@ jobs:
             ls -la allure-results || true
           fi
 
-      # 6) Copy branding & generate metrics against the PUBLISHED paths
-      - name: Extract metrics and generate dashboard
+      # 6) Optional: branding + metrics generated against the PUBLISHED paths
+      - name: Copy branding and generate metrics
         shell: bash
         run: |
           set -euo pipefail
-          RUN="${{ github.run_number }}"
+          RUN="${{ inputs.parent_run_number }}"
+          if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
           RUN_DIR="gh-pages/${RUN}"
 
           # Optional branding
-          [ -f .github/report/logo_icon.png ]    && cp .github/report/logo_icon.png    "$RUN_DIR/" || true
-          [ -f .github/report/report_styles.css ]&& cp .github/report/report_styles.css "$RUN_DIR/" || true
+          [ -f .github/report/logo_icon.png ] && cp .github/report/logo_icon.png "$RUN_DIR/" || true
+          [ -f .github/report/report_styles.css ] && cp .github/report/report_styles.css "$RUN_DIR/" || true
 
-          # Paths for metrics script:
-          ALLURE_DIR="$RUN_DIR"                                # Allure SPA lives here (index.html, data/, widgets/)
-          SWAGGER_DIR="$RUN_DIR/swagger-coverage-report"       # Swagger HTML we just copied
-          OUT_DIR="$RUN_DIR"                                   # where to write dashboard
+          # Paths for metrics script
+          ALLURE_DIR="$RUN_DIR"                          # Allure SPA output (index.html, data/, widgets/)
+          SWAGGER_DIR="$RUN_DIR/swagger-coverage-report" # Swagger HTML we just copied
+          OUT_DIR="$RUN_DIR"                             # Where to write metrics/dashboard
 
-          chmod +x .github/scripts/extract-metrics.sh
-          .github/scripts/extract-metrics.sh "$ALLURE_DIR" "$SWAGGER_DIR" "$OUT_DIR"
-          echo "Metrics extracted and dashboard generated"
+          if [ -f .github/scripts/extract-metrics.sh ]; then
+            chmod +x .github/scripts/extract-metrics.sh || true
+            .github/scripts/extract-metrics.sh "$ALLURE_DIR" "$SWAGGER_DIR" "$OUT_DIR"
+          else
+            echo "extract-metrics.sh not found; skipping metrics generation"
+          fi
 
-      # 7) Publish (single push)
+      # 7) Single publish (commit + push)
       - name: Publish Allure + Swagger (single push)
         shell: bash
         run: |
           set -euo pipefail
+          RUN="${{ inputs.parent_run_number }}"
+          if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
+
+          # Avoid dubious ownership errors
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/gh-pages"
+
           cd gh-pages
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add .
-          git commit -m "Publish Allure + Swagger for run ${{ github.run_number }}" || echo "Nothing to commit"
+          git commit -m "Publish Allure + Swagger for run ${RUN}" || echo "Nothing to commit"
           git push
