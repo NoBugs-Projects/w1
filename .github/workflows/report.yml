@@ -46,7 +46,7 @@ jobs:
       - name: Copy Swagger coverage report
         run: |
           if [ -f allure-results/swagger-coverage-report.html ]; then
-            sudo mkdir gh-pages/w1/${{ github.run_number }}/swagger-coverage-report
+            sudo mkdir allure-history/${{ github.run_number }}/swagger-coverage-report
             sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/swagger-coverage-report/index.html || echo "Failed to copy swagger report"
           fi
           sudo ls allure-history/${{ github.run_number }}/swagger-coverage-report
