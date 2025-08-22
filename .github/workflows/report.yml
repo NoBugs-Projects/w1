@@ -32,13 +32,6 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: Build test report
-        uses: simple-elf/allure-report-action@v1.9
-        with:
-          gh_pages: gh-pages
-          allure_history: allure-history
-          allure_results: allure-results
-
       - name: Copy Allure report
         run: |
           if [ -f allure-history/${{ github.run_number }}/index.html ]; then
@@ -54,9 +47,9 @@ jobs:
         run: |
           if [ -f allure-results/swagger-coverage-report.html ]; then
             sudo mkdir gh-pages/w1/${{ github.run_number }}/swagger-coverage-report
-            sudo cp allure-results/swagger-coverage-report.html gh-pages/w1/${{ github.run_number }}/swagger-coverage-report/index.html || echo "Failed to copy swagger report"
+            sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/swagger-coverage-report/index.html || echo "Failed to copy swagger report"
           fi
-          sudo ls gh-pages/w1/${{ github.run_number }}/swagger-coverage-report
+          sudo ls allure-history/${{ github.run_number }}/swagger-coverage-report
 
       - name: Extract metrics and generate dashboard
         run: |
@@ -69,8 +62,15 @@ jobs:
           fi
           # Execute extract-metrics.sh script
           chmod +x .github/scripts/extract-metrics.sh
-          .github/scripts/extract-metrics.sh allure-history/${{ github.run_number }}/allure-report/ gh-pages/w1/${{ github.run_number }}/swagger-coverage-report/ allure-history/${{ github.run_number }}
+          .github/scripts/extract-metrics.sh allure-history/${{ github.run_number }}/allure-report/ allure-history/${{ github.run_number }}/swagger-coverage-report/ allure-history/${{ github.run_number }}
           echo "Metrics extracted and dashboard generated"
+
+      - name: Build test report
+        uses: simple-elf/allure-report-action@v1.9
+        with:
+          gh_pages: gh-pages
+          allure_history: allure-history
+          allure_results: allure-results
 
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
