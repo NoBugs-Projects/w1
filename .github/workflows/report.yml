@@ -10,79 +10,82 @@ on:
 jobs:
   report:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
-      # Checkout the repository to get access to the index.html file
+      # 1) Source repo (to get scripts, .github, etc.)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Выкачиваем все артефакты в одну директорию для формирования одного общего репорта
+      # 2) Download test artifacts -> allure-results/
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: allure-results
           merge-multiple: true
 
-      # Следующие 3 степа на сохранение Allure репортов с историей и публикацию их в GitHub Pages.
-      # Необходимо ознакомиться с документацией: https://allurereport.org/docs/integrations-github/,
-      # так как есть степы, которые необходимо выполнить вручную в настройках репозитория, чтобы публикация работала корректно.
-      # Рекомендованные степы для создания пустой ветки gh-pages, используемой для публикации репортов: https://gist.github.com/ramnathv/2227408?permalink_comment_id=2915143#gistcomment-2915143
-      - name: Load test report history
+      # 3) Checkout gh-pages (published site working tree)
+      - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
-      - name: Build test report
+      # 4) Build Allure into gh-pages (no auto push)
+      - name: Build Allure (no auto push)
         uses: simple-elf/allure-report-action@v1.9
         with:
-          gh_pages: gh-pages
-          allure_history: allure-history
-          allure_results: allure-results
+          gh_pages: gh-pages                  # where the SPA will be written
+          allure_history: allure-history      # history cache dir (local workspace)
+          allure_results: allure-results      # input results
+          keep_reports: true                  # <— crucial: do not push
 
-#      - name: Copy Allure report
-#        run: |
-#          if [ -f allure-history/${{ github.run_number }}/index.html ]; then
-#            sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/ || echo "Failed to copy swagger report"
-#            sudo mkdir allure-history/${{ github.run_number }}/report
-#            sudo mv allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/report/ || echo "Failed to copy Allure files to managed directory"
-#            echo "Report files copied to managed directory"
-#          else
-#            echo "No Allure files found to copy"
-#          fi
-
+      # 5) Add Swagger coverage HTML next to the run folder
       - name: Add Swagger coverage to published site
+        shell: bash
         run: |
-          DEST="gh-pages/${{ github.run_number }}/swagger-coverage-report"
+          set -euo pipefail
+          RUN="${{ github.run_number }}"
+          DEST="gh-pages/${RUN}/swagger-coverage-report"
           mkdir -p "$DEST"
-          cp allure-results/swagger-coverage-report.html "$DEST/index.html"
-          
+
+          if [ -f "allure-results/swagger-coverage-report.html" ]; then
+            cp "allure-results/swagger-coverage-report.html" "$DEST/index.html"
+          else
+            echo "No swagger-coverage-report.html found in allure-results/"
+            ls -la allure-results || true
+          fi
+
+      # 6) Copy branding & generate metrics against the PUBLISHED paths
+      - name: Extract metrics and generate dashboard
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN="${{ github.run_number }}"
+          RUN_DIR="gh-pages/${RUN}"
+
+          # Optional branding
+          [ -f .github/report/logo_icon.png ]    && cp .github/report/logo_icon.png    "$RUN_DIR/" || true
+          [ -f .github/report/report_styles.css ]&& cp .github/report/report_styles.css "$RUN_DIR/" || true
+
+          # Paths for metrics script:
+          ALLURE_DIR="$RUN_DIR"                                # Allure SPA lives here (index.html, data/, widgets/)
+          SWAGGER_DIR="$RUN_DIR/swagger-coverage-report"       # Swagger HTML we just copied
+          OUT_DIR="$RUN_DIR"                                   # where to write dashboard
+
+          chmod +x .github/scripts/extract-metrics.sh
+          .github/scripts/extract-metrics.sh "$ALLURE_DIR" "$SWAGGER_DIR" "$OUT_DIR"
+          echo "Metrics extracted and dashboard generated"
+
+      # 7) Publish (single push)
+      - name: Publish Allure + Swagger (single push)
+        shell: bash
+        run: |
+          set -euo pipefail
           cd gh-pages
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add .
-          git commit -m "Add Swagger for run ${{ github.run_number }}" || echo "Nothing to commit"
+          git commit -m "Publish Allure + Swagger for run ${{ github.run_number }}" || echo "Nothing to commit"
           git push
-
-
-      - name: Extract metrics and generate dashboard
-        run: |
-          # Copy logo to allure-history directory
-          if [ -f .github/report/logo_icon.png ]; then
-            sudo cp .github/report/logo_icon.png allure-history/${{ github.run_number }}/ || echo "Failed to copy logo"
-          fi
-          if [ -f .github/report/report_styles.css ]; then
-            sudo cp .github/report/report_styles.css allure-history/${{ github.run_number }}/ || echo "Failed to styles"
-          fi
-          # Execute extract-metrics.sh script
-          chmod +x .github/scripts/extract-metrics.sh
-          .github/scripts/extract-metrics.sh allure-history/${{ github.run_number }}/allure-report/ allure-history/${{ github.run_number }}/swagger-coverage-report/ allure-history/${{ github.run_number }}
-          echo "Metrics extracted and dashboard generated"
-
-
-      - name: Publish test report
-        uses: peaceiris/actions-gh-pages@v3
-        #        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
