@@ -42,13 +42,10 @@ jobs:
       - name: Copy Allure report
         run: |
           if [ -f allure-history/${{ github.run_number }}/index.html ]; then
-            sudo mkdir allure-history/${{ github.run_number }}/allure-report
-            sudo mv allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/allure-report/ || echo "Failed to copy Allure files to managed directory"
-            echo "Allure files copied to managed directory"
-            sudo ls allure-history/${{ github.run_number }}/allure-report
-            sudo mkdir allure-history/${{ github.run_number }}/swagger-coverage-report
-            sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/swagger-coverage-report/index.html || echo "Failed to copy swagger report"
-            sudo ls allure-history/${{ github.run_number }}/swagger-coverage-report
+            sudo cp allure-results/swagger-coverage-report.html allure-history/${{ github.run_number }}/ || echo "Failed to copy swagger report"
+            sudo mkdir allure-history/${{ github.run_number }}/report
+            sudo mv allure-history/${{ github.run_number }}/* allure-history/${{ github.run_number }}/report/ || echo "Failed to copy Allure files to managed directory"
+            echo "Report files copied to managed directory"
           else
             echo "No Allure files found to copy"
           fi
