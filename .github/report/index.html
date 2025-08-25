@@ -32,8 +32,12 @@
         .btn{display:inline-block;margin-top:8px;padding:8px 12px;border-radius:6px;background:#0d6efd;color:#fff;text-decoration:none}
         .btn.pink{background:#e91e63}
 
-        /* Ensure donut height is 70% of width */
-        #testStatusChart{width:100% !important;height:auto !important;}
+        /* Ensure donut height is strictly limited to 70px maximum */
+        #testStatusChart{width:100% !important;height:70px !important;max-height:70px !important;}
+        
+        /* Ensure HTTP Method Coverage and Status Code Coverage charts are strictly limited to 70px maximum */
+        #methodCoverageChart{width:100% !important;height:70px !important;max-height:70px !important;}
+        #statusCodeChart{width:100% !important;height:70px !important;max-height:70px !important;}
     </style>
 </head>
 <body>
@@ -248,8 +252,7 @@
         },
         options:{
           responsive:true,
-          maintainAspectRatio:true,
-          aspectRatio:(1/0.7), /* width / height => height = 70% of width */
+          maintainAspectRatio:false,
           layout:{ padding:{ top:3, bottom:3, left:3, right:3 } },
           plugins:{ legend:{ position:'bottom', labels:{ padding:3, font:{ size:10 }, boxWidth:10, boxHeight:10 } } }
         }
