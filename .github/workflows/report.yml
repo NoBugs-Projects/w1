@@ -14,34 +14,52 @@ jobs:
       contents: write
 
     steps:
-      # 1) Repo (scripts, workflow files, etc.)
+      # 1) Репозиторий (скрипты, стили и т.п.)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) Test artifacts -> allure-results/
+      # 2) Артефакты тестов -> allure-results/
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: allure-results
           merge-multiple: true
 
-      # 3) Published site working tree
+      # 3) Рабочее дерево опубликованного сайта (ветка gh-pages)
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
-      # 4) Build Allure into gh-pages (no auto push)
+      # 4) Сборка Allure в gh-pages БЕЗ авто-push
       - name: Build Allure (no auto push)
         uses: simple-elf/allure-report-action@v1.9
         with:
-          gh_pages: gh-pages
+          gh_pages: gh-pages                  # action положит отчёт в gh-pages/<run>/
           allure_history: allure-history
           allure_results: allure-results
           keep_reports: true
 
-      # 5) Add Swagger next to the run folder
+      # 5) Перенос Allure в подпапку /allure-report/
+      - name: Relocate Allure into /allure-report/
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN="${{ inputs.parent_run_number }}"
+          if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
+
+          RUN_DIR="gh-pages/${RUN}"
+          DEST="${RUN_DIR}/allure-report"
+          mkdir -p "$DEST"
+
+          # переносим всё из gh-pages/<run>/ в gh-pages/<run>/allure-report, кроме уже существующих целевых папок
+          find "$RUN_DIR" -mindepth 1 -maxdepth 1 \
+            ! -name 'allure-report' \
+            ! -name 'swagger-coverage-report' \
+            -exec mv -t "$DEST" {} +
+
+      # 6) Кладём Swagger рядом
       - name: Add Swagger coverage to published site
         shell: bash
         run: |
@@ -59,7 +77,7 @@ jobs:
             ls -la allure-results || true
           fi
 
-      # 6) Optional: branding + metrics generated against the PUBLISHED paths
+      # 7) (Опционально) брендинг + метрики по опубликованным путям
       - name: Copy branding and generate metrics
         shell: bash
         run: |
@@ -68,36 +86,47 @@ jobs:
           if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
           RUN_DIR="gh-pages/${RUN}"
 
-          # Optional branding
-          [ -f .github/report/logo_icon.png ] && cp .github/report/logo_icon.png "$RUN_DIR/" || true
+          # Опциональные файлы брендинга
+          [ -f .github/report/logo_icon.png ]     && cp .github/report/logo_icon.png     "$RUN_DIR/" || true
           [ -f .github/report/report_styles.css ] && cp .github/report/report_styles.css "$RUN_DIR/" || true
 
-          # Paths for metrics script
-          ALLURE_DIR="$RUN_DIR"                          # Allure SPA output (index.html, data/, widgets/)
-          SWAGGER_DIR="$RUN_DIR/swagger-coverage-report" # Swagger HTML we just copied
-          OUT_DIR="$RUN_DIR"                             # Where to write metrics/dashboard
+          # Пути для скрипта метрик
+          ALLURE_DIR="$RUN_DIR/allure-report"                 # тут index.html, data/, widgets/
+          SWAGGER_DIR="$RUN_DIR/swagger-coverage-report"      # тут index.html Swagger
+          OUT_DIR="$RUN_DIR"                                  # сюда писать метрики/дашборд
 
           if [ -f .github/scripts/extract-metrics.sh ]; then
             chmod +x .github/scripts/extract-metrics.sh || true
+            # ВАЖНО: внутри скрипта не использовать sudo для записи в gh-pages/*
             .github/scripts/extract-metrics.sh "$ALLURE_DIR" "$SWAGGER_DIR" "$OUT_DIR"
           else
             echo "extract-metrics.sh not found; skipping metrics generation"
           fi
 
-      # 7) Single publish (commit + push)
-      - name: Publish Allure + Swagger (single push)
+      # 8) Нормализация прав (на случай, если где-то писали от root)
+      - name: Normalize ownership and permissions in gh-pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo chown -R "$(id -u):$(id -g)" gh-pages
+          find gh-pages -type d -exec chmod 755 {} \;
+          find gh-pages -type f -exec chmod 644 {} \;
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/gh-pages"
+
+      # 9) Публикация одним коммитом
+      - name: Publish Allure + Swagger + Dashboard (single push)
         shell: bash
         run: |
           set -euo pipefail
           RUN="${{ inputs.parent_run_number }}"
           if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
 
-          # Avoid dubious ownership errors
-          git config --global --add safe.directory "$GITHUB_WORKSPACE/gh-pages"
+          echo "Preview tree:"
+          find gh-pages -maxdepth 3 -type f | sort | sed -n '1,200p'
 
           cd gh-pages
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add .
-          git commit -m "Publish Allure + Swagger for run ${RUN}" || echo "Nothing to commit"
+          git commit -m "Publish Allure (/allure-report), Swagger and dashboard for run ${RUN}" || echo "Nothing to commit"
           git push
