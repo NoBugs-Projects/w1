@@ -1,4 +1,4 @@
-<!-- index.html -->
+<!-- .github/report/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,8 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* Keep your existing CSS; below is only minimal structure glue.
-           Using external report_styles.css for the real look & feel. */
+        /* Layout basics (keep your full CSS in report_styles.css) */
         .dashboard-container{max-width:1200px;margin:0 auto;padding:8px}
         .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px}
         .kpi-card{background:#fff;border-radius:6px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.1);border-left:3px solid #007bff}
@@ -32,6 +31,9 @@
         .report-card{background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
         .btn{display:inline-block;margin-top:8px;padding:8px 12px;border-radius:6px;background:#0d6efd;color:#fff;text-decoration:none}
         .btn.pink{background:#e91e63}
+
+        /* Ensure donut height is 70% of width */
+        #testStatusChart{width:100% !important;height:auto !important;}
     </style>
 </head>
 <body>
@@ -85,11 +87,11 @@
             </div>
         </div>
 
-        <!-- Donut -->
+        <!-- Donut (70% height of width) -->
         <div class="charts-grid">
             <div class="chart-container">
                 <h3>Test Status Distribution</h3>
-                <canvas id="testStatusChart" width="300" height="320"></canvas>
+                <canvas id="testStatusChart"></canvas>
             </div>
         </div>
     </div>
@@ -174,11 +176,11 @@
         <div class="charts-grid">
             <div class="chart-container">
                 <h3>HTTP Method Coverage</h3>
-                <canvas id="methodCoverageChart" width="300" height="360"></canvas>
+                <canvas id="methodCoverageChart"></canvas>
             </div>
             <div class="chart-container">
                 <h3>Status Code Coverage</h3>
-                <canvas id="statusCodeChart" width="300" height="360"></canvas>
+                <canvas id="statusCodeChart"></canvas>
             </div>
         </div>
     </div>
@@ -213,60 +215,93 @@
 
     function getCoverageColor(p){ if(p<20) return '#dc3545'; if(p<70) return '#ffc107'; return '#28a745'; }
     function setGauge(id, p){
-      const g=document.getElementById(id); if(!g) return;
-      const v=g.querySelector('.gauge-value'); const c=getCoverageColor(p);
+      var g=document.getElementById(id); if(!g) return;
+      var v=g.querySelector('.gauge-value'); var c=getCoverageColor(p);
       g.style.setProperty('--percentage', p); g.style.setProperty('--gauge-color', c);
       v.textContent = p + '%'; v.style.color=c;
     }
     function setBarWidth(id, p){
-      const f=document.getElementById(id); if(!f) return;
-      const c=getCoverageColor(p); f.style.width = p + '%';
+      var f=document.getElementById(id); if(!f) return;
+      var c=getCoverageColor(p); f.style.width = p + '%';
       f.className = 'coverage-fill ' + (p<20?'coverage-low':(p<70?'coverage-medium':'coverage-high'));
     }
 
-    function testStatusChart(d){
-      const ctx=document.getElementById('testStatusChart').getContext('2d');
+    function createTestStatusChart(data){
+      var ctx=document.getElementById('testStatusChart').getContext('2d');
       if(charts.testStatus) charts.testStatus.destroy();
       charts.testStatus=new Chart(ctx,{
         type:'doughnut',
-        data:{labels:['Passed','Failed','Skipped','Flaky','Critical'],
-          datasets:[{data:[d.passedTests||0,d.failedTests||0,d.skippedTests||0,d.flakyTests||0,d.criticalFailures||0],
-            backgroundColor:['#28a745','#dc3545','#6c757d','#ffc107','#dc3545'],borderWidth:2,borderColor:'#fff'}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
+        data:{
+          labels:['Passed','Failed','Skipped','Flaky','Critical'],
+          datasets:[{
+            data:[
+              data.passedTests||0,
+              data.failedTests||0,
+              data.skippedTests||0,
+              data.flakyTests||0,
+              data.criticalFailures||0
+            ],
+            backgroundColor:['#28a745','#dc3545','#6c757d','#ffc107','#dc3545'],
+            borderWidth:2,
+            borderColor:'#fff'
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:true,
+          aspectRatio:(1/0.7), /* width / height => height = 70% of width */
+          layout:{ padding:{ top:3, bottom:3, left:3, right:3 } },
+          plugins:{ legend:{ position:'bottom', labels:{ padding:3, font:{ size:10 }, boxWidth:10, boxHeight:10 } } }
+        }
       });
     }
-    function methodCoverageChart(d){
-      const ctx=document.getElementById('methodCoverageChart').getContext('2d');
+
+    function createMethodCoverageChart(d){
+      var ctx=document.getElementById('methodCoverageChart').getContext('2d');
       if(charts.methodCoverage) charts.methodCoverage.destroy();
-      const m=d.methodCoverage||{}, keys=Object.keys(m), vals=keys.map(k=>m[k].coverage||0);
-      charts.methodCoverage=new Chart(ctx,{type:'bar',data:{labels:keys,datasets:[{label:'Coverage %',data:vals,backgroundColor:vals.map(getCoverageColor),borderColor:vals.map(getCoverageColor),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}}}});
+      var m=d.methodCoverage||{}, keys=Object.keys(m), vals=keys.map(function(k){ return m[k].coverage||0; });
+      charts.methodCoverage=new Chart(ctx,{
+        type:'bar',
+        data:{ labels:keys, datasets:[{ label:'Coverage %', data:vals, backgroundColor:vals.map(getCoverageColor), borderColor:vals.map(getCoverageColor), borderWidth:1 }] },
+        options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, max:100 } } }
+      });
     }
-    function statusCodeChart(d){
-      const ctx=document.getElementById('statusCodeChart').getContext('2d');
+
+    function createStatusCodeChart(d){
+      var ctx=document.getElementById('statusCodeChart').getContext('2d');
       if(charts.statusCode) charts.statusCode.destroy();
-      const s=d.statusCodeCoverage||{}, codes=Object.keys(s), cnt=codes.map(k=>s[k]||0);
-      charts.statusCode=new Chart(ctx,{type:'bar',data:{labels:codes,datasets:[{label:'Coverage Count',data:cnt,backgroundColor:'#007bff',borderColor:'#0056b3',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+      var s=d.statusCodeCoverage||{}, codes=Object.keys(s), cnt=codes.map(function(k){ return s[k]||0; });
+      charts.statusCode=new Chart(ctx,{
+        type:'bar',
+        data:{ labels:codes, datasets:[{ label:'Coverage Count', data:cnt, backgroundColor:'#007bff', borderColor:'#0056b3', borderWidth:1 }] },
+        options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
+      });
     }
 
     function applyMetrics(data){
       if(data.allure){
+        document.getElementById('pass-rate-value').textContent = (data.allure.passRate||0) + '%';
         setBarWidth('pass-rate-fill', Number(data.allure.passRate||0));
-        testStatusChart(data.allure);
+        document.getElementById('total-tests-value').textContent = data.allure.totalTests||0;
+        document.getElementById('passed-tests').textContent = (data.allure.passedTests||0) + ' passed';
+        document.getElementById('failed-tests').textContent = (data.allure.failedTests||0) + ' failed';
+        createTestStatusChart(data.allure);
       }
       if(data.swagger){
         setGauge('api-coverage-gauge', Number(data.swagger.apiCoverage||0));
         setGauge('conditions-coverage-gauge', Number(data.swagger.conditionsCoverage||0));
+        document.getElementById('operations-coverage-value').textContent = (data.swagger.apiCoverage||0) + '%';
         setBarWidth('operations-coverage-fill', Number(data.swagger.apiCoverage||0));
-        methodCoverageChart(data.swagger);
-        statusCodeChart(data.swagger);
+        createMethodCoverageChart(data.swagger);
+        createStatusCodeChart(data.swagger);
       }
     }
 
     function loadMetrics(){
       fetch('metrics.json')
-        .then(r=>{ if(!r.ok) throw new Error('no metrics'); return r.json(); })
+        .then(function(r){ if(!r.ok) throw new Error('no metrics'); return r.json(); })
         .then(applyMetrics)
-        .catch(()=>{ /* leave static placeholders if metrics.json missing */ });
+        .catch(function(){ /* keep placeholders if metrics missing */ });
     }
 
     document.addEventListener('DOMContentLoaded', loadMetrics);
