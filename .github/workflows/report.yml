@@ -14,11 +14,11 @@ jobs:
       contents: write
 
     steps:
-      # 1) Репозиторий (скрипты, стили и т.п.)
+      # 1) Репозиторий (скрипты, workflow, extract-metrics.sh и т.п.)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) Артефакты тестов -> allure-results/
+      # 2) Скачиваем артефакты тестов в allure-results/ (сливаем все артефакты)
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -32,66 +32,64 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      # 4) Сборка Allure в gh-pages БЕЗ авто-push
-      - name: Build Allure (no auto push)
-        uses: simple-elf/allure-report-action@v1.9
+      # 4) Устанавливаем Java (нужна Allure CLI)
+      - name: Setup Java (for Allure CLI)
+        uses: actions/setup-java@v4
         with:
-          gh_pages: gh-pages                  # action положит отчёт в gh-pages/<run>/
-          allure_history: allure-history
-          allure_results: allure-results
-          keep_reports: true
+          distribution: temurin
+          java-version: "17"
 
-      - name: Отладка и перенос Allure в /allure-report/ (одним шагом)
+      # 5) Устанавливаем Allure CLI
+      - name: Install Allure CLI
         shell: bash
         run: |
           set -euo pipefail
-          # Определяем номер запуска: берём входной, иначе текущий run_number
+          VER="2.29.0"
+          curl -sSL -o "allure-${VER}.tgz" "https://github.com/allure-framework/allure2/releases/download/${VER}/allure-${VER}.tgz"
+          sudo tar -zxvf "allure-${VER}.tgz" -C /opt/
+          sudo ln -sf "/opt/allure-${VER}/bin/allure" /usr/bin/allure
+          allure --version
+
+      # 6) Подготовка history: переносим историю прошлого прогона в allure-results/history (если есть)
+      - name: Prepare Allure history
+        shell: bash
+        run: |
+          set -euo pipefail
           RUN="${{ inputs.parent_run_number }}"
           if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
-          
-          RUN_DIR="gh-pages/${RUN}"
-          DEST="${RUN_DIR}/allure-report"
-          
-          # --- Отладочная печать входных артефактов ---
-          echo "=== allure-results (2 уровня) ==="
-          find allure-results -maxdepth 2 -print 2>/dev/null | sort || true
-          
-          # --- Проверяем, что директория публикации существует ---
-          echo "=== Проверка директории публикации: $RUN_DIR ==="
-          if [ ! -d "$RUN_DIR" ]; then
-            echo "Директория $RUN_DIR не найдена. Похоже, шаг сборки Allure не создал выходные файлы."
-            echo "Дерево gh-pages (2 уровня):"
-            find gh-pages -maxdepth 2 -type d -print | sort || true
-            exit 1
-          fi
-          
-          # --- Проверяем, что в $RUN_DIR действительно есть артефакты Allure ---
-          if ! { [ -f "$RUN_DIR/index.html" ] || [ -f "$RUN_DIR/app.js" ] || [ -d "$RUN_DIR/data" ]; }; then
-            echo "В $RUN_DIR не найдено типичных файлов Allure (index.html/app.js/data). Перенос пропускаем."
-            echo "Содержимое корня ран-а:"
-            find "$RUN_DIR" -maxdepth 1 -mindepth 1 -print | sort || true
-            exit 0
-          fi
-          
-          # --- Печатаем текущие файлы перед переносом ---
-          echo "=== Содержимое $RUN_DIR (до переноса) ==="
-          find "$RUN_DIR" -maxdepth 1 -mindepth 1 -print | sort
-          
-          # --- Переносим всё в /allure-report/, кроме того, что должно остаться в корне run-а ---
-          mkdir -p "$DEST"
-          # Включаем расширенные шаблоны и захват скрытых файлов
-          shopt -s extglob dotglob nullglob
-          # Исключаем: уже существующую папку отчёта, папку swagger, а также файлы метрик/стилей/логотип
-          mv "$RUN_DIR"/!(allure-report|swagger-coverage-report|metrics.json|report_styles.css|logo_icon.png) "$DEST"/ || true
-          
-          # --- Печать после переноса ---
-          echo "=== После переноса — $DEST ==="
-          find "$DEST" -maxdepth 2 -print | sort
-          echo "=== После переноса — корень ран-а $RUN_DIR ==="
-          find "$RUN_DIR" -maxdepth 2 -print | sort
-      
 
-      # 6) Кладём Swagger рядом
+          # Ищем последний опубликованный ран с allure-report/history
+          PREV="$(ls -d gh-pages/*/allure-report 2>/dev/null | sed -E 's|gh-pages/([0-9]+)/allure-report|\1|' | grep -E '^[0-9]+$' | sort -n | tail -1 || true)"
+          echo "Detected previous run: ${PREV:-<none>}"
+
+          if [ -n "$PREV" ] && [ -d "gh-pages/${PREV}/allure-report/history" ]; then
+            mkdir -p allure-results/history
+            cp -r gh-pages/${PREV}/allure-report/history/* allure-results/history/ || true
+            echo "History copied from gh-pages/${PREV}/allure-report/history -> allure-results/history"
+          else
+            echo "No previous history found"
+          fi
+
+          echo "== allure-results top-level =="
+          find allure-results -maxdepth 1 -type f | sort | head -n 50 || true
+
+      # 7) Генерируем Allure в gh-pages/<run>/allure-report
+      - name: Generate Allure report to /allure-report/
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN="${{ inputs.parent_run_number }}"
+          if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
+
+          OUT="gh-pages/${RUN}/allure-report"
+          mkdir -p "$OUT"
+          # Собираем отчёт из allure-results
+          allure generate --clean "allure-results" -o "$OUT"
+
+          echo "== Generated tree =="
+          find "gh-pages/${RUN}" -maxdepth 2 -print | sort
+
+      # 8) Кладём Swagger рядом: gh-pages/<run>/swagger-coverage-report/index.html
       - name: Add Swagger coverage to published site
         shell: bash
         run: |
@@ -101,7 +99,6 @@ jobs:
 
           DEST="gh-pages/${RUN}/swagger-coverage-report"
           mkdir -p "$DEST"
-
           if [ -f "allure-results/swagger-coverage-report.html" ]; then
             cp "allure-results/swagger-coverage-report.html" "$DEST/index.html"
           else
@@ -109,7 +106,7 @@ jobs:
             ls -la allure-results || true
           fi
 
-      # 7) (Опционально) брендинг + метрики по опубликованным путям
+      # 9) (Опционально) брендинг и генерация метрик по уже опубликованным путям
       - name: Copy branding and generate metrics
         shell: bash
         run: |
@@ -118,24 +115,24 @@ jobs:
           if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
           RUN_DIR="gh-pages/${RUN}"
 
-          # Опциональные файлы брендинга
+          # Опциональные файлы брендинга (если есть)
           [ -f .github/report/logo_icon.png ]     && cp .github/report/logo_icon.png     "$RUN_DIR/" || true
           [ -f .github/report/report_styles.css ] && cp .github/report/report_styles.css "$RUN_DIR/" || true
 
           # Пути для скрипта метрик
-          ALLURE_DIR="$RUN_DIR/allure-report"                 # тут index.html, data/, widgets/
-          SWAGGER_DIR="$RUN_DIR/swagger-coverage-report"      # тут index.html Swagger
-          OUT_DIR="$RUN_DIR"                                  # сюда писать метрики/дашборд
+          ALLURE_DIR="$RUN_DIR/allure-report"
+          SWAGGER_DIR="$RUN_DIR/swagger-coverage-report"
+          OUT_DIR="$RUN_DIR"
 
           if [ -f .github/scripts/extract-metrics.sh ]; then
             chmod +x .github/scripts/extract-metrics.sh || true
             # ВАЖНО: внутри скрипта не использовать sudo для записи в gh-pages/*
             .github/scripts/extract-metrics.sh "$ALLURE_DIR" "$SWAGGER_DIR" "$OUT_DIR"
           else
-            echo "extract-metrics.sh not found; skipping metrics generation"
+            echo "extract-metrics.sh not found; skipping metrics"
           fi
 
-      # 8) Нормализация прав (на случай, если где-то писали от root)
+      # 10) Нормализуем владельца/права, чтобы git add не упал из-за Permission denied
       - name: Normalize ownership and permissions in gh-pages
         shell: bash
         run: |
@@ -145,7 +142,7 @@ jobs:
           find gh-pages -type f -exec chmod 644 {} \;
           git config --global --add safe.directory "$GITHUB_WORKSPACE/gh-pages"
 
-      # 9) Публикация одним коммитом
+      # 11) Публикуем всё одним коммитом
       - name: Publish Allure + Swagger + Dashboard (single push)
         shell: bash
         run: |
@@ -153,7 +150,7 @@ jobs:
           RUN="${{ inputs.parent_run_number }}"
           if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
 
-          echo "Preview tree:"
+          echo "== Preview to publish =="
           find gh-pages -maxdepth 3 -type f | sort | sed -n '1,200p'
 
           cd gh-pages
