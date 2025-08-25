@@ -41,38 +41,28 @@ extract_allure_metrics() {
   echo -e "${YELLOW}📊 Reading Allure summary...${NC}"
   local summary="$allure_dir/widgets/summary.json"
 
-  local total=0 passed=0 failed=0 broken=0 skipped=0 unknown=0
-  local duration_ms=0
-
+  local total=0 passed=0 failed=0 broken=0 skipped=0 duration_ms=0
   if [ -f "$summary" ] && command -v jq >/dev/null 2>&1; then
-    total=$(jq -r '.statistic.total // 0' "$summary" 2>/dev/null || echo 0)
-    passed=$(jq -r '.statistic.passed // 0' "$summary" 2>/dev/null || echo 0)
-    failed=$(jq -r '.statistic.failed // 0' "$summary" 2>/dev/null || echo 0)
-    broken=$(jq -r '.statistic.broken // 0' "$summary" 2>/dev/null || echo 0)
-    skipped=$(jq -r '.statistic.skipped // 0' "$summary" 2>/dev/null || echo 0)
-    unknown=$(jq -r '.statistic.unknown // 0' "$summary" 2>/dev/null || echo 0)
-    duration_ms=$(jq -r '.time.duration // 0' "$summary" 2>/dev/null || echo 0)
+    total=$(jq -r '.statistic.total // 0' "$summary" 2>/dev/null || true);       [ -n "$total" ] || total=0
+    passed=$(jq -r '.statistic.passed // 0' "$summary" 2>/dev/null || true);     [ -n "$passed" ] || passed=0
+    failed=$(jq -r '.statistic.failed // 0' "$summary" 2>/dev/null || true);     [ -n "$failed" ] || failed=0
+    broken=$(jq -r '.statistic.broken // 0' "$summary" 2>/dev/null || true);     [ -n "$broken" ] || broken=0
+    skipped=$(jq -r '.statistic.skipped // 0' "$summary" 2>/dev/null || true);   [ -n "$skipped" ] || skipped=0
+    duration_ms=$(jq -r '.time.duration // 0' "$summary" 2>/dev/null || true);   [ -n "$duration_ms" ] || duration_ms=0
   else
     echo -e "${YELLOW}⚠️  No $summary or jq missing — defaulting Allure metrics to zeros${NC}"
   fi
 
-  # Treat "broken" as failed in the dashboard
+  # Treat "broken" as failed for dashboard
   local failed_like=$((failed + broken))
   local pass_rate=0
   if [ "$total" -gt 0 ]; then
-    # scale=1 keeps one decimal
-    pass_rate=$(echo "scale=1; $passed*100/$total" | bc -l 2>/dev/null || echo 0)
+    pass_rate=$(echo "scale=1; $passed*100/$total" | bc -l 2>/dev/null || true); [ -n "$pass_rate" ] || pass_rate=0
   fi
 
-  # durations: Allure time.duration is in ms (total run); avg per test ~= total/total
   local total_seconds=$(( duration_ms / 1000 ))
   local avg_seconds=0
-  if [ "$total" -gt 0 ]; then
-    avg_seconds=$(( total_seconds / total ))
-  fi
-
-  # No direct "flaky" / "critical" in summary.json; keep as 0
-  local flaky_tests=0 flaky_rate=0 critical_failures=0
+  if [ "$total" -gt 0 ]; then avg_seconds=$(( total_seconds / total )); fi
 
   cat > "$metrics_file" <<EOF
 {
@@ -81,10 +71,10 @@ extract_allure_metrics() {
     "passedTests": $passed,
     "failedTests": $failed_like,
     "skippedTests": $skipped,
-    "criticalFailures": $critical_failures,
-    "flakyTests": $flaky_tests,
+    "criticalFailures": 0,
+    "flakyTests": 0,
     "passRate": $pass_rate,
-    "flakyRate": $flaky_rate,
+    "flakyRate": 0,
     "avgDuration": $avg_seconds,
     "totalDuration": $total_seconds
   }
@@ -111,18 +101,14 @@ extract_swagger_metrics() {
 
   if [ -n "$report" ]; then
     echo "Using: $report"
-    # Extract numbers with grep; ignore errors if patterns not found
-    total_ops=$(grep -Eo 'All operations: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || echo 0)
-    no_calls_ops=$(grep -Eo 'Operations without calls: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || echo 0)
-
-    total_tags=$(grep -Eo 'All tags: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || echo 0)
-    no_calls_tags=$(grep -Eo 'Tags without calls: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || echo 0)
-
-    total_conditions=$(grep -Eo 'Total: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || echo 0)
-
-    full_pct=$(grep -Eo 'Full coverage: [0-9.]+%' "$report" 2>/dev/null | grep -Eo '[0-9.]+' | head -n1 || echo 0)
-    partial_pct=$(grep -Eo 'Partial coverage: [0-9.]+%' "$report" 2>/dev/null | grep -Eo '[0-9.]+' | head -n1 || echo 0)
-    empty_pct=$(grep -Eo 'Empty coverage: [0-9.]+%' "$report" 2>/dev/null | grep -Eo '[0-9.]+' | head -n1 || echo 0)
+    total_ops=$(grep -Eo 'All operations: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || true);        [ -n "$total_ops" ] || total_ops=0
+    no_calls_ops=$(grep -Eo 'Operations without calls: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || true); [ -n "$no_calls_ops" ] || no_calls_ops=0
+    total_tags=$(grep -Eo 'All tags: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || true);              [ -n "$total_tags" ] || total_tags=0
+    no_calls_tags=$(grep -Eo 'Tags without calls: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || true); [ -n "$no_calls_tags" ] || no_calls_tags=0
+    total_conditions=$(grep -Eo 'Total: [0-9]+' "$report" 2>/dev/null | grep -Eo '[0-9]+' | head -n1 || true);           [ -n "$total_conditions" ] || total_conditions=0
+    full_pct=$(grep -Eo 'Full coverage: [0-9.]+%' "$report" 2>/dev/null | grep -Eo '[0-9.]+' | head -n1 || true);        [ -n "$full_pct" ] || full_pct=0
+    partial_pct=$(grep -Eo 'Partial coverage: [0-9.]+%' "$report" 2>/dev/null | grep -Eo '[0-9.]+' | head -n1 || true);  [ -n "$partial_pct" ] || partial_pct=0
+    empty_pct=$(grep -Eo 'Empty coverage: [0-9.]+%' "$report" 2>/dev/null | grep -Eo '[0-9.]+' | head -n1 || true);      [ -n "$empty_pct" ] || empty_pct=0
   else
     echo -e "${YELLOW}⚠️  Swagger report not found — defaulting to zeros${NC}"
   fi
@@ -130,25 +116,23 @@ extract_swagger_metrics() {
   local covered_ops=0 covered_tags=0 api_coverage=0 conditions_coverage=0
   if [ "$total_ops" -gt 0 ]; then
     covered_ops=$(( total_ops - no_calls_ops ))
-    api_coverage=$(echo "scale=1; $covered_ops*100/$total_ops" | bc -l 2>/dev/null || echo 0)
+    api_coverage=$(echo "scale=1; $covered_ops*100/$total_ops" | bc -l 2>/dev/null || true); [ -n "$api_coverage" ] || api_coverage=0
   fi
   if [ "$total_tags" -gt 0 ]; then
     covered_tags=$(( total_tags - no_calls_tags ))
   fi
   if [ "$total_conditions" -gt 0 ]; then
-    # no "covered_conditions" in HTML; estimate by api_coverage
     conditions_coverage="$api_coverage"
   fi
 
-  # Method/status coverage JSON optional; supply example structure when missing
+  # Optional JSON for method/status coverage; fall back to a small example
   local method_cov='{"GET":{"coverage":85,"total":200},"POST":{"coverage":70,"total":150},"PUT":{"coverage":60,"total":50},"DELETE":{"coverage":40,"total":33}}'
   local status_cov='{"200":15,"400":8,"403":5,"404":3,"500":2}'
   if [ -f "$swagger_dir/swagger-coverage.json" ] && command -v jq >/dev/null 2>&1; then
-    local mc sc
-    mc=$(jq -r 'select(.methods) | .methods' "$swagger_dir/swagger-coverage.json" 2>/dev/null || true)
-    sc=$(jq -r 'select(.statusCodes) | .statusCodes' "$swagger_dir/swagger-coverage.json" 2>/dev/null || true)
-    if [ -n "${mc:-}" ] && [ "$mc" != "null" ]; then method_cov="$mc"; fi
-    if [ -n "${sc:-}" ] && [ "$sc" != "null" ]; then status_cov="$sc"; fi
+    local mc; mc=$(jq -r 'select(.methods) | .methods' "$swagger_dir/swagger-coverage.json" 2>/dev/null || true)
+    local sc; sc=$(jq -r 'select(.statusCodes) | .statusCodes' "$swagger_dir/swagger-coverage.json" 2>/dev/null || true)
+    [ -n "${mc:-}" ] && [ "$mc" != "null" ] && method_cov="$mc"
+    [ -n "${sc:-}" ] && [ "$sc" != "null" ] && status_cov="$sc"
   fi
 
   if command -v jq >/dev/null 2>&1 && [ -f "$metrics_file" ]; then
@@ -211,44 +195,64 @@ generate_final_index() {
   local SWAGGER_REPORT_URL="${BASE_URL_PREFIX}swagger-coverage-report/"
   local RUN_NUMBER="${BASE_URL_PREFIX%/}"; RUN_NUMBER="${RUN_NUMBER##*/}"
 
+  # Export link placeholders (always)
   export ALLURE_REPORT_URL SWAGGER_REPORT_URL RUN_NUMBER
 
-  # Read metrics (if jq present) and export for envsubst
+  # Export metric placeholders (if metrics exist)
   if [ -f "$metrics_file" ] && command -v jq >/dev/null 2>&1; then
-    # Allure
     export ALLURE_PASS_RATE="$(jq -r '.allure.passRate // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export ALLURE_TOTAL_TESTS="$(jq -r '.allure.totalTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export ALLURE_PASSED_TESTS="$(jq -r '.allure.passedTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export ALLURE_FAILED_TESTS="$(jq -r '.allure.failedTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export ALLURE_SKIPPED_TESTS="$(jq -r '.allure.skippedTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export ALLURE_FLAKY_TESTS="$(jq -r '.allure.flakyTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
-    export ALLURE_FLAKY_RATE="$(jq -r '.allure.flakyRate // 0' "$metrics_file" 2>/dev/null || echo 0)"
-    # durations already seconds in our metrics
+    export ALLURE_FLAKY_RATE="0"
+    # durations already seconds
     export ALLURE_AVG_DURATION="$(jq -r '.allure.avgDuration // 0' "$metrics_file" 2>/dev/null || echo 0)s"
     export ALLURE_TOTAL_DURATION="$(jq -r '.allure.totalDuration // 0' "$metrics_file" 2>/dev/null || echo 0)s"
     export ALLURE_CRITICAL_FAILURES="$(jq -r '.allure.criticalFailures // 0' "$metrics_file" 2>/dev/null || echo 0)"
 
-    # Swagger
     export SWAGGER_API_COVERAGE="$(jq -r '.swagger.apiCoverage // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export SWAGGER_CONDITIONS_COVERAGE="$(jq -r '.swagger.conditionsCoverage // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export SWAGGER_FULL_COVERAGE="$(jq -r '.swagger.fullCoverage // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export SWAGGER_PARTIAL_COVERAGE="$(jq -r '.swagger.partialCoverage // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export SWAGGER_EMPTY_COVERAGE="$(jq -r '.swagger.emptyCoverage // 0' "$metrics_file" 2>/dev/null || echo 0)"
-    export SWAGGER_OPERATIONS_COVERAGE="$(jq -r '.swagger.apiCoverage // 0' "$metrics_file" 2>/dev/null || echo 0)" # reuse for bar width
     export SWAGGER_COVERED_OPERATIONS="$(jq -r '.swagger.coveredOperations // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export SWAGGER_TOTAL_OPERATIONS="$(jq -r '.swagger.totalOperations // 0' "$metrics_file" 2>/dev/null || echo 0)"
-    export SWAGGER_TAGS_COVERAGE="$(jq -r '.swagger.coveredTags as $c | .swagger.totalTags as $t | (if ($t|tonumber)>0 then ($c*100/$t) else 0 end) | tostring' "$metrics_file" 2>/dev/null || echo 0)"
+    # derive tag coverage %
     export SWAGGER_COVERED_TAGS="$(jq -r '.swagger.coveredTags // 0' "$metrics_file" 2>/dev/null || echo 0)"
     export SWAGGER_TOTAL_TAGS="$(jq -r '.swagger.totalTags // 0' "$metrics_file" 2>/dev/null || echo 0)"
+    if [ "${SWAGGER_TOTAL_TAGS:-0}" -gt 0 ]; then
+      export SWAGGER_TAGS_COVERAGE="$(echo "scale=1; $SWAGGER_COVERED_TAGS*100/$SWAGGER_TOTAL_TAGS" | bc -l 2>/dev/null || echo 0)"
+    else
+      export SWAGGER_TAGS_COVERAGE="0"
+    fi
+    export SWAGGER_OPERATIONS_COVERAGE="$SWAGGER_API_COVERAGE"
   else
-    echo -e "${YELLOW}⚠️  No metrics or jq — injecting only links & run number${NC}"
+    # sensible defaults for first render
+    export ALLURE_PASS_RATE="0" ALLURE_TOTAL_TESTS="0" ALLURE_PASSED_TESTS="0" ALLURE_FAILED_TESTS="0"
+    export ALLURE_SKIPPED_TESTS="0" ALLURE_FLAKY_TESTS="0" ALLURE_FLAKY_RATE="0" ALLURE_CRITICAL_FAILURES="0"
+    export ALLURE_AVG_DURATION="0s" ALLURE_TOTAL_DURATION="0s"
+    export SWAGGER_API_COVERAGE="0" SWAGGER_CONDITIONS_COVERAGE="0" SWAGGER_FULL_COVERAGE="0" SWAGGER_PARTIAL_COVERAGE="0"
+    export SWAGGER_EMPTY_COVERAGE="0" SWAGGER_OPERATIONS_COVERAGE="0" SWAGGER_COVERED_OPERATIONS="0" SWAGGER_TOTAL_OPERATIONS="0"
+    export SWAGGER_TAGS_COVERAGE="0" SWAGGER_COVERED_TAGS="0" SWAGGER_TOTAL_TAGS="0"
   fi
+
+  # Only substitute our placeholders (protect JS template literals)
+  local SUBST_VARS='$RUN_NUMBER $ALLURE_REPORT_URL $SWAGGER_REPORT_URL \
+$ALLURE_PASS_RATE $ALLURE_TOTAL_TESTS $ALLURE_PASSED_TESTS $ALLURE_FAILED_TESTS \
+$ALLURE_SKIPPED_TESTS $ALLURE_FLAKY_TESTS $ALLURE_FLAKY_RATE $ALLURE_CRITICAL_FAILURES \
+$ALLURE_AVG_DURATION $ALLURE_TOTAL_DURATION \
+$SWAGGER_API_COVERAGE $SWAGGER_CONDITIONS_COVERAGE $SWAGGER_FULL_COVERAGE \
+$SWAGGER_PARTIAL_COVERAGE $SWAGGER_EMPTY_COVERAGE $SWAGGER_OPERATIONS_COVERAGE \
+$SWAGGER_COVERED_OPERATIONS $SWAGGER_TOTAL_OPERATIONS $SWAGGER_TAGS_COVERAGE \
+$SWAGGER_COVERED_TAGS $SWAGGER_TOTAL_TAGS'
 
   if command -v envsubst >/dev/null 2>&1; then
     local tmp; tmp=$(mktemp)
-    envsubst < "$final_file" > "$tmp" && mv "$tmp" "$final_file"
+    envsubst "$SUBST_VARS" < "$final_file" > "$tmp" && mv "$tmp" "$final_file"
   else
-    # Minimal fallback: replace only links and run number
+    # Minimal fallback: sed replace a subset (links + run number)
     sed -i.bak \
       -e "s|\$ALLURE_REPORT_URL|$ALLURE_REPORT_URL|g" \
       -e "s|\$SWAGGER_REPORT_URL|$SWAGGER_REPORT_URL|g" \

@@ -5,13 +5,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Web Test Framework - Reports Dashboard</title>
-    <link rel="stylesheet" href="report_styles.css">
+
+    <!-- External styles (cache-busted by run number) -->
+    <link rel="stylesheet" href="report_styles.css?v=$RUN_NUMBER">
     <link rel="icon" type="image/png" href="logo_icon.png">
+
+    <!-- Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        /* (styles unchanged — shortened for brevity; keep your full CSS here) */
+        /* Keep your existing CSS; below is only minimal structure glue.
+           Using external report_styles.css for the real look & feel. */
         .dashboard-container{max-width:1200px;margin:0 auto;padding:8px}
-        /* ... keep the rest of your CSS exactly as you had it ... */
+        .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px}
+        .kpi-card{background:#fff;border-radius:6px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.1);border-left:3px solid #007bff}
+        .chart-container{background:#fff;border-radius:6px;padding:8px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+        .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+        .coverage-bar{background:#f0f0f0;border-radius:6px;height:12px;margin:5px 0;overflow:hidden}
+        .coverage-fill{height:100%;border-radius:10px}
+        .coverage-low{background:#dc3545}.coverage-medium{background:#ffc107}.coverage-high{background:#28a745}
+        .gauge-container{text-align:center;padding:8px}
+        .gauge{width:90px;height:90px;border-radius:50%;margin:0 auto 8px;position:relative;background:conic-gradient(var(--gauge-color) 0deg,var(--gauge-color) calc(var(--percentage)*3.6deg),#f0f0f0 calc(var(--percentage)*3.6deg),#f0f0f0 360deg)}
+        .gauge::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:#fff;border-radius:50%}
+        .gauge-value{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-weight:700}
+        .reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+        .report-card{background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+        .btn{display:inline-block;margin-top:8px;padding:8px 12px;border-radius:6px;background:#0d6efd;color:#fff;text-decoration:none}
+        .btn.pink{background:#e91e63}
     </style>
 </head>
 <body>
@@ -24,23 +44,18 @@
         <p id="run-info">Comprehensive Test Reports Dashboard - Run #$RUN_NUMBER</p>
     </div>
 
-    <div id="alert-banner" class="alert-banner" style="display:none;">
-        <div>
-            <strong>⚠️ Critical Issues Detected</strong>
-            <p id="alert-message" style="margin:5px 0 0 0;font-size:.9rem;"></p>
-        </div>
-        <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:inherit;font-size:1.2rem;cursor:pointer;">×</button>
-    </div>
-
     <!-- 📊 1. Test Status Overview -->
     <div class="chart-container">
         <h2 class="chart-title">📊 Test Execution Status</h2>
 
+        <!-- KPI Cards -->
         <div class="kpi-grid">
             <div class="kpi-card" id="pass-rate-card">
                 <div class="kpi-label">Pass Rate</div>
                 <div class="kpi-value" id="pass-rate-value">$ALLURE_PASS_RATE%</div>
-                <div class="coverage-bar"><div class="coverage-fill" id="pass-rate-fill" style="width:$ALLURE_PASS_RATE%"></div></div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="pass-rate-fill" style="width: $ALLURE_PASS_RATE%"></div>
+                </div>
             </div>
 
             <div class="kpi-card" id="total-tests-card">
@@ -55,7 +70,7 @@
             <div class="kpi-card" id="avg-duration-card">
                 <div class="kpi-label">Average Duration</div>
                 <div class="kpi-value" id="avg-duration-value">$ALLURE_AVG_DURATION</div>
-                <div class="metric-details"><span>Total: <span id="total-duration">$ALLURE_TOTAL_DURATION</span></span></div>
+                <div class="metric-details">Total: <span id="total-duration">$ALLURE_TOTAL_DURATION</span></div>
             </div>
 
             <div class="kpi-card" id="critical-failures-card">
@@ -70,6 +85,7 @@
             </div>
         </div>
 
+        <!-- Donut -->
         <div class="charts-grid">
             <div class="chart-container">
                 <h3>Test Status Distribution</h3>
@@ -83,57 +99,71 @@
         <h2 class="chart-title">⚙️ API Coverage Analysis</h2>
 
         <div class="kpi-grid">
-            <div class="kpi-card" id="api-coverage-card">
+            <div class="kpi-card">
                 <div class="kpi-label">API Coverage</div>
                 <div class="gauge-container">
-                    <div class="gauge" id="api-coverage-gauge"><div class="gauge-value" id="api-coverage-value">$SWAGGER_API_COVERAGE%</div></div>
+                    <div class="gauge" id="api-coverage-gauge">
+                        <div class="gauge-value" id="api-coverage-value">$SWAGGER_API_COVERAGE%</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="kpi-card" id="conditions-coverage-card">
+            <div class="kpi-card">
                 <div class="kpi-label">Conditions Coverage</div>
                 <div class="gauge-container">
-                    <div class="gauge" id="conditions-coverage-gauge"><div class="gauge-value" id="conditions-coverage-value">$SWAGGER_CONDITIONS_COVERAGE%</div></div>
+                    <div class="gauge" id="conditions-coverage-gauge">
+                        <div class="gauge-value" id="conditions-coverage-value">$SWAGGER_CONDITIONS_COVERAGE%</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="kpi-card" id="full-coverage-card">
+            <div class="kpi-card">
                 <div class="kpi-label">Full Coverage</div>
                 <div class="gauge-container">
-                    <div class="gauge" id="full-coverage-gauge"><div class="gauge-value" id="full-coverage-value">$SWAGGER_FULL_COVERAGE%</div></div>
+                    <div class="gauge" id="full-coverage-gauge">
+                        <div class="gauge-value" id="full-coverage-value">$SWAGGER_FULL_COVERAGE%</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="kpi-card" id="partial-coverage-card">
+            <div class="kpi-card">
                 <div class="kpi-label">Partial Coverage</div>
                 <div class="gauge-container">
-                    <div class="gauge" id="partial-coverage-gauge"><div class="gauge-value" id="partial-coverage-value">$SWAGGER_PARTIAL_COVERAGE%</div></div>
+                    <div class="gauge" id="partial-coverage-gauge">
+                        <div class="gauge-value" id="partial-coverage-value">$SWAGGER_PARTIAL_COVERAGE%</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="kpi-card" id="empty-coverage-card">
+            <div class="kpi-card">
                 <div class="kpi-label">Empty Coverage</div>
                 <div class="gauge-container">
-                    <div class="gauge" id="empty-coverage-gauge"><div class="gauge-value" id="empty-coverage-value">$SWAGGER_EMPTY_COVERAGE%</div></div>
+                    <div class="gauge" id="empty-coverage-gauge">
+                        <div class="gauge-value" id="empty-coverage-value">$SWAGGER_EMPTY_COVERAGE%</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="kpi-grid">
-            <div class="kpi-card" id="operations-coverage-card">
+            <div class="kpi-card">
                 <div class="kpi-label">Operations Coverage</div>
                 <div class="kpi-value" id="operations-coverage-value">$SWAGGER_OPERATIONS_COVERAGE%</div>
-                <div class="coverage-bar"><div class="coverage-fill" id="operations-coverage-fill" style="width:$SWAGGER_OPERATIONS_COVERAGE%"></div></div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="operations-coverage-fill" style="width: $SWAGGER_OPERATIONS_COVERAGE%"></div>
+                </div>
                 <div class="metric-details">
                     <span>Covered: <span id="covered-operations">$SWAGGER_COVERED_OPERATIONS</span></span>
                     <span>Total: <span id="total-operations">$SWAGGER_TOTAL_OPERATIONS</span></span>
                 </div>
             </div>
 
-            <div class="kpi-card" id="tags-coverage-card">
+            <div class="kpi-card">
                 <div class="kpi-label">Tags Coverage</div>
                 <div class="kpi-value" id="tags-coverage-value">$SWAGGER_TAGS_COVERAGE%</div>
-                <div class="coverage-bar"><div class="coverage-fill" id="tags-coverage-fill" style="width:$SWAGGER_TAGS_COVERAGE%"></div></div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="tags-coverage-fill" style="width: $SWAGGER_TAGS_COVERAGE%"></div>
+                </div>
                 <div class="metric-details">
                     <span>Covered: <span id="covered-tags">$SWAGGER_COVERED_TAGS</span></span>
                     <span>Total: <span id="total-tags">$SWAGGER_TOTAL_TAGS</span></span>
@@ -153,28 +183,22 @@
         </div>
     </div>
 
-    <!-- Reports Section -->
+    <!-- Reports links -->
     <div class="reports-section">
         <h2>📋 Detailed Reports</h2>
         <div class="reports-grid">
             <div class="report-card">
                 <div class="report-icon">📊</div>
                 <h3>Allure Test Report</h3>
-                <p>Comprehensive test execution results with detailed analytics, screenshots, and performance metrics.</p>
-                <a href="$ALLURE_REPORT_URL" id="allure-link" class="btn" target="_blank">
-                    <span class="status-indicator"></span>
-                    View Allure Report
-                </a>
+                <p>Comprehensive test execution results with detailed analytics.</p>
+                <a href="$ALLURE_REPORT_URL" id="allure-link" class="btn" target="_blank">View Allure Report</a>
             </div>
 
             <div class="report-card">
                 <div class="report-icon pink">🔍</div>
                 <h3>Swagger Coverage Report</h3>
-                <p>API endpoint coverage analysis showing which endpoints have been tested and their current status.</p>
-                <a href="$SWAGGER_REPORT_URL" id="swagger-link" class="btn pink" target="_blank">
-                    <span class="status-indicator"></span>
-                    View Swagger Coverage
-                </a>
+                <p>API endpoint coverage analysis and testing status.</p>
+                <a href="$SWAGGER_REPORT_URL" id="swagger-link" class="btn pink" target="_blank">View Swagger Coverage</a>
             </div>
         </div>
     </div>
@@ -185,46 +209,67 @@
 </div>
 
 <script>
-    const injectedRunNumber = "$RUN_NUMBER";
     let charts = {};
 
     function getCoverageColor(p){ if(p<20) return '#dc3545'; if(p<70) return '#ffc107'; return '#28a745'; }
-    function updateGauge(id, p){ const g=document.getElementById(id); if(!g) return; const v=g.querySelector('.gauge-value'); const c=getCoverageColor(p); g.style.setProperty('--percentage', p); g.style.setProperty('--gauge-color', c); v.textContent=`${p}%`; v.style.color=c; }
-    function updateCoverageBar(id, p){ const f=document.getElementById(id); const c=getCoverageColor(p); f.style.width=`${p}%`; f.className=`coverage-fill ${p<20?'coverage-low':p<70?'coverage-medium':'coverage-high'}`; }
+    function setGauge(id, p){
+      const g=document.getElementById(id); if(!g) return;
+      const v=g.querySelector('.gauge-value'); const c=getCoverageColor(p);
+      g.style.setProperty('--percentage', p); g.style.setProperty('--gauge-color', c);
+      v.textContent = p + '%'; v.style.color=c;
+    }
+    function setBarWidth(id, p){
+      const f=document.getElementById(id); if(!f) return;
+      const c=getCoverageColor(p); f.style.width = p + '%';
+      f.className = 'coverage-fill ' + (p<20?'coverage-low':(p<70?'coverage-medium':'coverage-high'));
+    }
 
-    function createTestStatusChart(d){
+    function testStatusChart(d){
       const ctx=document.getElementById('testStatusChart').getContext('2d');
       if(charts.testStatus) charts.testStatus.destroy();
-      charts.testStatus=new Chart(ctx,{type:'doughnut',data:{labels:['Passed','Failed','Skipped','Flaky','Critical'],datasets:[{data:[d.passedTests||0,d.failedTests||0,d.skippedTests||0,d.flakyTests||0,d.criticalFailures||0],backgroundColor:['#28a745','#dc3545','#6c757d','#ffc107','#dc3545'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:3,font:{size:8},boxWidth:8,boxHeight:8}}}}});
+      charts.testStatus=new Chart(ctx,{
+        type:'doughnut',
+        data:{labels:['Passed','Failed','Skipped','Flaky','Critical'],
+          datasets:[{data:[d.passedTests||0,d.failedTests||0,d.skippedTests||0,d.flakyTests||0,d.criticalFailures||0],
+            backgroundColor:['#28a745','#dc3545','#6c757d','#ffc107','#dc3545'],borderWidth:2,borderColor:'#fff'}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
+      });
     }
-    function createMethodCoverageChart(d){
+    function methodCoverageChart(d){
       const ctx=document.getElementById('methodCoverageChart').getContext('2d');
       if(charts.methodCoverage) charts.methodCoverage.destroy();
       const m=d.methodCoverage||{}, keys=Object.keys(m), vals=keys.map(k=>m[k].coverage||0);
-      charts.methodCoverage=new Chart(ctx,{type:'bar',data:{labels:keys,datasets:[{label:'Coverage %',data:vals,backgroundColor:vals.map(getCoverageColor),borderColor:vals.map(getCoverageColor),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}}});
+      charts.methodCoverage=new Chart(ctx,{type:'bar',data:{labels:keys,datasets:[{label:'Coverage %',data:vals,backgroundColor:vals.map(getCoverageColor),borderColor:vals.map(getCoverageColor),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}}}});
     }
-    function createStatusCodeChart(d){
+    function statusCodeChart(d){
       const ctx=document.getElementById('statusCodeChart').getContext('2d');
       if(charts.statusCode) charts.statusCode.destroy();
       const s=d.statusCodeCoverage||{}, codes=Object.keys(s), cnt=codes.map(k=>s[k]||0);
-      charts.statusCode=new Chart(ctx,{type:'bar',data:{labels:codes,datasets:[{label:'Coverage Count',data:cnt,backgroundColor:'#007bff',borderColor:'#0056b3',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}});
+      charts.statusCode=new Chart(ctx,{type:'bar',data:{labels:codes,datasets:[{label:'Coverage Count',data:cnt,backgroundColor:'#007bff',borderColor:'#0056b3',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
     }
 
-    function updateDashboard(data){
-      if(data.allure){ createTestStatusChart(data.allure); updateCoverageBar('pass-rate-fill', data.allure.passRate||0); }
-      if(data.swagger){ updateGauge('api-coverage-gauge', data.swagger.apiCoverage||0); updateGauge('conditions-coverage-gauge', data.swagger.conditionsCoverage||0); createMethodCoverageChart(data.swagger); createStatusCodeChart(data.swagger); }
+    function applyMetrics(data){
+      if(data.allure){
+        setBarWidth('pass-rate-fill', Number(data.allure.passRate||0));
+        testStatusChart(data.allure);
+      }
+      if(data.swagger){
+        setGauge('api-coverage-gauge', Number(data.swagger.apiCoverage||0));
+        setGauge('conditions-coverage-gauge', Number(data.swagger.conditionsCoverage||0));
+        setBarWidth('operations-coverage-fill', Number(data.swagger.apiCoverage||0));
+        methodCoverageChart(data.swagger);
+        statusCodeChart(data.swagger);
+      }
     }
 
     function loadMetrics(){
-      fetch('metrics.json').then(r=>{ if(!r.ok) throw new Error('no metrics'); return r.json(); })
-        .then(updateDashboard)
-        .catch(()=>{ /* optional: fallback demo data */ });
+      fetch('metrics.json')
+        .then(r=>{ if(!r.ok) throw new Error('no metrics'); return r.json(); })
+        .then(applyMetrics)
+        .catch(()=>{ /* leave static placeholders if metrics.json missing */ });
     }
 
-    document.addEventListener('DOMContentLoaded', function(){
-      // Links + run number already injected by template variables
-      loadMetrics();
-    });
+    document.addEventListener('DOMContentLoaded', loadMetrics);
 </script>
 </body>
 </html>
