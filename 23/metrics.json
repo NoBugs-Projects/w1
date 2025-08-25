@@ -1,0 +1,29 @@
+{
+  "allure": {
+    "totalTests": 32,
+    "passedTests": 32,
+    "failedTests": 0,
+    "skippedTests": 2,
+    "criticalFailures": 0,
+    "flakyTests": 0,
+    "passRate": 100.0,
+    "flakyRate": 0,
+    "avgDuration": 22,
+    "totalDuration": 733
+  },
+  "swagger": {
+    "totalOperations": 0,
+    "coveredOperations": 0,
+    "totalTags": 0,
+    "coveredTags": 0,
+    "totalConditions": 0,
+    "coveredConditions": 0,
+    "apiCoverage": 0,
+    "conditionsCoverage": 0,
+    "fullCoverage": 0,
+    "partialCoverage": 0,
+    "emptyCoverage": 0,
+    "methodCoverage": {},
+    "statusCodeCoverage": {}
+  }
+}
