@@ -41,23 +41,55 @@ jobs:
           allure_results: allure-results
           keep_reports: true
 
-      # 5) Перенос Allure в подпапку /allure-report/
-      - name: Relocate Allure into /allure-report/
+      - name: Отладка и перенос Allure в /allure-report/ (одним шагом)
         shell: bash
         run: |
           set -euo pipefail
+          # Определяем номер запуска: берём входной, иначе текущий run_number
           RUN="${{ inputs.parent_run_number }}"
           if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
-
+          
           RUN_DIR="gh-pages/${RUN}"
           DEST="${RUN_DIR}/allure-report"
+          
+          # --- Отладочная печать входных артефактов ---
+          echo "=== allure-results (2 уровня) ==="
+          find allure-results -maxdepth 2 -print 2>/dev/null | sort || true
+          
+          # --- Проверяем, что директория публикации существует ---
+          echo "=== Проверка директории публикации: $RUN_DIR ==="
+          if [ ! -d "$RUN_DIR" ]; then
+            echo "Директория $RUN_DIR не найдена. Похоже, шаг сборки Allure не создал выходные файлы."
+            echo "Дерево gh-pages (2 уровня):"
+            find gh-pages -maxdepth 2 -type d -print | sort || true
+            exit 1
+          fi
+          
+          # --- Проверяем, что в $RUN_DIR действительно есть артефакты Allure ---
+          if ! { [ -f "$RUN_DIR/index.html" ] || [ -f "$RUN_DIR/app.js" ] || [ -d "$RUN_DIR/data" ]; }; then
+            echo "В $RUN_DIR не найдено типичных файлов Allure (index.html/app.js/data). Перенос пропускаем."
+            echo "Содержимое корня ран-а:"
+            find "$RUN_DIR" -maxdepth 1 -mindepth 1 -print | sort || true
+            exit 0
+          fi
+          
+          # --- Печатаем текущие файлы перед переносом ---
+          echo "=== Содержимое $RUN_DIR (до переноса) ==="
+          find "$RUN_DIR" -maxdepth 1 -mindepth 1 -print | sort
+          
+          # --- Переносим всё в /allure-report/, кроме того, что должно остаться в корне run-а ---
           mkdir -p "$DEST"
-
-          # переносим всё из gh-pages/<run>/ в gh-pages/<run>/allure-report, кроме уже существующих целевых папок
-          find "$RUN_DIR" -mindepth 1 -maxdepth 1 \
-            ! -name 'allure-report' \
-            ! -name 'swagger-coverage-report' \
-            -exec mv -t "$DEST" {} +
+          # Включаем расширенные шаблоны и захват скрытых файлов
+          shopt -s extglob dotglob nullglob
+          # Исключаем: уже существующую папку отчёта, папку swagger, а также файлы метрик/стилей/логотип
+          mv "$RUN_DIR"/!(allure-report|swagger-coverage-report|metrics.json|report_styles.css|logo_icon.png) "$DEST"/ || true
+          
+          # --- Печать после переноса ---
+          echo "=== После переноса — $DEST ==="
+          find "$DEST" -maxdepth 2 -print | sort
+          echo "=== После переноса — корень ран-а $RUN_DIR ==="
+          find "$RUN_DIR" -maxdepth 2 -print | sort
+      
 
       # 6) Кладём Swagger рядом
       - name: Add Swagger coverage to published site
