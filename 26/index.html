@@ -1,0 +1,230 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Web Test Framework - Reports Dashboard</title>
+    <link rel="stylesheet" href="report_styles.css">
+    <link rel="icon" type="image/png" href="logo_icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* (styles unchanged — shortened for brevity; keep your full CSS here) */
+        .dashboard-container{max-width:1200px;margin:0 auto;padding:8px}
+        /* ... keep the rest of your CSS exactly as you had it ... */
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo"><img src="logo_icon.png" alt="NoBugs Logo" /></div>
+            <h1>Web Test Framework - Analytics Dashboard</h1>
+        </div>
+        <p id="run-info">Comprehensive Test Reports Dashboard - Run #26</p>
+    </div>
+
+    <div id="alert-banner" class="alert-banner" style="display:none;">
+        <div>
+            <strong>⚠️ Critical Issues Detected</strong>
+            <p id="alert-message" style="margin:5px 0 0 0;font-size:.9rem;"></p>
+        </div>
+        <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:inherit;font-size:1.2rem;cursor:pointer;">×</button>
+    </div>
+
+    <!-- 📊 1. Test Status Overview -->
+    <div class="chart-container">
+        <h2 class="chart-title">📊 Test Execution Status</h2>
+
+        <div class="kpi-grid">
+            <div class="kpi-card" id="pass-rate-card">
+                <div class="kpi-label">Pass Rate</div>
+                <div class="kpi-value" id="pass-rate-value">100.0%</div>
+                <div class="coverage-bar"><div class="coverage-fill" id="pass-rate-fill" style="width:100.0%"></div></div>
+            </div>
+
+            <div class="kpi-card" id="total-tests-card">
+                <div class="kpi-label">Total Tests</div>
+                <div class="kpi-value" id="total-tests-value">22</div>
+                <div class="metric-details">
+                    <span id="passed-tests">22 passed</span>
+                    <span id="failed-tests">0 failed</span>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="avg-duration-card">
+                <div class="kpi-label">Average Duration</div>
+                <div class="kpi-value" id="avg-duration-value">10s</div>
+                <div class="metric-details"><span>Total: <span id="total-duration">237s</span></span></div>
+            </div>
+
+            <div class="kpi-card" id="critical-failures-card">
+                <div class="kpi-label">Critical Failures</div>
+                <div class="kpi-value" id="critical-failures-value">0</div>
+                <div class="metric-details"><span id="flaky-tests">0 flaky</span></div>
+            </div>
+
+            <div class="kpi-card" id="skipped-tests-card">
+                <div class="kpi-label">Skipped Tests</div>
+                <div class="kpi-value" id="skipped-tests">0</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Test Status Distribution</h3>
+                <canvas id="testStatusChart" width="300" height="320"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚙️ 2. API Coverage Analysis -->
+    <div class="chart-container">
+        <h2 class="chart-title">⚙️ API Coverage Analysis</h2>
+
+        <div class="kpi-grid">
+            <div class="kpi-card" id="api-coverage-card">
+                <div class="kpi-label">API Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="api-coverage-gauge"><div class="gauge-value" id="api-coverage-value">4.1%</div></div>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="conditions-coverage-card">
+                <div class="kpi-label">Conditions Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="conditions-coverage-gauge"><div class="gauge-value" id="conditions-coverage-value">4.1%</div></div>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="full-coverage-card">
+                <div class="kpi-label">Full Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="full-coverage-gauge"><div class="gauge-value" id="full-coverage-value">0.462%</div></div>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="partial-coverage-card">
+                <div class="kpi-label">Partial Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="partial-coverage-gauge"><div class="gauge-value" id="partial-coverage-value">2.309%</div></div>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="empty-coverage-card">
+                <div class="kpi-label">Empty Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="empty-coverage-gauge"><div class="gauge-value" id="empty-coverage-value">97.229%</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card" id="operations-coverage-card">
+                <div class="kpi-label">Operations Coverage</div>
+                <div class="kpi-value" id="operations-coverage-value">4.1%</div>
+                <div class="coverage-bar"><div class="coverage-fill" id="operations-coverage-fill" style="width:4.1%"></div></div>
+                <div class="metric-details">
+                    <span>Covered: <span id="covered-operations">18</span></span>
+                    <span>Total: <span id="total-operations">433</span></span>
+                </div>
+            </div>
+
+            <div class="kpi-card" id="tags-coverage-card">
+                <div class="kpi-label">Tags Coverage</div>
+                <div class="kpi-value" id="tags-coverage-value">23.333333333333332%</div>
+                <div class="coverage-bar"><div class="coverage-fill" id="tags-coverage-fill" style="width:23.333333333333332%"></div></div>
+                <div class="metric-details">
+                    <span>Covered: <span id="covered-tags">7</span></span>
+                    <span>Total: <span id="total-tags">30</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>HTTP Method Coverage</h3>
+                <canvas id="methodCoverageChart" width="300" height="360"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Status Code Coverage</h3>
+                <canvas id="statusCodeChart" width="300" height="360"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div class="reports-section">
+        <h2>📋 Detailed Reports</h2>
+        <div class="reports-grid">
+            <div class="report-card">
+                <div class="report-icon">📊</div>
+                <h3>Allure Test Report</h3>
+                <p>Comprehensive test execution results with detailed analytics, screenshots, and performance metrics.</p>
+                <a href="/w1/26/allure-report/" id="allure-link" class="btn" target="_blank">
+                    <span class="status-indicator"></span>
+                    View Allure Report
+                </a>
+            </div>
+
+            <div class="report-card">
+                <div class="report-icon pink">🔍</div>
+                <h3>Swagger Coverage Report</h3>
+                <p>API endpoint coverage analysis showing which endpoints have been tested and their current status.</p>
+                <a href="/w1/26/swagger-coverage-report/" id="swagger-link" class="btn pink" target="_blank">
+                    <span class="status-indicator"></span>
+                    View Swagger Coverage
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Built with <strong style="color:#08fc04;">NoBugs</strong> ❤️ for quality assurance</p>
+    </div>
+</div>
+
+<script>
+    const injectedRunNumber = "26";
+    let charts = {};
+
+    function getCoverageColor(p){ if(p<20) return '#dc3545'; if(p<70) return '#ffc107'; return '#28a745'; }
+    function updateGauge(id, p){ const g=document.getElementById(id); if(!g) return; const v=g.querySelector('.gauge-value'); const c=getCoverageColor(p); g.style.setProperty('--percentage', p); g.style.setProperty('--gauge-color', c); v.textContent=`%`; v.style.color=c; }
+    function updateCoverageBar(id, p){ const f=document.getElementById(id); const c=getCoverageColor(p); f.style.width=`%`; f.className=`coverage-fill ${p<20?'coverage-low':p<70?'coverage-medium':'coverage-high'}`; }
+
+    function createTestStatusChart(d){
+      const ctx=document.getElementById('testStatusChart').getContext('2d');
+      if(charts.testStatus) charts.testStatus.destroy();
+      charts.testStatus=new Chart(ctx,{type:'doughnut',data:{labels:['Passed','Failed','Skipped','Flaky','Critical'],datasets:[{data:[d.passedTests||0,d.failedTests||0,d.skippedTests||0,d.flakyTests||0,d.criticalFailures||0],backgroundColor:['#28a745','#dc3545','#6c757d','#ffc107','#dc3545'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:3,font:{size:8},boxWidth:8,boxHeight:8}}}}});
+    }
+    function createMethodCoverageChart(d){
+      const ctx=document.getElementById('methodCoverageChart').getContext('2d');
+      if(charts.methodCoverage) charts.methodCoverage.destroy();
+      const m=d.methodCoverage||{}, keys=Object.keys(m), vals=keys.map(k=>m[k].coverage||0);
+      charts.methodCoverage=new Chart(ctx,{type:'bar',data:{labels:keys,datasets:[{label:'Coverage %',data:vals,backgroundColor:vals.map(getCoverageColor),borderColor:vals.map(getCoverageColor),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}}});
+    }
+    function createStatusCodeChart(d){
+      const ctx=document.getElementById('statusCodeChart').getContext('2d');
+      if(charts.statusCode) charts.statusCode.destroy();
+      const s=d.statusCodeCoverage||{}, codes=Object.keys(s), cnt=codes.map(k=>s[k]||0);
+      charts.statusCode=new Chart(ctx,{type:'bar',data:{labels:codes,datasets:[{label:'Coverage Count',data:cnt,backgroundColor:'#007bff',borderColor:'#0056b3',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}});
+    }
+
+    function updateDashboard(data){
+      if(data.allure){ createTestStatusChart(data.allure); updateCoverageBar('pass-rate-fill', data.allure.passRate||0); }
+      if(data.swagger){ updateGauge('api-coverage-gauge', data.swagger.apiCoverage||0); updateGauge('conditions-coverage-gauge', data.swagger.conditionsCoverage||0); createMethodCoverageChart(data.swagger); createStatusCodeChart(data.swagger); }
+    }
+
+    function loadMetrics(){
+      fetch('metrics.json').then(r=>{ if(!r.ok) throw new Error('no metrics'); return r.json(); })
+        .then(updateDashboard)
+        .catch(()=>{ /* optional: fallback demo data */ });
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      // Links + run number already injected by template variables
+      loadMetrics();
+    });
+</script>
+</body>
+</html>
