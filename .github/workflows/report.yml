@@ -114,23 +114,31 @@ jobs:
           RUN="${{ inputs.parent_run_number }}"
           if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
           RUN_DIR="gh-pages/${RUN}"
-
+          
           # Опциональные файлы брендинга (если есть)
           [ -f .github/report/logo_icon.png ]     && cp .github/report/logo_icon.png     "$RUN_DIR/" || true
           [ -f .github/report/report_styles.css ] && cp .github/report/report_styles.css "$RUN_DIR/" || true
-
+          
           # Пути для скрипта метрик
           ALLURE_DIR="$RUN_DIR/allure-report"
           SWAGGER_DIR="$RUN_DIR/swagger-coverage-report"
           OUT_DIR="$RUN_DIR"
-
+          
+          # Базовый префикс ссылок, например /w1/23/
+          REPO="${GITHUB_REPOSITORY#*/}"   # "w1"
+          BASE_PREFIX="/${REPO}/${RUN}/"
+          
           if [ -f .github/scripts/extract-metrics.sh ]; then
             chmod +x .github/scripts/extract-metrics.sh || true
-            # ВАЖНО: внутри скрипта не использовать sudo для записи в gh-pages/*
-            .github/scripts/extract-metrics.sh "$ALLURE_DIR" "$SWAGGER_DIR" "$OUT_DIR"
+            .github/scripts/extract-metrics.sh "$ALLURE_DIR" "$SWAGGER_DIR" "$OUT_DIR" "$BASE_PREFIX"
           else
             echo "extract-metrics.sh not found; skipping metrics"
           fi
+          
+          # (опционально) быстрый просмотр того, что получилось
+          echo "== Result files in ${RUN_DIR} =="
+          find "$RUN_DIR" -maxdepth 2 -type f | sort
+
 
       # 10) Нормализуем владельца/права, чтобы git add не упал из-за Permission denied
       - name: Normalize ownership and permissions in gh-pages
