@@ -83,6 +83,73 @@ EOF
   echo -e "${GREEN}✅ Allure metrics extracted${NC}"
 }
 
+# ---------------- Test Coverage metrics (from Java source) ----------------
+extract_test_coverage_metrics() {
+  local source_dir="${1:-src/test/java}"
+  local metrics_file="$2"
+
+  echo -e "${YELLOW}🧪 Reading test coverage metrics...${NC}"
+  
+  local total_tests=0 automated_tests=0 manual_tests=0 coverage_percentage=0
+  
+  if [ -d "$source_dir" ]; then
+    echo "Scanning Java test files in: $source_dir"
+    
+    # Find all Java files and count tests
+    while IFS= read -r -d '' file; do
+      if [[ -f "$file" ]]; then
+        echo "  Scanning: $file"
+        
+        # Count total @Test methods
+        local test_count=$(grep -c "@Test" "$file" 2>/dev/null || echo 0)
+        total_tests=$((total_tests + test_count))
+        
+        # Count @Test methods with @ManualTest annotation
+        local manual_count=$(grep -c "@Test.*@ManualTest\|@ManualTest.*@Test" "$file" 2>/dev/null || echo 0)
+        manual_tests=$((manual_tests + manual_count))
+      fi
+    done < <(find "$source_dir" -name "*.java" -type f -print0 2>/dev/null || true)
+    
+    # Calculate automated tests and coverage percentage
+    automated_tests=$((total_tests - manual_tests))
+    if [ "$total_tests" -gt 0 ]; then
+      coverage_percentage=$(echo "scale=1; $automated_tests*100/$total_tests" | bc -l 2>/dev/null || echo 0)
+    fi
+    
+    echo "  Total Tests: $total_tests"
+    echo "  Automated Tests: $automated_tests"
+    echo "  Manual Tests: $manual_tests"
+    echo "  Test Coverage: ${coverage_percentage}%"
+  else
+    echo -e "${YELLOW}⚠️  Test source directory not found — defaulting test coverage to zeros${NC}"
+  fi
+
+  # Add test coverage to metrics file
+  if command -v jq >/dev/null 2>&1 && [ -f "$metrics_file" ]; then
+    local tmp; tmp=$(mktemp)
+    jq --argjson testCoverage "{
+      \"totalTests\": $total_tests,
+      \"automatedTests\": $automated_tests,
+      \"manualTests\": $manual_tests,
+      \"coveragePercentage\": $coverage_percentage
+    }" '.testCoverage = $testCoverage' "$metrics_file" > "$tmp" && mv "$tmp" "$metrics_file"
+  else
+    # If jq not available, append to JSON manually
+    local test_coverage_section="
+  \"testCoverage\": {
+    \"totalTests\": $total_tests,
+    \"automatedTests\": $automated_tests,
+    \"manualTests\": $manual_tests,
+    \"coveragePercentage\": $coverage_percentage
+  }"
+    
+    # Remove last } and add test coverage before it
+    sed -i.bak "s/}$/,$test_coverage_section\n}/" "$metrics_file" 2>/dev/null || true
+  fi
+
+  echo -e "${GREEN}✅ Test coverage metrics extracted${NC}"
+}
+
 # ---------------- Swagger metrics (from HTML) ----------------
 extract_swagger_metrics() {
   local swagger_dir="$1"
@@ -228,6 +295,12 @@ generate_final_index() {
       export SWAGGER_TAGS_COVERAGE="0"
     fi
     export SWAGGER_OPERATIONS_COVERAGE="$SWAGGER_API_COVERAGE"
+
+    # Export test coverage metrics
+    export TEST_COVERAGE_TOTAL="$(jq -r '.testCoverage.totalTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
+    export TEST_COVERAGE_AUTOMATED="$(jq -r '.testCoverage.automatedTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
+    export TEST_COVERAGE_MANUAL="$(jq -r '.testCoverage.manualTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
+    export TEST_COVERAGE_PERCENTAGE="$(jq -r '.testCoverage.coveragePercentage // 0' "$metrics_file" 2>/dev/null || echo 0)"
   else
     # sensible defaults for first render
     export ALLURE_PASS_RATE="0" ALLURE_TOTAL_TESTS="0" ALLURE_PASSED_TESTS="0" ALLURE_FAILED_TESTS="0"
@@ -236,6 +309,7 @@ generate_final_index() {
     export SWAGGER_API_COVERAGE="0" SWAGGER_CONDITIONS_COVERAGE="0" SWAGGER_FULL_COVERAGE="0" SWAGGER_PARTIAL_COVERAGE="0"
     export SWAGGER_EMPTY_COVERAGE="0" SWAGGER_OPERATIONS_COVERAGE="0" SWAGGER_COVERED_OPERATIONS="0" SWAGGER_TOTAL_OPERATIONS="0"
     export SWAGGER_TAGS_COVERAGE="0" SWAGGER_COVERED_TAGS="0" SWAGGER_TOTAL_TAGS="0"
+    export TEST_COVERAGE_TOTAL="0" TEST_COVERAGE_AUTOMATED="0" TEST_COVERAGE_MANUAL="0" TEST_COVERAGE_PERCENTAGE="0"
   fi
 
   # Only substitute our placeholders (protect JS template literals)
@@ -246,7 +320,8 @@ $ALLURE_AVG_DURATION $ALLURE_TOTAL_DURATION \
 $SWAGGER_API_COVERAGE $SWAGGER_CONDITIONS_COVERAGE $SWAGGER_FULL_COVERAGE \
 $SWAGGER_PARTIAL_COVERAGE $SWAGGER_EMPTY_COVERAGE $SWAGGER_OPERATIONS_COVERAGE \
 $SWAGGER_COVERED_OPERATIONS $SWAGGER_TOTAL_OPERATIONS $SWAGGER_TAGS_COVERAGE \
-$SWAGGER_COVERED_TAGS $SWAGGER_TOTAL_TAGS'
+$SWAGGER_COVERED_TAGS $SWAGGER_TOTAL_TAGS \
+$TEST_COVERAGE_TOTAL $TEST_COVERAGE_AUTOMATED $TEST_COVERAGE_MANUAL $TEST_COVERAGE_PERCENTAGE'
 
   if command -v envsubst >/dev/null 2>&1; then
     local tmp; tmp=$(mktemp)
@@ -270,6 +345,7 @@ main() {
 
   extract_allure_metrics "$ALLURE_DIR" "$METRICS_FILE"
   extract_swagger_metrics "$SWAGGER_DIR" "$METRICS_FILE"
+  extract_test_coverage_metrics "src/test/java" "$METRICS_FILE"
   generate_final_index "$OUTPUT_DIR" "$METRICS_FILE"
 
   if [ -f "$METRICS_FILE" ]; then

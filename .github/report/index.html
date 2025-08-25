@@ -32,12 +32,15 @@
         .btn{display:inline-block;margin-top:8px;padding:8px 12px;border-radius:6px;background:#0d6efd;color:#fff;text-decoration:none}
         .btn.pink{background:#e91e63}
 
-        /* Ensure donut height is strictly limited to 70px maximum */
-        #testStatusChart{width:100% !important;height:70px !important;max-height:70px !important;}
+        /* Ensure donut height is strictly limited to 270px maximum */
+        #testStatusChart{width:100% !important;height:270px !important;max-height:270px !important;}
         
-        /* Ensure HTTP Method Coverage and Status Code Coverage charts are strictly limited to 70px maximum */
-        #methodCoverageChart{width:100% !important;height:70px !important;max-height:70px !important;}
-        #statusCodeChart{width:100% !important;height:70px !important;max-height:70px !important;}
+        /* Ensure HTTP Method Coverage and Status Code Coverage charts are strictly limited to 270px maximum */
+        #methodCoverageChart{width:100% !important;height:270px !important;max-height:270px !important;}
+        #statusCodeChart{width:100% !important;height:270px !important;max-height:270px !important;}
+        
+        /* Test coverage bar styling */
+        #test-coverage-fill{transition:width 0.3s ease}
     </style>
 </head>
 <body>
@@ -88,6 +91,18 @@
             <div class="kpi-card" id="skipped-tests-card">
                 <div class="kpi-label">Skipped Tests</div>
                 <div class="kpi-value" id="skipped-tests">$ALLURE_SKIPPED_TESTS</div>
+            </div>
+
+            <div class="kpi-card" id="test-coverage-card">
+                <div class="kpi-label">Test Coverage</div>
+                <div class="kpi-value" id="test-coverage-value">$TEST_COVERAGE_PERCENTAGE%</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="test-coverage-fill" style="width: $TEST_COVERAGE_PERCENTAGE%"></div>
+                </div>
+                <div class="metric-details">
+                    <span id="automated-tests">$TEST_COVERAGE_AUTOMATED automated</span>
+                    <span id="manual-tests">$TEST_COVERAGE_MANUAL manual</span>
+                </div>
             </div>
         </div>
 
@@ -297,6 +312,12 @@
         setBarWidth('operations-coverage-fill', Number(data.swagger.apiCoverage||0));
         createMethodCoverageChart(data.swagger);
         createStatusCodeChart(data.swagger);
+      }
+      if(data.testCoverage){
+        document.getElementById('test-coverage-value').textContent = (data.testCoverage.coveragePercentage||0) + '%';
+        setBarWidth('test-coverage-fill', Number(data.testCoverage.coveragePercentage||0));
+        document.getElementById('automated-tests').textContent = (data.testCoverage.automatedTests||0) + ' automated';
+        document.getElementById('manual-tests').textContent = (data.testCoverage.manualTests||0) + ' manual';
       }
     }
 
