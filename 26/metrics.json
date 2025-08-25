@@ -1,15 +1,15 @@
 {
   "allure": {
-    "totalTests": 22,
-    "passedTests": 22,
+    "totalTests": 27,
+    "passedTests": 27,
     "failedTests": 0,
     "skippedTests": 0,
     "criticalFailures": 0,
     "flakyTests": 0,
     "passRate": 100.0,
     "flakyRate": 0,
-    "avgDuration": 10,
-    "totalDuration": 237
+    "avgDuration": 34,
+    "totalDuration": 940
   },
   "swagger": {
     "totalOperations": 433,
