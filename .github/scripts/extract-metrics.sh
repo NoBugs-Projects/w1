@@ -215,9 +215,43 @@ append_test_metrics() {
     return 0
   fi
 
-  local files tests lines
+  local files tests lines total_tests automated_tests manual_tests
   files="$(find "$test_dir" -type f -name '*.java' 2>/dev/null | wc -l | tr -d '[:space:]')"; files="$(to_int "$files")"
-  tests="$(grep -R --include='*.java' -E '@Test\b' "$test_dir" 2>/dev/null | wc -l | tr -d '[:space:]')"; tests="$(to_int "$tests")"
+  
+  # Count total @Test methods
+  total_tests="$(grep -R --include='*.java' -E '@Test\b' "$test_dir" 2>/dev/null | wc -l | tr -d '[:space:]')"; total_tests="$(to_int "$total_tests")"
+  
+  # Count @Test methods with @ManualTest annotation
+  # Since @ManualTest and @Test are on separate lines, we need to count files with @ManualTest
+  # and assume those methods also have @Test annotations
+  local manual_tests=0
+  if command -v xargs >/dev/null 2>&1; then
+    # Use xargs for better performance
+    manual_tests="$(find "$test_dir" -name "*.java" -type f -print0 2>/dev/null | xargs -0 grep -c "@ManualTest" 2>/dev/null | awk -F: '{sum += $2} END {print sum+0}' | tr -d '[:space:]')"
+  else
+    # Fallback: iterate through files manually
+    while IFS= read -r file; do
+      if [[ -f "$file" ]]; then
+        local file_manual_count
+        file_manual_count="$(grep -c "@ManualTest" "$file" 2>/dev/null || echo 0)"
+        manual_tests=$((manual_tests + file_manual_count))
+      fi
+    done < <(find "$test_dir" -name "*.java" -type f 2>/dev/null)
+  fi
+  manual_tests="$(to_int "$manual_tests")"
+  
+  # Calculate automated tests (total - manual)
+  automated_tests=$((total_tests - manual_tests))
+  
+  # Calculate coverage percentage
+  local coverage_percentage=0
+  if [ "$total_tests" -gt 0 ]; then
+    if command -v bc >/dev/null 2>&1; then
+      coverage_percentage="$(echo "scale=1; $automated_tests*100/$total_tests" | bc -l 2>/dev/null || echo 0)"
+    else
+      coverage_percentage=$(( automated_tests*100/total_tests ))
+    fi
+  fi
 
   if command -v xargs >/dev/null 2>&1; then
     lines="$(find "$test_dir" -type f -name '*.java' -print0 2>/dev/null | xargs -0 cat 2>/dev/null | wc -l | tr -d '[:space:]')"
@@ -227,13 +261,16 @@ append_test_metrics() {
   lines="$(to_int "$lines")"
 
   echo "  Java test files: $files"
-  echo "  @Test annotations: $tests"
+  echo "  Total @Test annotations: $total_tests"
+  echo "  Automated tests: $automated_tests"
+  echo "  Manual tests: $manual_tests"
+  echo "  Test coverage: ${coverage_percentage}%"
   echo "  Lines of code: $lines"
 
   if command -v jq >/dev/null 2>&1 && [ -f "$metrics_file" ]; then
     local tmp; tmp="$(mktemp)"
-    jq --argjson tests "{\"javaFiles\": $files, \"javaTestAnnotations\": $tests, \"javaLines\": $lines}" \
-       '.tests = $tests' "$metrics_file" > "$tmp" && mv "$tmp" "$metrics_file"
+    jq --argjson tests "{\"javaFiles\": $files, \"javaTestAnnotations\": $total_tests, \"javaLines\": $lines, \"automatedTests\": $automated_tests, \"manualTests\": $manual_tests, \"coveragePercentage\": $coverage_percentage}" \
+       '.testCoverage = $tests' "$metrics_file" > "$tmp" && mv "$tmp" "$metrics_file"
     echo "  ✅ Appended test metrics to $metrics_file"
   else
     echo "  ℹ️ jq not available or $metrics_file missing; skipping JSON append."
@@ -291,6 +328,11 @@ generate_final_index() {
       export SWAGGER_TAGS_COVERAGE="0"
     fi
     export SWAGGER_OPERATIONS_COVERAGE="$SWAGGER_API_COVERAGE"
+    
+    # Export test coverage metrics
+    export TEST_COVERAGE_PERCENTAGE="$(jq -r '.testCoverage.coveragePercentage // 0' "$metrics_file" 2>/dev/null || echo 0)"
+    export TEST_COVERAGE_AUTOMATED="$(jq -r '.testCoverage.automatedTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
+    export TEST_COVERAGE_MANUAL="$(jq -r '.testCoverage.manualTests // 0' "$metrics_file" 2>/dev/null || echo 0)"
   else
     # Defaults for first render
     export ALLURE_PASS_RATE="0" ALLURE_TOTAL_TESTS="0" ALLURE_PASSED_TESTS="0" ALLURE_FAILED_TESTS="0"
@@ -299,6 +341,7 @@ generate_final_index() {
     export SWAGGER_API_COVERAGE="0" SWAGGER_CONDITIONS_COVERAGE="0" SWAGGER_FULL_COVERAGE="0" SWAGGER_PARTIAL_COVERAGE="0"
     export SWAGGER_EMPTY_COVERAGE="0" SWAGGER_OPERATIONS_COVERAGE="0" SWAGGER_COVERED_OPERATIONS="0" SWAGGER_TOTAL_OPERATIONS="0"
     export SWAGGER_TAGS_COVERAGE="0" SWAGGER_COVERED_TAGS="0" SWAGGER_TOTAL_TAGS="0"
+    export TEST_COVERAGE_PERCENTAGE="0" TEST_COVERAGE_AUTOMATED="0" TEST_COVERAGE_MANUAL="0"
   fi
 
   # Only substitute our placeholders (protect JS template literals)
@@ -309,7 +352,8 @@ $ALLURE_AVG_DURATION $ALLURE_TOTAL_DURATION \
 $SWAGGER_API_COVERAGE $SWAGGER_CONDITIONS_COVERAGE $SWAGGER_FULL_COVERAGE \
 $SWAGGER_PARTIAL_COVERAGE $SWAGGER_EMPTY_COVERAGE $SWAGGER_OPERATIONS_COVERAGE \
 $SWAGGER_COVERED_OPERATIONS $SWAGGER_TOTAL_OPERATIONS $SWAGGER_TAGS_COVERAGE \
-$SWAGGER_COVERED_TAGS $SWAGGER_TOTAL_TAGS'
+$SWAGGER_COVERED_TAGS $SWAGGER_TOTAL_TAGS \
+$TEST_COVERAGE_PERCENTAGE $TEST_COVERAGE_AUTOMATED $TEST_COVERAGE_MANUAL'
 
   if command -v envsubst >/dev/null 2>&1; then
     local tmp; tmp="$(mktemp)"
