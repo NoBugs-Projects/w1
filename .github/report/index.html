@@ -50,7 +50,7 @@
             <div class="logo"><img src="logo_icon.png" alt="NoBugs Logo" /></div>
             <h1>Web Test Framework<br>Analytics Dashboard</h1>
         </div>
-        <p id="run-info">Comprehensive Test Reports Dashboard - Run #$RUN_NUMBER</p>
+        <p id="run-info">Comprehensive Test Reports Dashboard - Run #<span id="run-number">$RUN_NUMBER</span></p>
     </div>
 
     <!-- 📊 1. Test Status Overview -->
@@ -107,6 +107,10 @@
                     <div class="coverage-fill" id="critical-failures-fill" style="width: 0%"></div>
                 </div>
                 <div class="metric-details"><span id="flaky-tests">$ALLURE_FLAKY_TESTS flaky</span></div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: Tests marked as critical that failed<br>
+                    📍 Source: Allure test execution results with critical tags</small>
+                </div>
             </div>
 
             <div class="kpi-card" id="skipped-tests-card">
@@ -114,6 +118,10 @@
                 <div class="kpi-value" id="skipped-tests">$ALLURE_SKIPPED_TESTS</div>
                 <div class="coverage-bar">
                     <div class="coverage-fill" id="skipped-tests-fill" style="width: 0%"></div>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: Tests that were skipped during execution<br>
+                    📍 Source: Allure test execution results</small>
                 </div>
             </div>
 
@@ -126,6 +134,10 @@
                 <div class="metric-details">
                     <span id="automated-tests">$TEST_COVERAGE_AUTOMATED automated</span>
                     <span id="manual-tests">$TEST_COVERAGE_MANUAL manual</span>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Automated Tests / Total Tests) × 100%<br>
+                    📍 Source: Test source code analysis (@Test annotations)</small>
                 </div>
             </div>
         </div>
@@ -151,6 +163,10 @@
                         <div class="gauge-value" id="api-coverage-value">$SWAGGER_API_COVERAGE%</div>
                     </div>
                 </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Covered Operations / Total Operations) × 100%<br>
+                    📍 Source: Swagger coverage analysis</small>
+                </div>
             </div>
 
             <div class="kpi-card">
@@ -159,6 +175,10 @@
                     <div class="gauge" id="conditions-coverage-gauge">
                         <div class="gauge-value" id="conditions-coverage-value">$SWAGGER_CONDITIONS_COVERAGE%</div>
                     </div>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Covered Conditions / Total Conditions) × 100%<br>
+                    📍 Source: Swagger conditions analysis</small>
                 </div>
             </div>
 
@@ -169,6 +189,10 @@
                         <div class="gauge-value" id="full-coverage-value">$SWAGGER_FULL_COVERAGE%</div>
                     </div>
                 </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Fully covered endpoints / Total endpoints) × 100%<br>
+                    📍 Source: Swagger coverage analysis</small>
+                </div>
             </div>
 
             <div class="kpi-card">
@@ -178,6 +202,10 @@
                         <div class="gauge-value" id="partial-coverage-value">$SWAGGER_PARTIAL_COVERAGE%</div>
                     </div>
                 </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Partially covered endpoints / Total endpoints) × 100%<br>
+                    📍 Source: Swagger coverage analysis</small>
+                </div>
             </div>
 
             <div class="kpi-card">
@@ -186,6 +214,10 @@
                     <div class="gauge" id="empty-coverage-gauge">
                         <div class="gauge-value" id="empty-coverage-value">$SWAGGER_EMPTY_COVERAGE%</div>
                     </div>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Uncovered endpoints / Total endpoints) × 100%<br>
+                    📍 Source: Swagger coverage analysis</small>
                 </div>
             </div>
         </div>
@@ -280,6 +312,9 @@
 
     <!-- Reports links -->
     <div class="reports-section">
+        <div id="ci-notice" style="display: none;" class="ci-notice">
+            <p>⚠️ This dashboard is showing sample data. For real-time metrics, please run the CI/CD pipeline.</p>
+        </div>
         <h2>📋 Detailed Reports</h2>
         <div class="reports-grid">
             <div class="report-card">
@@ -465,7 +500,54 @@
         .catch(function(){ /* keep placeholders if metrics missing */ });
     }
 
-    document.addEventListener('DOMContentLoaded', loadMetrics);
+    function handleRunNumber(){
+      const runNumberSpan = document.getElementById('run-number');
+      if (runNumberSpan) {
+        const runNumber = runNumberSpan.textContent;
+        // If RUN_NUMBER is not replaced (still shows $RUN_NUMBER), set a fallback
+        if (runNumber === '$RUN_NUMBER' || !runNumber || runNumber.trim() === '') {
+          runNumberSpan.textContent = 'Latest';
+          runNumberSpan.style.color = '#6c757d';
+          runNumberSpan.style.fontStyle = 'italic';
+        }
+      }
+    }
+
+    function handleReportLinks(){
+      const allureLink = document.getElementById('allure-link');
+      const swaggerLink = document.getElementById('swagger-link');
+      const ciNotice = document.getElementById('ci-notice');
+      
+      let showNotice = false;
+      
+      // Check if links are still showing placeholder values
+      if (allureLink && (allureLink.href.includes('$ALLURE_REPORT_URL') || allureLink.href === window.location.href)) {
+        allureLink.href = '#';
+        allureLink.textContent = 'Allure Report Not Available';
+        allureLink.style.opacity = '0.6';
+        allureLink.style.pointerEvents = 'none';
+        showNotice = true;
+      }
+      
+      if (swaggerLink && (swaggerLink.href.includes('$SWAGGER_REPORT_URL') || swaggerLink.href === window.location.href)) {
+        swaggerLink.href = '#';
+        swaggerLink.textContent = 'Swagger Report Not Available';
+        swaggerLink.style.opacity = '0.6';
+        swaggerLink.style.pointerEvents = 'none';
+        showNotice = true;
+      }
+      
+      // Show CI notice if needed
+      if (ciNotice && showNotice) {
+        ciNotice.style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      loadMetrics();
+      handleRunNumber();
+      handleReportLinks();
+    });
 </script>
 </body>
 </html>
