@@ -406,6 +406,36 @@ body {
 
 #conditions-coverage {
     color: #00cc00;
+}
+
+/* Progress bar colors for different metric types */
+#total-tests-fill {
+    background: #007bff !important; /* Blue for total count */
+}
+
+#avg-duration-fill {
+    background: #28a745 !important; /* Green for duration */
+}
+
+#critical-failures-fill {
+    background: #dc3545 !important; /* Red for failures */
+}
+
+#skipped-tests-fill {
+    background: #ffc107 !important; /* Yellow for skipped */
+}
+
+/* Gauge colors for different coverage types */
+#full-coverage-gauge {
+    --gauge-color: #28a745; /* Green for full coverage */
+}
+
+#partial-coverage-gauge {
+    --gauge-color: #ffc107; /* Yellow for partial coverage */
+}
+
+#empty-coverage-gauge {
+    --gauge-color: #dc3545; /* Red for empty coverage */
 } 
 
 /* Performance Metrics Styles */
@@ -446,6 +476,17 @@ body {
 .test-duration-item .duration-ms {
     color: #666;
     font-size: 0.9rem;
+}
+
+.test-duration-item .test-name {
+    color: #333;
+    font-weight: 500;
+    font-size: 0.9rem;
+    flex: 1;
+    margin-left: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .no-data {
@@ -495,5 +536,12 @@ body {
     
     .test-duration-item .rank {
         min-width: auto;
+    }
+    
+    .test-duration-item .test-name {
+        margin-left: 0;
+        text-align: center;
+        white-space: normal;
+        word-break: break-word;
     }
 } 

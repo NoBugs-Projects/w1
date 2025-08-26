@@ -74,6 +74,9 @@
             <div class="kpi-card" id="total-tests-card">
                 <div class="kpi-label">Total Tests</div>
                 <div class="kpi-value" id="total-tests-value">$ALLURE_TOTAL_TESTS</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="total-tests-fill" style="width: 100%"></div>
+                </div>
                 <div class="metric-details">
                     <span id="passed-tests">$ALLURE_PASSED_TESTS passed</span>
                     <span id="failed-tests">$ALLURE_FAILED_TESTS failed</span>
@@ -87,6 +90,9 @@
             <div class="kpi-card" id="avg-duration-card">
                 <div class="kpi-label">Average Duration</div>
                 <div class="kpi-value" id="avg-duration-value">$ALLURE_AVG_DURATION</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="avg-duration-fill" style="width: 0%"></div>
+                </div>
                 <div class="metric-details">Total: <span id="total-duration">$ALLURE_TOTAL_DURATION</span></div>
                 <div class="metric-calculation">
                     <small>📊 Calculated: Total Duration / Total Tests<br>
@@ -97,12 +103,18 @@
             <div class="kpi-card" id="critical-failures-card">
                 <div class="kpi-label">Critical Failures</div>
                 <div class="kpi-value" id="critical-failures-value">$ALLURE_CRITICAL_FAILURES</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="critical-failures-fill" style="width: 0%"></div>
+                </div>
                 <div class="metric-details"><span id="flaky-tests">$ALLURE_FLAKY_TESTS flaky</span></div>
             </div>
 
             <div class="kpi-card" id="skipped-tests-card">
                 <div class="kpi-label">Skipped Tests</div>
                 <div class="kpi-value" id="skipped-tests">$ALLURE_SKIPPED_TESTS</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="skipped-tests-fill" style="width: 0%"></div>
+                </div>
             </div>
 
             <div class="kpi-card" id="test-coverage-card">
@@ -362,14 +374,41 @@
       if(data.allure){
         document.getElementById('pass-rate-value').textContent = (data.allure.passRate||0) + '%';
         setBarWidth('pass-rate-fill', Number(data.allure.passRate||0));
+        
         document.getElementById('total-tests-value').textContent = data.allure.totalTests||0;
+        setBarWidth('total-tests-fill', 100); // Always 100% for total tests
+        
         document.getElementById('passed-tests').textContent = (data.allure.passedTests||0) + ' passed';
         document.getElementById('failed-tests').textContent = (data.allure.failedTests||0) + ' failed';
+        
+        // Set progress bars for duration and failure metrics
+        const avgDuration = Number(data.allure.avgDuration||0);
+        const totalTests = Number(data.allure.totalTests||0);
+        if (totalTests > 0) {
+          // Normalize average duration to a 0-100 scale (assuming 30s is 100%)
+          const durationPercent = Math.min((avgDuration / 30) * 100, 100);
+          setBarWidth('avg-duration-fill', durationPercent);
+        }
+        
+        // Set critical failures progress bar (0-100% based on total tests)
+        const criticalFailures = Number(data.allure.criticalFailures||0);
+        const criticalPercent = totalTests > 0 ? (criticalFailures / totalTests) * 100 : 0;
+        setBarWidth('critical-failures-fill', criticalPercent);
+        
+        // Set skipped tests progress bar
+        const skippedTests = Number(data.allure.skippedTests||0);
+        const skippedPercent = totalTests > 0 ? (skippedTests / totalTests) * 100 : 0;
+        setBarWidth('skipped-tests-fill', skippedPercent);
+        
         createTestStatusChart(data.allure);
       }
       if(data.swagger){
         setGauge('api-coverage-gauge', Number(data.swagger.apiCoverage||0));
         setGauge('conditions-coverage-gauge', Number(data.swagger.conditionsCoverage||0));
+        setGauge('full-coverage-gauge', Number(data.swagger.fullCoverage||0));
+        setGauge('partial-coverage-gauge', Number(data.swagger.partialCoverage||0));
+        setGauge('empty-coverage-gauge', Number(data.swagger.emptyCoverage||0));
+        
         document.getElementById('operations-coverage-value').textContent = (data.swagger.apiCoverage||0) + '%';
         setBarWidth('operations-coverage-fill', Number(data.swagger.apiCoverage||0));
         createMethodCoverageChart(data.swagger);
@@ -403,14 +442,16 @@
       }
       
       let html = '<div class="longest-tests-list">';
-      longestTests.forEach((duration, index) => {
+      longestTests.forEach((test, index) => {
         const rank = index + 1;
-        const durationMs = duration || 0;
+        const durationMs = test.duration || 0;
         const durationSec = (durationMs / 1000).toFixed(1);
+        const testName = test.name || 'Unknown Test';
         html += `<div class="test-duration-item">
           <span class="rank">#${rank}</span>
           <span class="duration">${durationSec}s</span>
           <span class="duration-ms">(${durationMs}ms)</span>
+          <span class="test-name">${testName}</span>
         </div>`;
       });
       html += '</div>';

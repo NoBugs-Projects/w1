@@ -318,8 +318,13 @@ append_performance_metrics() {
             fi
           fi
           
-          # Get top 10 longest tests
-          longest_tests="$(echo "$durations" | tail -10 | jq -R -s -c 'split("\n") | map(select(length > 0)) | map(tonumber) | reverse' 2>/dev/null || echo "[]")"
+          # Get top 10 longest tests with names
+          local longest_tests_data="[]"
+          if command -v jq >/dev/null 2>&1; then
+            # Create array of objects with name and duration
+            longest_tests_data="$(echo "$test_files" | xargs -I {} jq -r 'select(.time.duration) | {name: .name, duration: .time.duration}' {} 2>/dev/null | jq -s 'sort_by(.duration) | reverse | .[0:10]' 2>/dev/null || echo "[]")"
+          fi
+          longest_tests="$longest_tests_data"
         fi
       fi
     fi
