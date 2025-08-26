@@ -1,0 +1,107 @@
+{
+  "allure": {
+    "totalTests": 27,
+    "passedTests": 27,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "criticalFailures": 0,
+    "flakyTests": 0,
+    "passRate": 100.0,
+    "flakyRate": 0,
+    "avgDuration": 9,
+    "totalDuration": 245
+  },
+  "swagger": {
+    "totalOperations": 433,
+    "coveredOperations": 18,
+    "totalTags": 30,
+    "coveredTags": 7,
+    "totalConditions": 1885,
+    "coveredConditions": 7,
+    "apiCoverage": 4.1,
+    "conditionsCoverage": 4.1,
+    "fullCoverage": 0.462,
+    "partialCoverage": 2.309,
+    "emptyCoverage": 97.229,
+    "methodCoverage": {
+      "GET": {
+        "coverage": 85,
+        "total": 200
+      },
+      "POST": {
+        "coverage": 70,
+        "total": 150
+      },
+      "PUT": {
+        "coverage": 60,
+        "total": 50
+      },
+      "DELETE": {
+        "coverage": 40,
+        "total": 33
+      }
+    },
+    "statusCodeCoverage": {
+      "200": 15,
+      "400": 8,
+      "403": 5,
+      "404": 3,
+      "500": 2
+    }
+  },
+  "testCoverage": {
+    "javaFiles": 17,
+    "javaTestAnnotations": 52,
+    "javaLines": 1151,
+    "automatedTests": 29,
+    "manualTests": 23,
+    "coveragePercentage": 55.7
+  },
+  "performance": {
+    "medianDuration": 6010,
+    "longestTests": [
+      {
+        "name": "User should be able to create build type step and start build",
+        "duration": 82762
+      },
+      {
+        "name": "User should be able to create project",
+        "duration": 80002
+      },
+      {
+        "name": "User should be able to create build type step and start build",
+        "duration": 69686
+      },
+      {
+        "name": "User should be able to create project",
+        "duration": 68222
+      },
+      {
+        "name": "User should not be able to create project without name",
+        "duration": 55120
+      },
+      {
+        "name": "setupTeamCityServerTest",
+        "duration": 53765
+      },
+      {
+        "name": "setupTeamCityServerTest",
+        "duration": 53428
+      },
+      {
+        "name": "setupTeamCityServerTest",
+        "duration": 53274
+      },
+      {
+        "name": "User should not be able to create project without name",
+        "duration": 46169
+      },
+      {
+        "name": "User should be able to create build type",
+        "duration": 22117
+      }
+    ],
+    "parallelizationEfficiency": 85.0,
+    "redundancyIndex": 6.5
+  }
+}
