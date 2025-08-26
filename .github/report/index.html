@@ -65,6 +65,10 @@
                 <div class="coverage-bar">
                     <div class="coverage-fill" id="pass-rate-fill" style="width: $ALLURE_PASS_RATE%"></div>
                 </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Passed Tests / Total Tests) × 100%<br>
+                    📍 Source: Allure test execution results</small>
+                </div>
             </div>
 
             <div class="kpi-card" id="total-tests-card">
@@ -74,12 +78,20 @@
                     <span id="passed-tests">$ALLURE_PASSED_TESTS passed</span>
                     <span id="failed-tests">$ALLURE_FAILED_TESTS failed</span>
                 </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: Sum of all test methods with @Test annotation<br>
+                    📍 Source: Allure test execution summary</small>
+                </div>
             </div>
 
             <div class="kpi-card" id="avg-duration-card">
                 <div class="kpi-label">Average Duration</div>
                 <div class="kpi-value" id="avg-duration-value">$ALLURE_AVG_DURATION</div>
                 <div class="metric-details">Total: <span id="total-duration">$ALLURE_TOTAL_DURATION</span></div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: Total Duration / Total Tests<br>
+                    📍 Source: Allure test timing data</small>
+                </div>
             </div>
 
             <div class="kpi-card" id="critical-failures-card">
@@ -213,6 +225,10 @@
                 <div class="kpi-label">Median Test Duration</div>
                 <div class="kpi-value" id="median-duration-value">$PERFORMANCE_MEDIAN_DURATION ms</div>
                 <div class="metric-details">Central tendency of test execution time</div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: Middle value of sorted test durations<br>
+                    📍 Source: Allure test result files (.json)</small>
+                </div>
             </div>
 
             <div class="kpi-card">
@@ -222,6 +238,10 @@
                     <div class="coverage-fill" id="parallelization-efficiency-fill" style="width: $PERFORMANCE_PARALLELIZATION_EFFICIENCY%"></div>
                 </div>
                 <div class="metric-details">How evenly tests are distributed across shards</div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: Based on TestNG thread configuration & distribution<br>
+                    📍 Source: TestNG parallel settings + test execution analysis</small>
+                </div>
             </div>
 
             <div class="kpi-card">
@@ -231,6 +251,10 @@
                     <div class="coverage-fill" id="redundancy-index-fill" style="width: $PERFORMANCE_REDUNDANCY_INDEX%"></div>
                 </div>
                 <div class="metric-details">Duplicate test patterns detected</div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Duplicate patterns / Total patterns) × 100%<br>
+                    📍 Source: Test source code analysis (@Test descriptions)</small>
+                </div>
             </div>
         </div>
 
