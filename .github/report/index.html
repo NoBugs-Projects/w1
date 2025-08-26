@@ -48,7 +48,7 @@
     <div class="header">
         <div class="logo-container">
             <div class="logo"><img src="logo_icon.png" alt="NoBugs Logo" /></div>
-            <h1>Web Test Framework - Analytics Dashboard</h1>
+            <h1>Web Test Framework<br>Analytics Dashboard</h1>
         </div>
         <p id="run-info">Comprehensive Test Reports Dashboard - Run #$RUN_NUMBER</p>
     </div>
@@ -204,6 +204,44 @@
         </div>
     </div>
 
+    <!-- ⚡ 3. Performance & Parallelization Analysis -->
+    <div class="chart-container">
+        <h2 class="chart-title">⚡ Performance & Parallelization Analysis</h2>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Median Test Duration</div>
+                <div class="kpi-value" id="median-duration-value">$PERFORMANCE_MEDIAN_DURATION ms</div>
+                <div class="metric-details">Central tendency of test execution time</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Parallelization Efficiency</div>
+                <div class="kpi-value" id="parallelization-efficiency-value">$PERFORMANCE_PARALLELIZATION_EFFICIENCY%</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="parallelization-efficiency-fill" style="width: $PERFORMANCE_PARALLELIZATION_EFFICIENCY%"></div>
+                </div>
+                <div class="metric-details">How evenly tests are distributed across shards</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Redundancy Index</div>
+                <div class="kpi-value" id="redundancy-index-value">$PERFORMANCE_REDUNDANCY_INDEX%</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="redundancy-index-fill" style="width: $PERFORMANCE_REDUNDANCY_INDEX%"></div>
+                </div>
+                <div class="metric-details">Duplicate test patterns detected</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>Longest 10 Tests (Bottlenecks)</h3>
+            <div id="longest-tests-container">
+                <p class="no-data">Loading test duration data...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Reports links -->
     <div class="reports-section">
         <h2>📋 Detailed Reports</h2>
@@ -319,6 +357,40 @@
         document.getElementById('automated-tests').textContent = (data.testCoverage.automatedTests||0) + ' automated';
         document.getElementById('manual-tests').textContent = (data.testCoverage.manualTests||0) + ' manual';
       }
+      if(data.performance){
+        document.getElementById('median-duration-value').textContent = (data.performance.medianDuration||0) + ' ms';
+        document.getElementById('parallelization-efficiency-value').textContent = (data.performance.parallelizationEfficiency||0) + '%';
+        setBarWidth('parallelization-efficiency-fill', Number(data.performance.parallelizationEfficiency||0));
+        document.getElementById('redundancy-index-value').textContent = (data.performance.redundancyIndex||0) + '%';
+        setBarWidth('redundancy-index-fill', Number(data.performance.redundancyIndex||0));
+        
+        // Display longest tests
+        displayLongestTests(data.performance.longestTests||[]);
+      }
+    }
+
+    function displayLongestTests(longestTests){
+      const container = document.getElementById('longest-tests-container');
+      if (!container) return;
+      
+      if (!Array.isArray(longestTests) || longestTests.length === 0) {
+        container.innerHTML = '<p class="no-data">No test duration data available</p>';
+        return;
+      }
+      
+      let html = '<div class="longest-tests-list">';
+      longestTests.forEach((duration, index) => {
+        const rank = index + 1;
+        const durationMs = duration || 0;
+        const durationSec = (durationMs / 1000).toFixed(1);
+        html += `<div class="test-duration-item">
+          <span class="rank">#${rank}</span>
+          <span class="duration">${durationSec}s</span>
+          <span class="duration-ms">(${durationMs}ms)</span>
+        </div>`;
+      });
+      html += '</div>';
+      container.innerHTML = html;
     }
 
     function loadMetrics(){

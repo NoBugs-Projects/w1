@@ -55,6 +55,13 @@ body {
     color: #000000;
     margin-bottom: 10px;
     font-weight: 700;
+    line-height: 1.2;
+}
+
+.header h1 br {
+    display: block;
+    content: "";
+    margin-top: 5px;
 }
 
 .header p {
@@ -331,7 +338,12 @@ body {
     }
     
     .header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
+        line-height: 1.1;
+    }
+    
+    .header h1 br {
+        margin-top: 3px;
     }
     
     .metrics-grid {
@@ -394,4 +406,74 @@ body {
 
 #conditions-coverage {
     color: #00cc00;
+} 
+
+/* Performance Metrics Styles */
+.longest-tests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.test-duration-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 8px 12px;
+    background: #ffffff;
+    border-radius: 6px;
+    border-left: 3px solid #007bff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.test-duration-item .rank {
+    font-weight: 700;
+    color: #007bff;
+    min-width: 30px;
+}
+
+.test-duration-item .duration {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.test-duration-item .duration-ms {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
+/* Performance KPI specific styles */
+#parallelization-efficiency-fill,
+#redundancy-index-fill {
+    transition: width 0.3s ease;
+}
+
+/* Responsive adjustments for performance section */
+@media (max-width: 768px) {
+    .longest-tests-list {
+        max-height: 250px;
+    }
+    
+    .test-duration-item {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .test-duration-item .rank {
+        min-width: auto;
+    }
 } 
