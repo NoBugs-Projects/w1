@@ -4,6 +4,7 @@ import com.teamcity.api.enums.UserRole;
 import com.teamcity.api.generators.RandomData;
 import com.teamcity.api.models.BuildType;
 import com.teamcity.api.models.Roles;
+import com.teamcity.api.models.comparison.ModelAssertions;
 import com.teamcity.api.requests.checked.CheckedBase;
 import com.teamcity.api.requests.unchecked.UncheckedBase;
 import com.teamcity.api.spec.Specifications;
@@ -40,7 +41,8 @@ public class BuildTypeTest extends BaseApiTest {
 
         var buildType = checkedBuildTypeRequest.get().create(testData.get().getBuildType());
 
-        softy.assertThat(buildType.getId()).as("buildTypeId").isEqualTo(testData.get().getBuildType().getId());
+        // Use DTO comparison framework instead of manual field comparison
+        ModelAssertions.assertThatModels(testData.get().getBuildType(), buildType).match();
     }
 
     @Test(description = "User should not be able to create two build types with the same id", groups = {"Regression"})
@@ -113,7 +115,8 @@ public class BuildTypeTest extends BaseApiTest {
 
         var buildType = checkedBuildTypeRequest.get().create(testData.get().getBuildType());
 
-        softy.assertThat(buildType.getId()).as("buildTypeId").isEqualTo(testData.get().getBuildType().getId());
+        // Use DTO comparison framework instead of manual field comparison
+        ModelAssertions.assertThatModels(testData.get().getBuildType(), buildType).match();
     }
 
     @Test(description = "Project admin should not be able to create build type for not their project", groups = {"Regression"})

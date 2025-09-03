@@ -3,6 +3,8 @@ package com.teamcity.api;
 import com.teamcity.api.annotations.ManualTest;
 import com.teamcity.api.generators.RandomData;
 import com.teamcity.api.models.Project;
+import com.teamcity.api.models.NewProjectDescription;
+import com.teamcity.api.models.comparison.ModelAssertions;
 import com.teamcity.api.requests.checked.CheckedBase;
 import com.teamcity.api.requests.unchecked.UncheckedBase;
 import com.teamcity.api.spec.Specifications;
@@ -38,7 +40,7 @@ public class ProjectTest extends BaseApiTest {
 
         var project = checkedProjectRequest.get().create(testData.get().getNewProjectDescription());
 
-        softy.assertThat(project.getId()).as("projectId").isEqualTo(testData.get().getProject().getId());
+        ModelAssertions.assertThatModels(testData.get().getNewProjectDescription(), project).match();
     }
 
     @Test(description = "User should not be able to create two projects with the same id", groups = {"Regression"})

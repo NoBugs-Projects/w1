@@ -1,0 +1,62 @@
+services:
+  # TeamCity Server
+  teamcity-server:
+    image: jetbrains/teamcity-server:2023.11.1
+    container_name: teamcity-server
+    ports:
+      - "8111:8111"
+    volumes:
+      - ./tmp/teamcity_server/datadir:/data/teamcity_server/datadir
+      - ./tmp/teamcity_server/logs:/opt/teamcity/logs
+    environment:
+      - TEAMCITY_SERVER_MEM_OPTS=-Xmx2g -XX:MaxPermSize=270m -XX:ReservedCodeCacheSize=350m
+    user: "0"
+    networks:
+      - teamcity-network
+
+  # TeamCity Agent
+  teamcity-agent:
+    image: jetbrains/teamcity-agent:2023.11.1
+    container_name: teamcity-agent
+    depends_on:
+      - teamcity-server
+    environment:
+      - SERVER_URL=http://teamcity-server:8111
+    volumes:
+      - ./tmp/teamcity_agent/conf:/data/teamcity_agent/conf
+    user: "0"
+    networks:
+      - teamcity-network
+
+  # Selenoid (Browser automation)
+  selenoid:
+    image: aerokube/selenoid:latest-release
+    container_name: selenoid
+    ports:
+      - "4444:4444"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/:/etc/selenoid/:ro
+    networks:
+      - teamcity-network
+
+  # Selenoid UI (Web interface for Selenoid)
+  selenoid-ui:
+    image: aerokube/selenoid-ui:latest-release
+    container_name: selenoid-ui
+    ports:
+      - "8080:8080"
+    command: --selenoid-uri http://selenoid:4444
+    depends_on:
+      - selenoid
+    networks:
+      - teamcity-network
+
+networks:
+  teamcity-network:
+    driver: bridge
+
+volumes:
+  teamcity-data:
+  teamcity-logs:
+  teamcity-agent-conf:

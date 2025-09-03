@@ -3,6 +3,7 @@ package com.teamcity.api;
 import com.teamcity.api.models.BuildType;
 import com.teamcity.api.models.Project;
 import com.teamcity.api.models.User;
+import com.teamcity.api.models.comparison.ModelAssertions;
 import com.teamcity.api.requests.checked.CheckedBase;
 import io.qameta.allure.Feature;
 import org.testng.annotations.Test;
@@ -39,6 +40,7 @@ public class SearchTest extends BaseApiTest {
         var users = checkedUserRequest.search().stream().map(User::getUsername).toList();
         var buildTypes = checkedBuildTypeRequest.search().stream().map(BuildType::getName).toList();
 
+        // Verify that all created entities are found in search results
         softy.assertThat(projects).as("projects").containsAll(createdProjects);
         softy.assertThat(users).as("users").containsAll(createdUsers);
         softy.assertThat(buildTypes).as("buildTypes").containsAll(createdBuildTypes);

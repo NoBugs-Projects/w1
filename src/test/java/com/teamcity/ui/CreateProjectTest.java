@@ -2,6 +2,7 @@ package com.teamcity.ui;
 
 import com.teamcity.api.models.BuildType;
 import com.teamcity.api.models.Project;
+import com.teamcity.api.models.comparison.ModelAssertions;
 import com.teamcity.api.requests.checked.CheckedBase;
 import com.teamcity.api.spec.Specifications;
 import com.teamcity.ui.pages.ProjectsPage;
@@ -28,8 +29,9 @@ public class CreateProjectTest extends BaseUiTest {
         var checkedBuildTypeRequest = new CheckedBase<BuildType>(Specifications.getSpec()
                 .authSpec(testData.get().getUser()), BUILD_TYPES);
         var buildType = checkedBuildTypeRequest.read(createdBuildTypeId);
-        softy.assertThat(buildType.getProject().getName()).as("projectName").isEqualTo(testData.get().getProject().getName());
-        softy.assertThat(buildType.getName()).as("buildTypeName").isEqualTo(testData.get().getBuildType().getName());
+        // Use DTO comparison framework instead of manual field comparison
+        ModelAssertions.assertThatModels(testData.get().getProject(), buildType.getProject()).match();
+        ModelAssertions.assertThatModels(testData.get().getBuildType(), buildType).match();
         // Добавляем созданную сущность в сторедж, чтобы автоматически удалить ее в конце теста логикой, реализованной в API части
 
         var createdProjectId = ProjectsPage.open()
@@ -38,7 +40,8 @@ public class CreateProjectTest extends BaseUiTest {
         var checkedProjectRequest = new CheckedBase<Project>(Specifications.getSpec()
                 .authSpec(testData.get().getUser()), PROJECTS);
         var project = checkedProjectRequest.read(createdProjectId);
-        softy.assertThat(project.getName()).as("projectName").isEqualTo(testData.get().getProject().getName());
+        // Use DTO comparison framework instead of manual field comparison
+        ModelAssertions.assertThatModels(testData.get().getProject(), project).match();
     }
 
     @Test(description = "User should not be able to create project without name", groups = {"Regression"})

@@ -1,6 +1,7 @@
 package com.teamcity.ui;
 
 import com.teamcity.api.models.BuildType;
+import com.teamcity.api.models.comparison.ModelAssertions;
 import com.teamcity.api.requests.checked.CheckedBase;
 import com.teamcity.api.spec.Specifications;
 import com.teamcity.ui.annotations.UserSession;
@@ -28,7 +29,8 @@ public class CreateBuildTypeTest extends BaseUiTest {
         var checkedBuildTypeRequest = new CheckedBase<BuildType>(Specifications.getSpec()
                 .authSpec(testData.get().getUser()), BUILD_TYPES);
         var buildType = checkedBuildTypeRequest.read(createdBuildTypeId);
-        softy.assertThat(buildType.getName()).as("buildTypeName").isEqualTo(testData.get().getBuildType().getName());
+        // Use DTO comparison framework instead of manual field comparison
+        ModelAssertions.assertThatModels(testData.get().getBuildType(), buildType).match();
     }
 
     @Test(description = "User should not be able to create build type without name", groups = {"Regression"})

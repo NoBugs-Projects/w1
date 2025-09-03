@@ -1,0 +1,30 @@
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Build output
+target/
+*.class
+*.jar
+*.war
+
+# Test output
+test-allure/
+test-swagger/
+test-output/
+
+# Docker temporary files
+tmp/
+docker-compose.override.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
