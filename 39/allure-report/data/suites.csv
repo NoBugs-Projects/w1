@@ -1,2 +1,2 @@
 "Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
-"passed","Wed Sep 03 17:18:41 UTC 2025","Wed Sep 03 17:19:34 UTC 2025","52638","Surefire suite","chrome","com.teamcity.ui.SetupServerTest","com.teamcity.ui.SetupServerTest","setupTeamCityServerTest","setupTeamCityServerTest",""
+"passed","Wed Sep 03 17:28:29 UTC 2025","Wed Sep 03 17:29:22 UTC 2025","53824","Surefire suite","chrome","com.teamcity.ui.SetupServerTest","com.teamcity.ui.SetupServerTest","setupTeamCityServerTest","setupTeamCityServerTest",""

@@ -8,8 +8,8 @@
     "flakyTests": 0,
     "passRate": 100.0,
     "flakyRate": 0,
-    "avgDuration": 52,
-    "totalDuration": 52
+    "avgDuration": 53,
+    "totalDuration": 53
   },
   "swagger": {
     "totalOperations": 0,
@@ -70,7 +70,7 @@
       },
       {
         "name": "setupTeamCityServerTest",
-        "duration": 52638
+        "duration": 53824
       }
     ],
     "parallelizationEfficiency": 85.0,
