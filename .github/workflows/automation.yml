@@ -27,9 +27,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
+            ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
             ${{ runner.os }}-maven-
+
+      - name: Resolve dependencies
+        run: ./mvnw dependency:resolve
 
       - name: Validate Checkstyle
         run: ./mvnw validate
@@ -47,8 +51,8 @@ jobs:
         if: inputs.browser
         run: sed -i "s/^browser=.*/browser=${{ inputs.browser }}/" src/main/resources/config.properties
 
-      - name: Run tests
-        run: ./mvnw test -P ${{ inputs.package }}
+      - name: Clean and run tests
+        run: ./mvnw clean test -P ${{ inputs.package }}
 
       # Создание репорта с покрытием API тестов, основанного на Swagger. Документация: https://github.com/viclovsky/swagger-coverage
       # Обязательно добавить SwaggerCoverageRestAssured фильтр во все реквесты, как в Specifications.reqBuilder
