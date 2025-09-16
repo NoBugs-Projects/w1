@@ -8,8 +8,8 @@
     "flakyTests": 0,
     "passRate": 100.0,
     "flakyRate": 0,
-    "avgDuration": 56,
-    "totalDuration": 56
+    "avgDuration": 53,
+    "totalDuration": 53
   },
   "swagger": {
     "totalOperations": 0,
@@ -58,19 +58,19 @@
     "coveragePercentage": 55.7
   },
   "performance": {
-    "medianDuration": 54421,
+    "medianDuration": 53449,
     "longestTests": [
       {
         "name": "setupTeamCityServerTest",
-        "duration": 56874
+        "duration": 53746
       },
       {
         "name": "setupTeamCityServerTest",
-        "duration": 54421
+        "duration": 53449
       },
       {
         "name": "setupTeamCityServerTest",
-        "duration": 53470
+        "duration": 52795
       }
     ],
     "parallelizationEfficiency": 85.0,
