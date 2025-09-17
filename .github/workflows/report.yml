@@ -167,3 +167,51 @@ jobs:
           git add .
           git commit -m "Publish Allure (/allure-report), Swagger and dashboard for run ${RUN}" || echo "Nothing to commit"
           git push
+
+      # 12) Отправляем уведомление в Telegram
+      - name: Send Telegram notification
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN="${{ inputs.parent_run_number }}"
+          if [ -z "$RUN" ]; then RUN="${{ github.run_number }}"; fi
+          
+          # Определяем статус выполнения
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS_EMOJI="✅"
+            STATUS_TEXT="SUCCESS"
+          elif [ "${{ job.status }}" = "failure" ]; then
+            STATUS_EMOJI="❌"
+            STATUS_TEXT="FAILED"
+          else
+            STATUS_EMOJI="⚠️"
+            STATUS_TEXT="CANCELLED"
+          fi
+          
+          # Формируем сообщение
+          MESSAGE="🚀 *Test Execution Report* ${STATUS_EMOJI}
+
+          *Status:* ${STATUS_TEXT}
+          *Run Number:* ${RUN}
+          *Repository:* ${{ github.repository }}
+          *Branch:* ${{ github.ref_name }}
+          *Commit:* \`${{ github.sha }}\`
+          
+          📊 *Test Report:* https://nobugs-projects.github.io/w1/${RUN}/
+          
+          🔗 *Allure Report:* https://nobugs-projects.github.io/w1/${RUN}/allure-report/
+          🔍 *Swagger Coverage:* https://nobugs-projects.github.io/w1/${RUN}/swagger-coverage-report/
+          
+          *Workflow:* ${{ github.workflow }}
+          *Triggered by:* ${{ github.actor }}"
+          
+          # Отправляем сообщение в Telegram
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\",
+              \"text\": \"${MESSAGE}\",
+              \"parse_mode\": \"Markdown\",
+              \"disable_web_page_preview\": false
+            }"
