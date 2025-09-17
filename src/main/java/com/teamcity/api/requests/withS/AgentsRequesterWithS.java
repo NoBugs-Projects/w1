@@ -1,17 +1,17 @@
-package com.teamcity.api.requests.checked;
+package com.teamcity.api.requests.withS;
 
 import com.teamcity.api.models.Agents;
 import com.teamcity.api.models.BaseModel;
-import com.teamcity.api.requests.CrudInterface;
+import com.teamcity.api.requests.interfaces.CrudInterface;
 import com.teamcity.api.requests.Request;
-import com.teamcity.api.requests.unchecked.UncheckedAgents;
+import com.teamcity.api.requests.withoutS.AgentsRequester;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 
-public final class CheckedAgents extends Request implements CrudInterface {
+public final class AgentsRequesterWithS extends Request implements CrudInterface {
 
-    public CheckedAgents(RequestSpecification spec) {
+    public AgentsRequesterWithS(RequestSpecification spec) {
         super(spec, null);
     }
 
@@ -22,7 +22,7 @@ public final class CheckedAgents extends Request implements CrudInterface {
 
     @Override
     public Agents read(String id) {
-        return new UncheckedAgents(spec)
+        return new AgentsRequester(spec)
                 .read(id)
                 .then().assertThat().statusCode(HttpStatus.SC_OK)
                 .extract().as(Agents.class);
@@ -34,7 +34,7 @@ public final class CheckedAgents extends Request implements CrudInterface {
         // Превращаем переданную модель в операцию (так как данный эндпоинт поддерживает несколько видов операций)
         // Если model принадлежит классу AuthorizedInfo, то после айди допишется операция /authorizedInfo
         operation = "/" + StringUtils.uncapitalize(operation);
-        return new UncheckedAgents(spec)
+        return new AgentsRequester(spec)
                 .update(id + operation, model)
                 .then().assertThat().statusCode(HttpStatus.SC_OK)
                 .extract().as(model.getClass());

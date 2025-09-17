@@ -1,8 +1,8 @@
 package com.teamcity.api.steps;
 
 import com.teamcity.api.models.User;
-import com.teamcity.api.requests.CheckedRequests;
-import com.teamcity.api.spec.Specifications;
+import com.teamcity.api.requests.RequestersWithS;
+import com.teamcity.api.spec.RequestSpecs;
 import io.qameta.allure.Step;
 
 import static com.teamcity.api.enums.Endpoint.USERS;
@@ -29,8 +29,8 @@ import static com.teamcity.api.enums.Endpoint.USERS;
 public final class AdminSteps {
 
     /** The super user request specification for admin operations */
-    private static final CheckedRequests SUPER_USER_REQUESTS =
-            new CheckedRequests(Specifications.getSpec().superUserSpec());
+    private static final RequestersWithS SUPER_USER_REQUESTS =
+            new RequestersWithS(RequestSpecs.superUserSpec());
 
     /**
      * Private constructor to prevent instantiation of utility class.

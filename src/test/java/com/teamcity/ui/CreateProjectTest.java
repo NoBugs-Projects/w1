@@ -3,8 +3,8 @@ package com.teamcity.ui;
 import com.teamcity.api.models.BuildType;
 import com.teamcity.api.models.Project;
 import com.teamcity.api.models.comparison.ModelAssertions;
-import com.teamcity.api.requests.checked.CheckedBase;
-import com.teamcity.api.spec.Specifications;
+import com.teamcity.api.requests.withS.RequesterWithS;
+import com.teamcity.api.spec.RequestSpecs;
 import com.teamcity.ui.pages.ProjectsPage;
 import com.teamcity.ui.pages.admin.CreateProjectPage;
 import com.teamcity.ui.pages.admin.EditBuildTypePage;
@@ -26,8 +26,7 @@ public class CreateProjectTest extends BaseUiTest {
                 .setupProject(testData.get().getProject().getName(), testData.get().getBuildType().getName());
         var createdBuildTypeId = EditBuildTypePage.open().getBuildTypeId();
 
-        var checkedBuildTypeRequest = new CheckedBase<BuildType>(Specifications.getSpec()
-                .authSpec(testData.get().getUser()), BUILD_TYPES);
+        var checkedBuildTypeRequest = new RequesterWithS<BuildType>(RequestSpecs.authSpec(testData.get().getUser()), BUILD_TYPES);
         var buildType = checkedBuildTypeRequest.read(createdBuildTypeId);
         // Use DTO comparison framework instead of manual field comparison
         ModelAssertions.assertThatModels(testData.get().getProject(), buildType.getProject()).match();
@@ -37,8 +36,7 @@ public class CreateProjectTest extends BaseUiTest {
         var createdProjectId = ProjectsPage.open()
                 .verifyProjectAndBuildType(testData.get().getProject().getName(), testData.get().getBuildType().getName())
                 .getProjectId();
-        var checkedProjectRequest = new CheckedBase<Project>(Specifications.getSpec()
-                .authSpec(testData.get().getUser()), PROJECTS);
+        var checkedProjectRequest = new RequesterWithS<Project>(RequestSpecs.authSpec(testData.get().getUser()), PROJECTS);
         var project = checkedProjectRequest.read(createdProjectId);
         // Use DTO comparison framework instead of manual field comparison
         ModelAssertions.assertThatModels(testData.get().getProject(), project).match();

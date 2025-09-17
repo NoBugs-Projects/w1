@@ -1,272 +1,310 @@
 package com.teamcity.api;
 
-import com.teamcity.api.annotations.ManualTest;
 import com.teamcity.api.generators.RandomData;
 import com.teamcity.api.models.Project;
-import com.teamcity.api.models.NewProjectDescription;
+import com.teamcity.api.models.Role;
+import com.teamcity.api.models.Roles;
 import com.teamcity.api.models.comparison.ModelAssertions;
-import com.teamcity.api.requests.checked.CheckedBase;
-import com.teamcity.api.requests.unchecked.UncheckedBase;
-import com.teamcity.api.spec.Specifications;
+import com.teamcity.api.requests.withS.RequesterWithS;
+import com.teamcity.api.requests.withoutS.Requester;
+import com.teamcity.api.spec.RequestSpecs;
+import com.teamcity.api.spec.ResponseSpecs;
 import io.qameta.allure.Feature;
 import static io.qameta.allure.Allure.step;
 import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static com.teamcity.api.enums.Endpoint.PROJECTS;
 import static com.teamcity.api.enums.Endpoint.USERS;
 import static com.teamcity.api.generators.TestDataGenerator.generate;
+import static com.teamcity.api.enums.UserRole.PROJECT_VIEWER;
+import static com.teamcity.api.enums.UserRole.PROJECT_DEVELOPER;
+import static com.teamcity.api.enums.UserRole.AGENT_MANAGER;
+
+import com.teamcity.api.enums.UserRole;
 
 @Feature("Project")
 public class ProjectTest extends BaseApiTest {
 
     private static final int PROJECT_ID_CHARACTERS_LIMIT = 225;
-    private final ThreadLocal<CheckedBase<Project>> checkedProjectRequest = new ThreadLocal<>();
-    private final ThreadLocal<UncheckedBase> uncheckedProjectRequest = new ThreadLocal<>();
+    private final ThreadLocal<RequesterWithS<Project>> projectRequestWithS = new ThreadLocal<>();
+    private final ThreadLocal<Requester> projectRequest = new ThreadLocal<>();
 
     @BeforeMethod(alwaysRun = true)
     public void getRequests() {
-        checkedProjectRequest.set(new CheckedBase<>(Specifications.getSpec()
-                .authSpec(testData.get().getUser()), PROJECTS));
-        uncheckedProjectRequest.set(new UncheckedBase(Specifications.getSpec()
-                .authSpec(testData.get().getUser()), PROJECTS));
+        projectRequestWithS.set(new RequesterWithS<>(RequestSpecs.authSpec(testData.get().getUser()), PROJECTS));
+        projectRequest.set(new Requester(RequestSpecs.authSpec(testData.get().getUser()), PROJECTS));
+    }
+
+    @DataProvider(name = "validProjectScenarios")
+    public Object[][] validProjectScenarios() {
+        return new Object[][]{
+            {"Repeating symbols in ID", "aaaabbbbcccc", null},
+            {"Maximum ID length (225 symbols)", RandomData.getString(PROJECT_ID_CHARACTERS_LIMIT), null},
+            {"Latin letters and digits in ID", "Project123Test456", null},
+            {"Single valid symbol in ID", "a", null},
+            {"Long name (more than 225 symbols)", null, RandomData.getString(PROJECT_ID_CHARACTERS_LIMIT + 10)},
+            {"Cyrillic symbols in name", null, "ТестовыйПроект"}
+        };
+    }
+
+    @DataProvider(name = "invalidIdScenarios")
+    public Object[][] invalidIdScenarios() {
+        return new Object[][]{
+            {"Empty ID", "", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+            {"ID starting with number", "123Project", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+            {"ID with invalid symbols", "Project@#$%", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+            {"ID with Cyrillic symbols", "Проект", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+            {"ID starting with underscore", "_Project", HttpStatus.SC_INTERNAL_SERVER_ERROR},
+            {"ID exceeding max length", RandomData.getString(PROJECT_ID_CHARACTERS_LIMIT + 1), HttpStatus.SC_INTERNAL_SERVER_ERROR}
+        };
+    }
+
+    @DataProvider(name = "rolePermissionScenarios")
+    public Object[][] rolePermissionScenarios() {
+        return new Object[][]{
+            {"Project Viewer", PROJECT_VIEWER},
+            {"Project Developer", PROJECT_DEVELOPER},
+            {"Agent Manager", AGENT_MANAGER}
+        };
     }
 
     @Test(description = "User should be able to create project", groups = {"Regression"})
     public void userCreatesProjectTest() {
-        checkedSuperUser.getRequest(USERS).create(testData.get().getUser());
+        step("Create user", () -> {
+            superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        });
 
-        var project = checkedProjectRequest.get().create(testData.get().getNewProjectDescription());
-
-        ModelAssertions.assertThatModels(testData.get().getNewProjectDescription(), project).match();
+        step("Create project", () -> {
+            var project = projectRequestWithS.get().create(testData.get().getNewProjectDescription());
+            ModelAssertions.assertThatModels(testData.get().getNewProjectDescription(), project).match();
+        });
     }
 
     @Test(description = "User should not be able to create two projects with the same id", groups = {"Regression"})
     public void userCreatesTwoProjectsWithSameIdTest() {
-        checkedSuperUser.getRequest(USERS).create(testData.get().getUser());
+        step("Create user", () -> {
+            superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        });
 
-        checkedProjectRequest.get().create(testData.get().getNewProjectDescription());
+        step("Create first project", () -> {
+            projectRequestWithS.get().create(testData.get().getNewProjectDescription());
+        });
 
-        var secondTestData = generate();
-        secondTestData.getNewProjectDescription().setId(testData.get().getNewProjectDescription().getId());
+        step("Attempt to create second project with same ID", () -> {
+            var secondTestData = generate();
+            secondTestData.getNewProjectDescription().setId(testData.get().getNewProjectDescription().getId());
 
-        uncheckedProjectRequest.get().create(secondTestData.getNewProjectDescription())
-                .then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST);
+            projectRequest.get().create(secondTestData.getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsBadRequestWithDuplicateId());
+        });
     }
 
     @Test(description = "User should not be able to create project with id exceeding the limit", groups = {"Regression"})
     public void userCreatesProjectWithIdExceedingLimitTest() {
-        checkedSuperUser.getRequest(USERS).create(testData.get().getUser());
+        step("Create user", () -> {
+            superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        });
 
-        testData.get().getNewProjectDescription().setId(RandomData.getString(PROJECT_ID_CHARACTERS_LIMIT + 1));
+        step("Attempt to create project with ID exceeding limit", () -> {
+            testData.get().getNewProjectDescription().setId(RandomData.getString(PROJECT_ID_CHARACTERS_LIMIT + 1));
 
-        uncheckedProjectRequest.get().create(testData.get().getNewProjectDescription())
-                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            projectRequest.get().create(testData.get().getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsInternalServerError());
+        });
 
-        testData.get().getNewProjectDescription().setId(RandomData.getString(PROJECT_ID_CHARACTERS_LIMIT));
-
-        checkedProjectRequest.get().create(testData.get().getNewProjectDescription());
+        step("Create project with valid ID length", () -> {
+            testData.get().getNewProjectDescription().setId(RandomData.getString(PROJECT_ID_CHARACTERS_LIMIT));
+            projectRequestWithS.get().create(testData.get().getNewProjectDescription());
+        });
     }
 
     @Test(description = "Unauthorized user should not be able to create project", groups = {"Regression"})
     public void unauthorizedUserCreatesProjectTest() {
-        var uncheckedUnauthProjectRequest = new UncheckedBase(Specifications.getSpec()
-                .unauthSpec(), PROJECTS);
-        uncheckedUnauthProjectRequest.create(testData.get().getNewProjectDescription())
-                .then().assertThat().statusCode(HttpStatus.SC_UNAUTHORIZED);
+        step("Attempt to create project without authentication", () -> {
+            var unauthProjectRequest = new Requester(RequestSpecs.unauthSpec(), PROJECTS);
+            unauthProjectRequest.create(testData.get().getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsUnauthorized());
+        });
 
-        uncheckedSuperUser.getRequest(PROJECTS)
-                .read(testData.get().getProject().getId())
-                .then().assertThat().statusCode(HttpStatus.SC_NOT_FOUND)
-                .body(Matchers.containsString("Could not find the entity requested"));
+        step("Verify project was not created", () -> {
+            superUserRequester.getRequest(PROJECTS)
+                    .read(testData.get().getProject().getId())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsNotFoundWithEntityNotFound());
+        });
     }
 
     @Test(description = "User should be able to delete project", groups = {"Regression"})
     public void userDeletesProjectTest() {
-        checkedSuperUser.getRequest(USERS).create(testData.get().getUser());
+        step("Create user", () -> {
+            superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        });
 
-        checkedProjectRequest.get().create(testData.get().getNewProjectDescription());
-        checkedProjectRequest.get().delete(testData.get().getProject().getId());
+        step("Create project", () -> {
+            projectRequestWithS.get().create(testData.get().getNewProjectDescription());
+        });
 
-        uncheckedProjectRequest.get().read(testData.get().getProject().getId())
-                .then().assertThat().statusCode(HttpStatus.SC_NOT_FOUND)
-                .body(Matchers.containsString("Could not find the entity requested"));
+        step("Delete project", () -> {
+            projectRequestWithS.get().delete(testData.get().getProject().getId());
+        });
+
+        step("Verify project was deleted", () -> {
+            projectRequest.get().read(testData.get().getProject().getId())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsNotFoundWithEntityNotFound());
+        });
     }
 
-    // ========== POSITIVE TESTS (Project creation with correct data) ==========
-
-    @Test(description = "User should be able to create a project if id includes repeating symbols", groups = {"Manual"})
-    @ManualTest
-    public void userCreatesProjectWithRepeatingSymbolsInIdTest() {
-        step("Create project with repeating symbols in ID");
-        step("Verify project created successfully");
+    @Test(description = "User should be able to create projects with various valid ID and name scenarios", 
+          groups = {"Regression"}, dataProvider = "validProjectScenarios")
+    public void userCreatesProjectWithValidDataTest(String scenario, String customId, String customName) {
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Create project with " + scenario, () -> {
+            if (customId != null) {
+                testData.get().getNewProjectDescription().setId(customId);
+            }
+            if (customName != null) {
+                testData.get().getNewProjectDescription().setName(customName);
+            }
+            var project = projectRequestWithS.get().create(testData.get().getNewProjectDescription());
+            ModelAssertions.assertThatModels(testData.get().getNewProjectDescription(), project).match();
+        });
     }
 
-    @Test(description = "User should be able to create a project if id has 225 symbols", groups = {"Manual"})
-    @ManualTest
-    public void userCreatesProjectWithMaxIdLengthTest() {
-        step("Create project with maximum ID length (225 symbols)");
-        step("Verify project created successfully");
-    }
-
-    @Test(description = "User should be able to create a project if id includes latin letters, digits", groups = {"Manual"})
-    @ManualTest
-    public void userCreatesProjectWithLatinLettersAndDigitsInIdTest() {
-        step("Create project with Latin letters and digits in ID");
-        step("Verify project created successfully");
-    }
-
-    @Test(description = "User should be able to create a project if id includes 1 valid symbol", groups = {"Manual"})
-    @ManualTest
-    public void userCreatesProjectWithSingleValidSymbolInIdTest() {
-        step("Create project with single valid symbol in ID");
-        step("Verify project created successfully");
-    }
-
-    @Test(description = "User should be able to create a project if name has more than 225 symbols", groups = {"Manual"})
-    @ManualTest
-    public void userCreatesProjectWithLongNameTest() {
-        step("Create project with long name (more than 225 symbols)");
-        step("Verify project created successfully");
-    }
-
-    @Test(description = "User should be able to create a project if name has cyrillic symbols", groups = {"Manual"})
-    @ManualTest
-    public void userCreatesProjectWithCyrillicSymbolsInNameTest() {
-        step("Create project with Cyrillic symbols in name");
-        step("Verify project created successfully");
-    }
-
-    @Test(description = "User should be able to create a project with 'copyAllAssociatedSettings' false", groups = {"Manual"})
-    @ManualTest
-    public void userCreatesProjectWithCopyAllAssociatedSettingsFalseTest() {
-        step("Create project with copyAllAssociatedSettings set to false");
-        step("Verify project created successfully");
-    }
-
-    @Test(description = "User should be able to create a copy of a project", groups = {"Manual"})
-    @ManualTest
+    @Test(description = "User should be able to create a copy of a project", groups = {"Regression"})
     public void userCreatesCopyOfProjectTest() {
-        step("Create copy of existing project");
-        step("Verify project copy created successfully");
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Create original project", () -> {
+            projectRequestWithS.get().create(testData.get().getNewProjectDescription());
+        });
+        
+        step("Create copy of existing project", () -> {
+            var copyProjectData = generate();
+            copyProjectData.getNewProjectDescription().setId("copy_of_" + testData.get().getNewProjectDescription().getId());
+            copyProjectData.getNewProjectDescription().setName("Copy of " + testData.get().getNewProjectDescription().getName());
+            copyProjectData.getNewProjectDescription().setParentProject(testData.get().getProject());
+            
+            var copiedProject = projectRequestWithS.get().create(copyProjectData.getNewProjectDescription());
+            ModelAssertions.assertThatModels(copyProjectData.getNewProjectDescription(), copiedProject).match();
+        });
     }
 
-    // ========== NEGATIVE TESTS (Invalid data for project creation) ==========
 
-    @Test(description = "User should not be able to create a project with empty id", groups = {"Manual"})
-    @ManualTest
-    public void userCannotCreateProjectWithEmptyIdTest() {
-        step("Attempt to create project with empty ID");
-        step("Verify project creation failed with bad request");
+    @Test(description = "User should not be able to create projects with invalid ID scenarios", 
+          groups = {"Regression"}, dataProvider = "invalidIdScenarios")
+    public void userCannotCreateProjectWithInvalidIdTest(String scenario, String invalidId, int expectedStatusCode) {
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Attempt to create project with " + scenario, () -> {
+            testData.get().getNewProjectDescription().setId(invalidId);
+            projectRequest.get().create(testData.get().getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsInternalServerError());
+        });
     }
 
-    @Test(description = "User should not be able to create a project if id starts with number", groups = {"Manual"})
-    @ManualTest
-    public void userCannotCreateProjectWithIdStartingWithNumberTest() {
-        step("Attempt to create project with ID starting with number");
-        step("Verify project creation failed with bad request");
-    }
-
-    @Test(description = "User should not be able to create a project if id includes invalid symbols", groups = {"Manual"})
-    @ManualTest
-    public void userCannotCreateProjectWithInvalidSymbolsInIdTest() {
-        step("Attempt to create project with invalid symbols in ID");
-        step("Verify project creation failed with bad request");
-    }
-
-    @Test(description = "User should not be able to create a project if id cyrillic symbols", groups = {"Manual"})
-    @ManualTest
-    public void userCannotCreateProjectWithCyrillicSymbolsInIdTest() {
-        step("Attempt to create project with Cyrillic symbols in ID");
-        step("Verify project creation failed with bad request");
-    }
-
-    @Test(description = "User should not be able to create a project if id has more than 225 symbols", groups = {"Manual"})
-    @ManualTest
-    public void userCannotCreateProjectWithIdExceedingMaxLengthTest() {
-        step("Attempt to create project with ID exceeding maximum length");
-        step("Verify project creation failed with internal server error");
-    }
-
-    @Test(description = "User should not be able to create a project if id starts with _", groups = {"Manual"})
-    @ManualTest
-    public void userCannotCreateProjectWithIdStartingWithUnderscoreTest() {
-        step("Attempt to create project with ID starting with underscore");
-        step("Verify project creation failed with bad request");
-    }
-
-    @Test(description = "User should not be able to create a project with empty name", groups = {"Manual"})
-    @ManualTest
+    @Test(description = "User should not be able to create a project with empty name", groups = {"Regression"})
     public void userCannotCreateProjectWithEmptyNameTest() {
-        step("Attempt to create project with empty name");
-        step("Verify project creation failed with bad request");
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Attempt to create project with empty name", () -> {
+            testData.get().getNewProjectDescription().setName("");
+            projectRequest.get().create(testData.get().getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsBadRequest());
+        });
     }
 
-    @Test(description = "User should not be able to create a project with empty id and name", groups = {"Manual"})
-    @ManualTest
+    @Test(description = "User should not be able to create a project with empty id and name", groups = {"Regression"})
     public void userCannotCreateProjectWithEmptyIdAndNameTest() {
-        step("Attempt to create project with empty ID and name");
-        step("Verify project creation failed with bad request");
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Attempt to create project with empty ID and name", () -> {
+            testData.get().getNewProjectDescription().setId("");
+            testData.get().getNewProjectDescription().setName("");
+            projectRequest.get().create(testData.get().getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsBadRequest());
+        });
     }
 
-    @Test(description = "User should not be able to create a project with invalid id and empty name", groups = {"Manual"})
-    @ManualTest
+    @Test(description = "User should not be able to create a project with invalid id and empty name", groups = {"Regression"})
     public void userCannotCreateProjectWithInvalidIdAndEmptyNameTest() {
-        step("Attempt to create project with invalid ID and empty name");
-        step("Verify project creation failed with bad request");
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Attempt to create project with invalid ID and empty name", () -> {
+            testData.get().getNewProjectDescription().setId("123Invalid");
+            testData.get().getNewProjectDescription().setName("");
+            projectRequest.get().create(testData.get().getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsBadRequest());
+        });
     }
 
-    // ========== NEGATIVE TESTS (Duplicate project creation) ==========
 
-    @Test(description = "User should not be able to create 2 projects with the same name", groups = {"Manual"})
-    @ManualTest
+    @Test(description = "User should not be able to create 2 projects with the same name", groups = {"Regression"})
     public void userCannotCreateTwoProjectsWithSameNameTest() {
-        step("Create first project with specific name");
-        step("Attempt to create second project with same name");
-        step("Verify project creation failed with bad request");
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Create first project with specific name", () -> {
+            projectRequestWithS.get().create(testData.get().getNewProjectDescription());
+        });
+        
+        step("Attempt to create second project with same name", () -> {
+            var secondTestData = generate();
+            secondTestData.getNewProjectDescription().setName(testData.get().getNewProjectDescription().getName());
+            
+            projectRequest.get().create(secondTestData.getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsBadRequestWithDuplicateName());
+        });
     }
 
-    // ========== NEGATIVE TESTS (Project copying) ==========
-
-    @Test(description = "User should not be able to create a copy of non existing project", groups = {"Manual"})
-    @ManualTest
+    @Test(description = "User should not be able to create a copy of non existing project", groups = {"Regression"})
     public void userCannotCreateCopyOfNonExistingProjectTest() {
-        step("Attempt to create copy of non-existing project");
-        step("Verify project copy creation failed with not found");
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Attempt to create copy of non-existing project", () -> {
+            var copyProjectData = generate();
+            copyProjectData.getNewProjectDescription().setId("copy_of_nonexistent");
+            copyProjectData.getNewProjectDescription().setName("Copy of Nonexistent");
+            copyProjectData.getNewProjectDescription().setParentProject(new Project("nonexistent", "Nonexistent", null));
+            
+            projectRequest.get().create(copyProjectData.getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsNotFound());
+        });
     }
 
-    @Test(description = "User should not be able to create a copy with empty info about source project", groups = {"Manual"})
-    @ManualTest
+    @Test(description = "User should not be able to create a copy with empty info about source project", groups = {"Regression"})
     public void userCannotCreateCopyWithEmptySourceProjectInfoTest() {
-        step("Attempt to create copy with empty source project info");
-        step("Verify project copy creation failed with bad request");
-    }
-
-    // ========== NEGATIVE TESTS (Roles and permissions) ==========
-
-    @Test(description = "User should not be able to create project as Project Viewer", groups = {"Manual"})
-    @ManualTest
-    public void projectViewerCannotCreateProjectTest() {
-        step("Attempt to create project as Project Viewer");
-        step("Verify project creation failed with forbidden");
-    }
-
-    @Test(description = "User should not be able to create project as Project Developer", groups = {"Manual"})
-    @ManualTest
-    public void projectDeveloperCannotCreateProjectTest() {
-        step("Attempt to create project as Project Developer");
-        step("Verify project creation failed with forbidden");
-    }
-
-    @Test(description = "User should not be able to create project as Agent Manager", groups = {"Manual"})
-    @ManualTest
-    public void agentManagerCannotCreateProjectTest() {
-        step("Attempt to create project as Agent Manager");
-        step("Verify project creation failed with forbidden");
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        
+        step("Attempt to create copy with empty source project info", () -> {
+            var copyProjectData = generate();
+            copyProjectData.getNewProjectDescription().setId("copy_with_empty_source");
+            copyProjectData.getNewProjectDescription().setName("Copy with Empty Source");
+            copyProjectData.getNewProjectDescription().setParentProject(new Project("", "", null));
+            
+            projectRequest.get().create(copyProjectData.getNewProjectDescription())
+                    .then().assertThat().spec(ResponseSpecs.requestReturnsNotFound());
+        });
     }
 
 
-
+    @Test(description = "Users with insufficient roles should not be able to create projects", 
+          groups = {"Regression"}, dataProvider = "rolePermissionScenarios")
+    public void userWithInsufficientRoleCannotCreateProjectTest(String roleName, UserRole userRole) {
+        step("Create user with " + roleName + " role", () -> {
+            var user = generate().getUser();
+            user.setRoles(Roles.builder().role(List.of(Role.builder().roleId(userRole).scope("g").build())).build());
+            superUserRequesterWithS.getRequest(USERS).create(user);
+            
+            var projectRequest = new Requester(RequestSpecs.authSpec(user), PROJECTS);
+            
+            step("Attempt to create project as " + roleName, () -> {
+                projectRequest.create(testData.get().getNewProjectDescription())
+                        .then().assertThat().spec(ResponseSpecs.requestReturnsForbiddenWithAccessDenied());
+            });
+        });
+    }
 }

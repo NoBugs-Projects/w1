@@ -3,8 +3,8 @@ package com.teamcity.api;
 import com.teamcity.api.models.Build;
 import com.teamcity.api.models.Property;
 import com.teamcity.api.models.Steps;
-import com.teamcity.api.requests.checked.CheckedBase;
-import com.teamcity.api.spec.Specifications;
+import com.teamcity.api.requests.withS.RequesterWithS;
+import com.teamcity.api.spec.RequestSpecs;
 import com.teamcity.common.WireMock;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
@@ -34,16 +34,16 @@ public class StartBuildTest extends BaseApiTest {
 
     @Test(description = "User should be able to start build", groups = {"Regression"})
     public void userStartsBuildTest() {
-        checkedSuperUser.getRequest(USERS).create(testData.get().getUser());
-        checkedSuperUser.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
+        superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
+        superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
 
         testData.get().getBuildType().setSteps(generate(Steps.class, List.of(
                 generate(Property.class, "script.content", "echo 'Hello World!'"),
                 generate(Property.class, "use.custom.script", "true"))));
 
-        checkedSuperUser.getRequest(BUILD_TYPES).create(testData.get().getBuildType());
+        superUserRequesterWithS.getRequest(BUILD_TYPES).create(testData.get().getBuildType());
 
-        var checkedBuildQueueRequest = new CheckedBase<Build>(Specifications.getSpec()
+        var checkedBuildQueueRequest = new RequesterWithS<Build>(RequestSpecs
                 .authSpec(testData.get().getUser()), BUILD_QUEUE);
         var build = checkedBuildQueueRequest.create(Build.builder()
                 .buildType(testData.get().getBuildType())
@@ -64,7 +64,7 @@ public class StartBuildTest extends BaseApiTest {
 
         WireMock.setupServer(post(BUILD_QUEUE.getUrl()), HttpStatus.SC_OK, fakeBuild);
 
-        var checkedBuildQueueRequest = new CheckedBase<Build>(Specifications.getSpec()
+        var checkedBuildQueueRequest = new RequesterWithS<Build>(RequestSpecs
                 .mockSpec(), BUILD_QUEUE);
         var build = checkedBuildQueueRequest.create(Build.builder()
                 .buildType(testData.get().getBuildType())
@@ -78,7 +78,7 @@ public class StartBuildTest extends BaseApiTest {
     private Build waitUntilBuildIsFinished(Build build) {
         // Необходимо использовать AtomicReference, так как переменная в лямбда выражении должна быть final или effectively final
         var atomicBuild = new AtomicReference<>(build);
-        var checkedBuildRequest = new CheckedBase<Build>(Specifications.getSpec()
+        var checkedBuildRequest = new RequesterWithS<Build>(RequestSpecs
                 .authSpec(testData.get().getUser()), BUILDS);
         Awaitility.await()
                 .until(() -> {

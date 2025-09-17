@@ -3,9 +3,9 @@ package com.teamcity;
 import com.teamcity.api.config.Config;
 import com.teamcity.api.generators.TestDataStorage;
 import com.teamcity.api.models.TestData;
-import com.teamcity.api.requests.CheckedRequests;
-import com.teamcity.api.requests.UncheckedRequests;
-import com.teamcity.api.spec.Specifications;
+import com.teamcity.api.requests.RequestersWithS;
+import com.teamcity.api.requests.Requesters;
+import com.teamcity.api.spec.RequestSpecs;
 import com.teamcity.ui.BaseUiTest;
 import io.qameta.allure.Allure;
 import org.assertj.core.api.SoftAssertions;
@@ -21,8 +21,8 @@ import static io.qameta.allure.util.ResultsUtils.TAG_LABEL_NAME;
 
 public abstract class BaseTest implements IHookable {
 
-    protected final CheckedRequests checkedSuperUser = new CheckedRequests(Specifications.getSpec().superUserSpec());
-    protected final UncheckedRequests uncheckedSuperUser = new UncheckedRequests(Specifications.getSpec().superUserSpec());
+    protected final RequestersWithS superUserRequesterWithS = new RequestersWithS(RequestSpecs.superUserSpec());
+    protected final Requesters superUserRequester = new Requesters(RequestSpecs.superUserSpec());
     public ThreadLocal<TestData> testData = new ThreadLocal<>();
     protected SoftAssertions softy;
 
@@ -34,7 +34,7 @@ public abstract class BaseTest implements IHookable {
 
     @AfterMethod(alwaysRun = true)
     public void deleteCreatedEntities() {
-        TestDataStorage.getStorage().deleteCreatedEntities(uncheckedSuperUser);
+        TestDataStorage.getStorage().deleteCreatedEntities(superUserRequester);
     }
 
     // Если делать assertAll в @AfterMethod, то ничего не будет работать: тест не будет ретраиться, а все последующие тесты в его классе скипнутся.

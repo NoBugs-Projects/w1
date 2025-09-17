@@ -2,9 +2,8 @@ package com.teamcity.ui;
 
 import com.teamcity.api.models.BuildType;
 import com.teamcity.api.models.comparison.ModelAssertions;
-import com.teamcity.api.requests.checked.CheckedBase;
-import com.teamcity.api.spec.Specifications;
-import com.teamcity.ui.annotations.UserSession;
+import com.teamcity.api.requests.withS.RequesterWithS;
+import com.teamcity.api.spec.RequestSpecs;
 import com.teamcity.ui.pages.admin.CreateBuildTypePage;
 import com.teamcity.ui.pages.admin.EditBuildTypePage;
 import io.qameta.allure.Feature;
@@ -18,7 +17,7 @@ public class CreateBuildTypeTest extends BaseUiTest {
 
     @Test(description = "User should be able to create build type", groups = {"Regression"})
     public void userCreatesBuildTypeTest(String ignoredBrowser) {
-        checkedSuperUser.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
+        superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
         loginAs(testData.get().getUser());
 
         CreateBuildTypePage.open(testData.get().getProject().getId())
@@ -26,8 +25,7 @@ public class CreateBuildTypeTest extends BaseUiTest {
                 .setupBuildType(testData.get().getBuildType().getName());
         var createdBuildTypeId = EditBuildTypePage.open().getBuildTypeId();
 
-        var checkedBuildTypeRequest = new CheckedBase<BuildType>(Specifications.getSpec()
-                .authSpec(testData.get().getUser()), BUILD_TYPES);
+        var checkedBuildTypeRequest = new RequesterWithS<BuildType>(RequestSpecs.authSpec(testData.get().getUser()), BUILD_TYPES);
         var buildType = checkedBuildTypeRequest.read(createdBuildTypeId);
         // Use DTO comparison framework instead of manual field comparison
         ModelAssertions.assertThatModels(testData.get().getBuildType(), buildType).match();
@@ -35,7 +33,7 @@ public class CreateBuildTypeTest extends BaseUiTest {
 
     @Test(description = "User should not be able to create build type without name", groups = {"Regression"})
     public void userCreatesBuildTypeWithoutName(String ignoredBrowser) {
-        checkedSuperUser.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
+        superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
         loginAs(testData.get().getUser());
 
         CreateBuildTypePage.open(testData.get().getProject().getId())

@@ -1,18 +1,18 @@
-package com.teamcity.api.requests.unchecked;
+package com.teamcity.api.requests.withoutS;
 
 import com.teamcity.api.enums.Endpoint;
 import com.teamcity.api.models.BaseModel;
-import com.teamcity.api.requests.CrudInterface;
+import com.teamcity.api.requests.interfaces.CrudInterface;
 import com.teamcity.api.requests.Request;
-import com.teamcity.api.requests.SearchInterface;
+import com.teamcity.api.requests.interfaces.SearchInterface;
 import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-public final class UncheckedBase extends Request implements CrudInterface, SearchInterface {
+public final class Requester extends Request implements CrudInterface, SearchInterface {
 
-    public UncheckedBase(RequestSpecification spec, Endpoint endpoint) {
+    public Requester(RequestSpecification spec, Endpoint endpoint) {
         super(spec, endpoint);
     }
 

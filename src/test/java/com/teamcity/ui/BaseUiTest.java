@@ -54,7 +54,7 @@ public abstract class BaseUiTest extends BaseTest {
     }
 
     protected void loginAs(User user) {
-        checkedSuperUser.getRequest(USERS).create(user);
+        superUserRequesterWithS.getRequest(USERS).create(user);
         LoginPage.open().login(user);
     }
 

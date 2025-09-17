@@ -1,18 +1,18 @@
-package com.teamcity.api.requests.unchecked;
+package com.teamcity.api.requests.withoutS;
 
 import com.teamcity.api.models.BaseModel;
-import com.teamcity.api.requests.CrudInterface;
+import com.teamcity.api.requests.interfaces.CrudInterface;
 import com.teamcity.api.requests.Request;
 import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-public final class UncheckedAgents extends Request implements CrudInterface {
+public final class ServerAuthSettingsRequester extends Request implements CrudInterface {
 
-    private static final String AGENTS_URL = "/app/rest/agents";
+    private static final String SERVER_AUTH_SETTINGS_URL = "/app/rest/server/authSettings";
 
-    public UncheckedAgents(RequestSpecification spec) {
+    public ServerAuthSettingsRequester(RequestSpecification spec) {
         super(spec, null);
     }
 
@@ -22,20 +22,20 @@ public final class UncheckedAgents extends Request implements CrudInterface {
     }
 
     @Override
-    @Step("Read Agents")
-    public Response read(String locator) {
+    @Step("Read ServerAuthSettings")
+    public Response read(String id) {
         return RestAssured.given()
                 .spec(spec)
-                .get(AGENTS_URL + "?locator=" + locator);
+                .get(SERVER_AUTH_SETTINGS_URL);
     }
 
     @Override
-    @Step("Update Agent")
+    @Step("Update ServerAuthSettings")
     public Response update(String id, BaseModel model) {
         return RestAssured.given()
                 .spec(spec)
                 .body(model)
-                .put(AGENTS_URL + "/id:" + id);
+                .put(SERVER_AUTH_SETTINGS_URL);
     }
 
     @Override

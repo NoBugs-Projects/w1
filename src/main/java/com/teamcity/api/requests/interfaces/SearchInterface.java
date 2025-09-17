@@ -1,4 +1,4 @@
-package com.teamcity.api.requests;
+package com.teamcity.api.requests.interfaces;
 
 public interface SearchInterface {
 

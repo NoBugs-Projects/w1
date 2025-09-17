@@ -1,8 +1,8 @@
 package com.teamcity.ui;
 
 import com.teamcity.api.models.Build;
-import com.teamcity.api.requests.checked.CheckedBase;
-import com.teamcity.api.spec.Specifications;
+import com.teamcity.api.requests.withS.RequesterWithS;
+import com.teamcity.api.spec.RequestSpecs;
 import com.teamcity.ui.pages.ProjectsPage;
 import com.teamcity.ui.pages.admin.CreateBuildTypeStepPage;
 import io.qameta.allure.Feature;
@@ -17,8 +17,8 @@ public class StartBuildTest extends BaseUiTest {
 
     @Test(description = "User should be able to create build type step and start build", groups = {"Regression"})
     public void userCreatesBuildTypeStepAndStartsBuildTest(String ignoredBrowser) {
-        checkedSuperUser.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
-        checkedSuperUser.getRequest(BUILD_TYPES).create(testData.get().getBuildType());
+        superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
+        superUserRequesterWithS.getRequest(BUILD_TYPES).create(testData.get().getBuildType());
         loginAs(testData.get().getUser());
 
         CreateBuildTypeStepPage.open(testData.get().getBuildType().getId())
@@ -29,7 +29,7 @@ public class StartBuildTest extends BaseUiTest {
                 .verifyProjectAndBuildType(testData.get().getProject().getName(), testData.get().getBuildType().getName())
                 .runBuildAndWaitUntilItIsFinished()
                 .getBuildId();
-        var checkedBuildRequest = new CheckedBase<Build>(Specifications.getSpec()
+        var checkedBuildRequest = new RequesterWithS<Build>(RequestSpecs
                 .authSpec(testData.get().getUser()), BUILDS);
         // Каждое действие на UI всегда проверяется через API
         var build = checkedBuildRequest.read(createdBuildId);

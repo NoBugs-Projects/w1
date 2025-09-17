@@ -2,8 +2,8 @@ package com.teamcity.api;
 
 import com.teamcity.api.models.Agent;
 import com.teamcity.api.models.AuthorizedInfo;
-import com.teamcity.api.requests.checked.CheckedAgents;
-import com.teamcity.api.spec.Specifications;
+import com.teamcity.api.requests.withS.AgentsRequesterWithS;
+import com.teamcity.api.spec.RequestSpecs;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import org.awaitility.Awaitility;
@@ -19,13 +19,13 @@ public class SetupAgentTest extends BaseApiTest {
 
     @Test(groups = {"Setup"})
     public void setupTeamCityAgentTest() {
-        var checkedAgentsRequest = new CheckedAgents(Specifications.getSpec().superUserSpec());
+        var checkedAgentsRequest = new AgentsRequesterWithS(RequestSpecs.superUserSpec());
         var agentId = waitUntilAgentIsFound(checkedAgentsRequest).getId();
         checkedAgentsRequest.update(agentId, generate(AuthorizedInfo.class));
     }
 
     @Step("Wait until agent is found")
-    private Agent waitUntilAgentIsFound(CheckedAgents checkedAgentsRequest) {
+    private Agent waitUntilAgentIsFound(AgentsRequesterWithS checkedAgentsRequest) {
         var atomicAgents = new AtomicReference<List<Agent>>();
         Awaitility.await()
                 .until(() -> {

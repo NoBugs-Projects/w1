@@ -16,43 +16,39 @@ import java.util.List;
 
 import static com.github.viclovsky.swagger.coverage.SwaggerCoverageConstants.OUTPUT_DIRECTORY;
 
-public final class Specifications {
+public final class RequestSpecs {
 
-    private static final ThreadLocal<Specifications> SPEC = ThreadLocal.withInitial(Specifications::new);
+    private static final ThreadLocal<RequestSpecs> SPEC = ThreadLocal.withInitial(RequestSpecs::new);
 
-    private Specifications() {
+    private RequestSpecs() {
     }
 
-    public static Specifications getSpec() {
-        return SPEC.get();
-    }
-
-    public RequestSpecification unauthSpec() {
+    public static RequestSpecification unauthSpec() {
         return reqBuilder()
                 .setBaseUri("http://" + Config.getProperty("host"))
                 .build();
     }
 
-    public RequestSpecification authSpec(User user) {
+    public static RequestSpecification authSpec(User user) {
         return reqBuilder()
                 .setBaseUri("http://%s:%s@%s".formatted(user.getUsername(), user.getPassword(),
                         Config.getProperty("host")))
                 .build();
     }
 
-    public RequestSpecification superUserSpec() {
+    public static RequestSpecification superUserSpec() {
         return reqBuilder()
                 .setBaseUri("http://:%s@%s".formatted(Config.getProperty("superUserToken"), Config.getProperty("host")))
                 .build();
     }
 
-    public RequestSpecification mockSpec() {
+    public static RequestSpecification mockSpec() {
         return reqBuilder()
                 .setBaseUri("http://localhost:8081")
                 .build();
     }
 
-    private RequestSpecBuilder reqBuilder() {
+    private static RequestSpecBuilder reqBuilder() {
         return new RequestSpecBuilder()
                 // Фильтры для отображения реквестов и респонсов в Allure репорте и генерации Swagger Coverage репорта
                 .addFilters(List.of(new RequestLoggingFilter(), new ResponseLoggingFilter(), new AllureRestAssured(),

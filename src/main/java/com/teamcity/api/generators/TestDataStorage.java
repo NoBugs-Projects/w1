@@ -2,7 +2,7 @@ package com.teamcity.api.generators;
 
 import com.teamcity.api.enums.Endpoint;
 import com.teamcity.api.models.BaseModel;
-import com.teamcity.api.requests.UncheckedRequests;
+import com.teamcity.api.requests.Requesters;
 
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -41,7 +41,7 @@ public final class TestDataStorage {
         addCreatedEntity(endpoint, getEntityId(model));
     }
 
-    public void deleteCreatedEntities(UncheckedRequests uncheckedSuperUser) {
+    public void deleteCreatedEntities(Requesters uncheckedSuperUser) {
         createdEntitiesMap.forEach((endpoint, ids) -> ids.forEach(id ->
                 uncheckedSuperUser.getRequest(endpoint).delete(id)));
         // Очистка Map необходима, так как если этого не делать и запускать более 1-ого теста, то со второго

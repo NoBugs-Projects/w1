@@ -1,12 +1,12 @@
-package com.teamcity.api.requests.checked;
+package com.teamcity.api.requests.withS;
 
 import com.teamcity.api.enums.Endpoint;
 import com.teamcity.api.generators.TestDataStorage;
 import com.teamcity.api.models.BaseModel;
-import com.teamcity.api.requests.CrudInterface;
+import com.teamcity.api.requests.interfaces.CrudInterface;
 import com.teamcity.api.requests.Request;
-import com.teamcity.api.requests.SearchInterface;
-import com.teamcity.api.requests.unchecked.UncheckedBase;
+import com.teamcity.api.requests.interfaces.SearchInterface;
+import com.teamcity.api.requests.withoutS.Requester;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -15,19 +15,19 @@ import java.util.List;
 
 @SuppressWarnings("unchecked")
 // Реализация checked реквестов с помощью дженериков. Позволяет получать респонс с конкретным нужным типом модели
-public final class CheckedBase<T extends BaseModel> extends Request implements CrudInterface, SearchInterface {
+public final class RequesterWithS<T extends BaseModel> extends Request implements CrudInterface, SearchInterface {
 
-    private final UncheckedBase uncheckedBase;
+    private final Requester requester;
 
     // Все реквесты, имеющие одинаковую реализацию CRUD методов, можно создать через общий конструктор
-    public CheckedBase(RequestSpecification spec, Endpoint endpoint) {
+    public RequesterWithS(RequestSpecification spec, Endpoint endpoint) {
         super(spec, endpoint);
-        uncheckedBase = new UncheckedBase(spec, endpoint);
+        requester = new Requester(spec, endpoint);
     }
 
     @Override
     public T create(BaseModel model) {
-        var createdModel = (T) uncheckedBase
+        var createdModel = (T) requester
                 .create(model)
                 .then().assertThat().statusCode(HttpStatus.SC_OK)
                 .extract().as(endpoint.getModelClass());
@@ -38,7 +38,7 @@ public final class CheckedBase<T extends BaseModel> extends Request implements C
 
     @Override
     public T read(String id) {
-        return (T) uncheckedBase
+        return (T) requester
                 .read(id)
                 .then().assertThat().statusCode(HttpStatus.SC_OK)
                 .extract().as(endpoint.getModelClass());
@@ -46,7 +46,7 @@ public final class CheckedBase<T extends BaseModel> extends Request implements C
 
     @Override
     public T update(String id, BaseModel model) {
-        return (T) uncheckedBase
+        return (T) requester
                 .update(id, model)
                 .then().assertThat().statusCode(HttpStatus.SC_OK)
                 .extract().as(endpoint.getModelClass());
@@ -54,7 +54,7 @@ public final class CheckedBase<T extends BaseModel> extends Request implements C
 
     @Override
     public String delete(String id) {
-        return uncheckedBase
+        return requester
                 .delete(id)
                 .then().assertThat().statusCode(HttpStatus.SC_NO_CONTENT)
                 .extract().asString();
@@ -62,7 +62,7 @@ public final class CheckedBase<T extends BaseModel> extends Request implements C
 
     @Override
     public List<T> search() {
-        return (List<T>) uncheckedBase
+        return (List<T>) requester
                 .search()
                 .then().assertThat().statusCode(HttpStatus.SC_OK)
                 .extract().jsonPath()
