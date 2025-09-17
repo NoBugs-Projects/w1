@@ -27,7 +27,7 @@ public class CreateBuildTypeTest extends BaseUiTest {
 
         var checkedBuildTypeRequest = new RequesterWithS<BuildType>(RequestSpecs.authSpec(testData.get().getUser()), BUILD_TYPES);
         var buildType = checkedBuildTypeRequest.read(createdBuildTypeId);
-        // Use DTO comparison framework instead of manual field comparison
+
         ModelAssertions.assertThatModels(testData.get().getBuildType(), buildType).match();
     }
 

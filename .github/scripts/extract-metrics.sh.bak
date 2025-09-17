@@ -227,7 +227,7 @@ append_test_metrics() {
   local manual_tests=0
   if command -v xargs >/dev/null 2>&1; then
     # Use xargs for better performance
-    manual_tests="$(find "$test_dir" -name "*.java" -type f -print0 2>/dev/null | xargs -0 grep -c "@ManualTest" 2>/dev/null | awk -F: '{sum += $2} END {print sum+0}' 2>/dev/null || echo 0)"
+    manual_tests="$(find "$test_dir" -name "*.java" -type f -print0 2>/dev/null | xargs -0 grep -c "@ManualTest" 2>/dev/null | awk -F: '{sum += $2} END {print sum+0}' | tr -d '[:space:]')"
   else
     # Fallback: iterate through files manually
     while IFS= read -r file; do
@@ -254,9 +254,9 @@ append_test_metrics() {
   fi
 
   if command -v xargs >/dev/null 2>&1; then
-    lines="$(find "$test_dir" -type f -name '*.java' -print0 2>/dev/null | xargs -0 cat 2>/dev/null | wc -l 2>/dev/null | tr -d '[:space:]' || echo 0)"
+    lines="$(find "$test_dir" -type f -name '*.java' -print0 2>/dev/null | xargs -0 cat 2>/dev/null | wc -l | tr -d '[:space:]')"
   else
-    lines="$(find "$test_dir" -type f -name '*.java' 2>/dev/null -exec cat {} + 2>/dev/null | wc -l 2>/dev/null | tr -d '[:space:]' || echo 0)"
+    lines="$(find "$test_dir" -type f -name '*.java' 2>/dev/null -exec cat {} + | wc -l | tr -d '[:space:]')"
   fi
   lines="$(to_int "$lines")"
 
