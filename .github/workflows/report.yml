@@ -211,7 +211,8 @@ jobs:
           
           # Отправляем сообщение в Telegram с обработкой ошибок
           echo "Sending Telegram notification..."
-          echo "Bot Token: ${{ secrets.TELEGRAM_BOT_TOKEN:0:10 }}..."
+          TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          echo "Bot Token: ${TELEGRAM_BOT_TOKEN:0:10}..."
           echo "Chat ID: ${{ secrets.TELEGRAM_CHAT_ID }}"
           
           RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
