@@ -27,31 +27,13 @@ public class UserSessionListener implements IInvokedMethodListener {
     @Override
     public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
         logger.info("UserSessionListener.beforeInvocation called for method: {}", method.getTestMethod().getMethodName());
-
-        if (shouldLogin(method, testResult)) {
-            logger.info("UserSession annotation found, proceeding with login setup");
-            // Generate test data if annotation is present
-            Object testInstance = testResult.getInstance();
-            if (testInstance instanceof BaseTest baseTest) {
-                logger.info("Test instance is BaseTest, generating test data");
-                baseTest.testData = new ThreadLocal<>();
-                baseTest.testData.set(TestDataGenerator.generate());
-                // Use AdminSteps to create the user
-                AdminSteps.createUser(baseTest.testData.get().getUser());
-                logger.info("Generated test data and created user for test: {}", testResult.getName());
-            } else {
-                logger.warn("Test instance is not BaseTest: {}", testInstance.getClass().getName());
-            }
-            performLogin(testResult);
-        } else {
-            logger.info("No UserSession annotation found for method: {}", method.getTestMethod().getMethodName());
-        }
+        // This listener is no longer needed - we'll handle @UserSession in the test classes directly
     }
 
     @Override
     public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
         logger.info("UserSessionListener.afterInvocation called for method: {}", method.getTestMethod().getMethodName());
-        // Optional: Add logout logic here if needed
+        // This listener is no longer needed - we'll handle @UserSession in the test classes directly
     }
 
     private boolean shouldLogin(IInvokedMethod method, ITestResult testResult) {

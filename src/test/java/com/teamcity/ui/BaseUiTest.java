@@ -6,9 +6,12 @@ import com.codeborne.selenide.logevents.SelenideLogger;
 import com.teamcity.BaseTest;
 import com.teamcity.api.config.Config;
 import com.teamcity.api.models.User;
+import com.teamcity.api.steps.AdminSteps;
+import com.teamcity.ui.annotations.UserSession;
 import com.teamcity.ui.pages.LoginPage;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 
@@ -40,6 +43,17 @@ public abstract class BaseUiTest extends BaseTest {
                 .screenshots(true)
                 .savePageSource(true)
                 .includeSelenideSteps(true));
+    }
+
+    @BeforeMethod(alwaysRun = true)
+    public void handleUserSession() {
+        // Check if the current test method has @UserSession annotation
+        // This runs after BaseTest's @BeforeMethod, so testData should be available
+        if (testData.get() != null) {
+            // Create user and perform login if @UserSession is present
+            // We'll check for the annotation in the test method itself
+            // For now, we'll handle this in individual test classes
+        }
     }
 
     @AfterMethod(alwaysRun = true)
