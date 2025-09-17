@@ -10,6 +10,8 @@ import com.teamcity.api.steps.AdminSteps;
 import com.teamcity.ui.annotations.UserSession;
 import com.teamcity.ui.pages.LoginPage;
 import io.qameta.allure.selenide.AllureSelenide;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
@@ -21,6 +23,7 @@ import static com.teamcity.api.enums.Endpoint.USERS;
 
 public abstract class BaseUiTest extends BaseTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(BaseUiTest.class);
     protected static final String GIT_URL = "https://github.com/selenide/selenide.git";
 
     @BeforeSuite(alwaysRun = true)
@@ -47,12 +50,41 @@ public abstract class BaseUiTest extends BaseTest {
 
     @BeforeMethod(alwaysRun = true)
     public void handleUserSession() {
-        // Check if the current test method has @UserSession annotation
         // This runs after BaseTest's @BeforeMethod, so testData should be available
         if (testData.get() != null) {
-            // Create user and perform login if @UserSession is present
-            // We'll check for the annotation in the test method itself
-            // For now, we'll handle this in individual test classes
+            // Check if the current test method has @UserSession annotation
+            try {
+                // Get the current test method name from the stack trace
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                String testMethodName = null;
+                for (StackTraceElement element : stackTrace) {
+                    if (element.getClassName().contains("Test") && 
+                        !element.getClassName().contains("BaseTest") &&
+                        !element.getMethodName().equals("handleUserSession")) {
+                        testMethodName = element.getMethodName();
+                        break;
+                    }
+                }
+                
+                if (testMethodName != null) {
+                    // Check if the test method has @UserSession annotation
+                    Class<?> testClass = this.getClass();
+                    try {
+                        java.lang.reflect.Method testMethod = testClass.getMethod(testMethodName, String.class);
+                        if (testMethod.isAnnotationPresent(UserSession.class)) {
+                            logger.info("Found @UserSession annotation on method: {}", testMethodName);
+                            // Create user and perform login
+                            AdminSteps.createUser(testData.get().getUser());
+                            LoginPage.open().login(testData.get().getUser());
+                            logger.info("User created and logged in for @UserSession method: {}", testMethodName);
+                        }
+                    } catch (NoSuchMethodException e) {
+                        // Method not found, continue without @UserSession handling
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Error checking for @UserSession annotation: {}", e.getMessage());
+            }
         }
     }
 

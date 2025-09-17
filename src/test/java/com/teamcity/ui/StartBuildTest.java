@@ -4,8 +4,7 @@ import com.teamcity.api.models.Build;
 import com.teamcity.api.models.comparison.ModelAssertions;
 import com.teamcity.api.requests.withS.RequesterWithS;
 import com.teamcity.api.spec.RequestSpecs;
-import com.teamcity.api.steps.AdminSteps;
-import com.teamcity.ui.pages.LoginPage;
+import com.teamcity.ui.annotations.UserSession;
 import com.teamcity.ui.pages.ProjectsPage;
 import com.teamcity.ui.pages.admin.CreateBuildTypeStepPage;
 import io.qameta.allure.Feature;
@@ -21,12 +20,8 @@ import static com.teamcity.api.enums.Endpoint.PROJECTS;
 public class StartBuildTest extends BaseUiTest {
 
     @Test(description = "User should be able to create build type step and start build", groups = {"Regression"})
+    @UserSession
     public void userCreatesBuildTypeStepAndStartsBuildTest(String ignoredBrowser) {
-        step("Create user and login", () -> {
-            AdminSteps.createUser(testData.get().getUser());
-            LoginPage.open().login(testData.get().getUser());
-        });
-
         step("Create project and build type via API", () -> {
             superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
             superUserRequesterWithS.getRequest(BUILD_TYPES).create(testData.get().getBuildType());

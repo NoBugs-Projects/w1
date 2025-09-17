@@ -27,13 +27,13 @@ public class UserSessionListener implements IInvokedMethodListener {
     @Override
     public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
         logger.info("UserSessionListener.beforeInvocation called for method: {}", method.getTestMethod().getMethodName());
-        // This listener is no longer needed - we'll handle @UserSession in the test classes directly
+        // We'll handle @UserSession in the BaseUiTest @BeforeMethod instead
     }
 
     @Override
     public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
         logger.info("UserSessionListener.afterInvocation called for method: {}", method.getTestMethod().getMethodName());
-        // This listener is no longer needed - we'll handle @UserSession in the test classes directly
+        // We'll handle @UserSession in the BaseUiTest @BeforeMethod instead
     }
 
     private boolean shouldLogin(IInvokedMethod method, ITestResult testResult) {

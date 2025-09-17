@@ -5,10 +5,9 @@ import com.teamcity.api.models.Project;
 import com.teamcity.api.models.comparison.ModelAssertions;
 import com.teamcity.api.requests.withS.RequesterWithS;
 import com.teamcity.api.spec.RequestSpecs;
-import com.teamcity.api.steps.AdminSteps;
 import com.teamcity.ui.annotations.BrowserFilter;
 import com.teamcity.ui.annotations.Browsers;
-import com.teamcity.ui.pages.LoginPage;
+import com.teamcity.ui.annotations.UserSession;
 import com.teamcity.ui.pages.ProjectsPage;
 import com.teamcity.ui.pages.admin.CreateProjectPage;
 import com.teamcity.ui.pages.admin.EditBuildTypePage;
@@ -26,12 +25,8 @@ public class CreateProjectTest extends BaseUiTest {
 
     @Test(description = "User should be able to create project", groups = {"Regression"})
     @Browsers({"chrome", "firefox"})
+    @UserSession
     public void userCreatesProject(String ignoredBrowser) {
-        step("Create user and login", () -> {
-            AdminSteps.createUser(testData.get().getUser());
-            LoginPage.open().login(testData.get().getUser());
-        });
-
         step("Create project from Git repository", () -> {
             CreateProjectPage.open(testData.get().getNewProjectDescription().getParentProject().getLocator())
                     .createFrom(GIT_URL)
@@ -65,12 +60,8 @@ public class CreateProjectTest extends BaseUiTest {
 
     @Test(description = "User should not be able to create project without name", groups = {"Regression"})
     @Browsers({"chrome"})
+    @UserSession
     public void userCreatesProjectWithoutName(String ignoredBrowser) {
-        step("Create user and login", () -> {
-            AdminSteps.createUser(testData.get().getUser());
-            LoginPage.open().login(testData.get().getUser());
-        });
-
         step("Attempt to create project with empty name", () -> {
             CreateProjectPage.open(testData.get().getNewProjectDescription().getParentProject().getLocator())
                     .createFrom(GIT_URL)
