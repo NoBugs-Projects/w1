@@ -16,13 +16,13 @@ import java.util.List;
  * This class models a collection of build agents in the TeamCity system. It is used
  * to wrap a list of Agent objects for API responses that return multiple agents.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

@@ -16,14 +16,14 @@ import io.restassured.specification.RequestSpecification;
  * It extends the base Request class and implements server auth settings-specific
  * CRUD operations.
  * </p>
- * 
+ *
  * <p>
  * This requester is specialized for server authentication settings management
  * and provides methods for reading and updating authentication configuration.
  * Create and delete operations are not supported for server auth settings
  * as they are managed by the TeamCity server.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

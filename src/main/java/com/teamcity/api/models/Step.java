@@ -16,13 +16,13 @@ import lombok.extern.jackson.Jacksonized;
  * defines a specific action to be performed during the build process, such as
  * running a command, compiling code, or executing tests.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -47,7 +47,7 @@ public class Step extends BaseModel {
      */
     @Random
     private String name;
-    
+
     /**
      * The type of the build step.
      * <p>
@@ -57,7 +57,7 @@ public class Step extends BaseModel {
      */
     @Builder.Default
     private String type = "simpleRunner";
-    
+
     /**
      * The properties associated with this build step.
      * <p>

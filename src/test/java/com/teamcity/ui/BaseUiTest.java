@@ -58,14 +58,14 @@ public abstract class BaseUiTest extends BaseTest {
                 StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
                 String testMethodName = null;
                 for (StackTraceElement element : stackTrace) {
-                    if (element.getClassName().contains("Test") && 
+                    if (element.getClassName().contains("Test") &&
                         !element.getClassName().contains("BaseTest") &&
                         !element.getMethodName().equals("handleUserSession")) {
                         testMethodName = element.getMethodName();
                         break;
                     }
                 }
-                
+
                 if (testMethodName != null) {
                     // Check if the test method has @UserSession annotation
                     Class<?> testClass = this.getClass();

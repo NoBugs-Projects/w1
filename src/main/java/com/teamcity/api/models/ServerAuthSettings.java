@@ -15,13 +15,13 @@ import lombok.extern.jackson.Jacksonized;
  * server. It includes settings for permission management and authentication
  * modules configuration.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -45,7 +45,7 @@ public class ServerAuthSettings extends BaseModel {
      * </p>
      */
     private Boolean perProjectPermissions;
-    
+
     /**
      * The authentication modules configuration.
      * <p>

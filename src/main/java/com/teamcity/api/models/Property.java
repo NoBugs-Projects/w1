@@ -16,13 +16,13 @@ import lombok.extern.jackson.Jacksonized;
  * used to configure various aspects of TeamCity entities such as build types,
  * projects, and agents.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -43,7 +43,7 @@ public class Property extends BaseModel {
      * This field represents the key part of the key-value pair. It identifies
      * the specific configuration setting being defined.
      * </p>
-     * 
+     *
      * <p>
      * This field is marked with @Parameterizable annotation, meaning it can be
      * populated with provided parameters during test data generation.
@@ -51,14 +51,14 @@ public class Property extends BaseModel {
      */
     @Parameterizable
     private String name;
-    
+
     /**
      * The value of the property.
      * <p>
      * This field represents the value part of the key-value pair. It contains
      * the actual configuration value for the property.
      * </p>
-     * 
+     *
      * <p>
      * This field is marked with @Parameterizable annotation, meaning it can be
      * populated with provided parameters during test data generation.

@@ -13,12 +13,12 @@ import static com.codeborne.selenide.Selectors.byCssSelector;
  * for data-test attributes and other custom attributes specific to the
  * TeamCity application.
  * </p>
- * 
+ *
  * <p>
  * The class uses CSS selectors and attribute selectors to provide efficient
  * and readable element location strategies for UI automation.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -40,12 +40,12 @@ public final class Selectors {
      * For example, byDataTest("runner-item") will find elements with
      * data-test="runner-item simpleRunner".
      * </p>
-     * 
+     *
      * <p>
      * The ~= operator searches for partial matches, making it useful for finding
      * elements that have multiple values in their data-test attribute.
      * </p>
-     * 
+     *
      * @param dataTest the data-test attribute value to search for
      * @return a By selector for elements with the specified data-test value
      */
@@ -65,7 +65,7 @@ public final class Selectors {
      * This is useful for finding elements that represent specific types of
      * items in the TeamCity UI.
      * </p>
-     * 
+     *
      * @param dataTestItemtype the data-test-itemtype attribute value to search for
      * @return a By selector for elements with the specified data-test-itemtype value
      */

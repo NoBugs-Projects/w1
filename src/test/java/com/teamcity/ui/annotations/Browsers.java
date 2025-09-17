@@ -15,7 +15,7 @@ public @interface Browsers {
     /**
      * Array of supported browser names (case-insensitive).
      * Common values: "chrome", "firefox", "safari", "edge", "ie"
-     * 
+     *
      * @return array of supported browser names
      */
     String[] value();

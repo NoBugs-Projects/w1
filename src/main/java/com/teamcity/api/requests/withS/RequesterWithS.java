@@ -21,13 +21,13 @@ import java.util.List;
  * class and implements all standard CRUD operations plus search functionality with
  * automatic response validation and type-safe return values.
  * </p>
- * 
+ *
  * <p>
  * This implementation uses generics to provide type-safe responses and automatically
  * validates HTTP status codes. All created entities are automatically tracked for
  * cleanup during test teardown.
  * </p>
- * 
+ *
  * @param <T> the type of BaseModel that this requester handles
  * @author TeamCity Testing Framework
  * @version 1.0

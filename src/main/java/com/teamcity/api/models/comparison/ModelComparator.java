@@ -13,13 +13,13 @@ import java.util.Objects;
  * configurable field mappings. It uses reflection to access field values
  * and compares them as strings for consistency.
  * </p>
- * 
+ *
  * <p>
  * The comparison supports field mapping, allowing request fields to be compared
  * against differently named response fields. This is useful when the API
  * response structure differs from the request structure.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -42,7 +42,7 @@ public final class ModelComparator {
      * fields in the request and response objects. All values are converted to strings
      * for comparison to ensure consistency.
      * </p>
-     * 
+     *
      * @param <A> the type of the request object
      * @param <B> the type of the response object
      * @param request the request object to compare
@@ -75,7 +75,7 @@ public final class ModelComparator {
      * starting from the most specific class and moving up to parent classes.
      * The field is made accessible before reading its value.
      * </p>
-     * 
+     *
      * @param obj the object to read the field from
      * @param fieldName the name of the field to read
      * @return the value of the field
@@ -112,7 +112,7 @@ public final class ModelComparator {
 
         /**
          * Constructs a new ComparisonResult with the given mismatches.
-         * 
+         *
          * @param mismatches the list of mismatches found during comparison
          */
         public ComparisonResult(List<Mismatch> mismatches) {
@@ -124,7 +124,7 @@ public final class ModelComparator {
          * <p>
          * A comparison is considered successful if no mismatches were found.
          * </p>
-         * 
+         *
          * @return true if no mismatches were found, false otherwise
          */
         public boolean isSuccess() {
@@ -133,7 +133,7 @@ public final class ModelComparator {
 
         /**
          * Gets the list of mismatches found during comparison.
-         * 
+         *
          * @return the list of mismatches
          */
         public List<Mismatch> getMismatches() {
@@ -146,7 +146,7 @@ public final class ModelComparator {
          * If the comparison was successful, returns a success message.
          * Otherwise, returns a detailed list of all mismatches found.
          * </p>
-         * 
+         *
          * @return a string representation of the comparison result
          */
         @Override
@@ -176,12 +176,12 @@ public final class ModelComparator {
          * The name of the field that mismatched.
          */
         private final String fieldName;
-        
+
         /**
          * The expected value from the request object.
          */
         private final Object expected;
-        
+
         /**
          * The actual value from the response object.
          */
@@ -189,7 +189,7 @@ public final class ModelComparator {
 
         /**
          * Constructs a new Mismatch with the given field information.
-         * 
+         *
          * @param fieldName the name of the field that mismatched
          * @param expected the expected value
          * @param actual the actual value
@@ -202,7 +202,7 @@ public final class ModelComparator {
 
         /**
          * Gets the name of the field that mismatched.
-         * 
+         *
          * @return the field name
          */
         public String getFieldName() {
@@ -211,7 +211,7 @@ public final class ModelComparator {
 
         /**
          * Gets the expected value from the request object.
-         * 
+         *
          * @return the expected value
          */
         public Object getExpected() {
@@ -220,7 +220,7 @@ public final class ModelComparator {
 
         /**
          * Gets the actual value from the response object.
-         * 
+         *
          * @return the actual value
          */
         public Object getActual() {

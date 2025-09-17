@@ -16,13 +16,13 @@ import lombok.extern.jackson.Jacksonized;
  * This class models a role assignment for a user in the TeamCity system. It defines
  * the specific role and scope for which the user has permissions.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -44,7 +44,7 @@ public class Role extends BaseModel {
      * This field specifies the type of role being assigned to the user.
      * The default value is SYSTEM_ADMIN for administrative access.
      * </p>
-     * 
+     *
      * <p>
      * This field is marked with @Parameterizable annotation, meaning it can be
      * populated with provided parameters during test data generation.
@@ -53,14 +53,14 @@ public class Role extends BaseModel {
     @Builder.Default
     @Parameterizable
     private UserRole roleId = UserRole.SYSTEM_ADMIN;
-    
+
     /**
      * The scope of the role assignment.
      * <p>
      * This field defines the scope or context in which the role applies.
      * The default value is "g" for global scope.
      * </p>
-     * 
+     *
      * <p>
      * This field is marked with @Parameterizable annotation, meaning it can be
      * populated with provided parameters during test data generation.

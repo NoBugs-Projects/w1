@@ -14,12 +14,12 @@ import java.util.EnumMap;
  * TeamCity API endpoints. It creates and manages a collection of Requester instances,
  * one for each endpoint defined in the Endpoint enum.
  * </p>
- * 
+ *
  * <p>
  * The class uses an EnumMap for efficient endpoint-to-requester mapping and provides
  * a simple interface for retrieving the appropriate requester for any given endpoint.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -47,7 +47,7 @@ public final class Requesters {
      * for each endpoint defined in the Endpoint enum, all using the provided
      * request specification.
      * </p>
-     * 
+     *
      * @param spec the REST Assured request specification to use for all requesters
      */
     public Requesters(RequestSpecification spec) {
@@ -62,7 +62,7 @@ public final class Requesters {
      * This method returns the Requester instance associated with the given endpoint.
      * The requester can be used to make unvalidated API calls to that specific endpoint.
      * </p>
-     * 
+     *
      * @param endpoint the endpoint for which to retrieve the requester
      * @return the Requester instance for the specified endpoint
      */

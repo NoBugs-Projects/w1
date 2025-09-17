@@ -17,13 +17,13 @@ import lombok.extern.jackson.Jacksonized;
  * TeamCity system. It includes the project's identification information and
  * its parent project in the project hierarchy.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -48,7 +48,7 @@ public class NewProjectDescription extends BaseModel {
      */
     @Random
     private String id;
-    
+
     /**
      * The display name of the new project.
      * <p>
@@ -58,7 +58,7 @@ public class NewProjectDescription extends BaseModel {
      */
     @Random
     private String name;
-    
+
     /**
      * The parent project in the project hierarchy.
      * <p>

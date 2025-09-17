@@ -9,21 +9,22 @@ import io.restassured.specification.RequestSpecification;
 import org.apache.http.HttpStatus;
 
 /**
- * Implementation of validated API requester for TeamCity server authentication settings with automatic response validation.
+ * Implementation of validated API requester for TeamCity server authentication settings
+ * with automatic response validation.
  * <p>
  * This class provides concrete implementation of the CrudInterface for making
  * validated API calls to TeamCity server authentication settings endpoints.
  * It extends the base Request class and implements server auth settings-specific
  * CRUD operations with automatic response validation and type-safe return values.
  * </p>
- * 
+ *
  * <p>
  * This requester is specialized for server authentication settings management
  * and provides methods for reading and updating authentication configuration
  * with automatic status code validation. Create and delete operations are not
  * supported for server auth settings as they are managed by the TeamCity server.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

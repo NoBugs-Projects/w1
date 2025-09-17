@@ -9,13 +9,13 @@ import lombok.Data;
  * throughout the test suite. It is generated using TestDataGenerator.generate()
  * and provides a single point of access to all test entities.
  * </p>
- * 
+ *
  * <p>
  * The order of field definitions is important and affects the TestDataGenerator.generate()
  * method, as it determines the order in which entities are created during test data
  * generation. This ensures proper dependency management between related entities.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -39,7 +39,7 @@ public class TestData {
      * </p>
      */
     private NewProjectDescription newProjectDescription;
-    
+
     /**
      * Project entity for testing.
      * <p>
@@ -48,7 +48,7 @@ public class TestData {
      * </p>
      */
     private Project project;
-    
+
     /**
      * User entity for testing.
      * <p>
@@ -57,7 +57,7 @@ public class TestData {
      * </p>
      */
     private User user;
-    
+
     /**
      * Build type entity for testing.
      * <p>

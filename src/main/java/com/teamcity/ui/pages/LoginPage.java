@@ -16,12 +16,12 @@ import static com.codeborne.selenide.Selenide.page;
  * methods for user authentication. It supports both regular user login and
  * super user login functionality.
  * </p>
- * 
+ *
  * <p>
  * The class extends BasePage and uses Selenide for web element interaction.
  * It implements the Page Object Model pattern for maintainable UI automation.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -34,7 +34,7 @@ public class LoginPage extends BasePage {
      * The URL path for the login page.
      */
     private static final String LOGIN_URL = "/login.html";
-    
+
     /**
      * Username input field element.
      * <p>
@@ -43,7 +43,7 @@ public class LoginPage extends BasePage {
      */
     // css селектор по id
     private final SelenideElement usernameInput = $("#username");
-    
+
     /**
      * Password input field element.
      * <p>
@@ -51,7 +51,7 @@ public class LoginPage extends BasePage {
      * </p>
      */
     private final SelenideElement passwordInput = $("#password");
-    
+
     /**
      * Login button element.
      * <p>
@@ -68,7 +68,7 @@ public class LoginPage extends BasePage {
      * LoginPage instance. The page constructor will automatically verify
      * that the page has loaded completely.
      * </p>
-     * 
+     *
      * @return a new LoginPage instance
      */
     @Step("Open login page")
@@ -84,7 +84,7 @@ public class LoginPage extends BasePage {
      * super=1 parameter) and returns a new LoginPage instance. This is used
      * for administrative operations that require super user privileges.
      * </p>
-     * 
+     *
      * @return a new LoginPage instance for super user login
      */
     @Step("Open super user login page")
@@ -99,7 +99,7 @@ public class LoginPage extends BasePage {
      * user's credentials and clicks the login button. It then navigates to
      * the ProjectsPage after successful authentication.
      * </p>
-     * 
+     *
      * @param user the user object containing login credentials
      * @return a new ProjectsPage instance after successful login
      */
@@ -120,7 +120,7 @@ public class LoginPage extends BasePage {
      * the configuration and clicks the login button. It then navigates to
      * the ProjectsPage after successful authentication.
      * </p>
-     * 
+     *
      * @return a new ProjectsPage instance after successful super user login
      */
     @Step("Login as super user")

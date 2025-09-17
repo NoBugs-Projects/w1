@@ -45,13 +45,13 @@ public class StartBuildTest extends BaseUiTest {
                     .authSpec(testData.get().getUser()), BUILDS);
             // Каждое действие на UI всегда проверяется через API
             var build = checkedBuildRequest.read(createdBuildId);
-            
+
             // Create expected build with finished state and success status
             var expectedBuild = Build.builder()
                     .state("finished")
                     .status("SUCCESS")
                     .build();
-            
+
             ModelAssertions.assertThatModels(expectedBuild, build).match();
         });
     }

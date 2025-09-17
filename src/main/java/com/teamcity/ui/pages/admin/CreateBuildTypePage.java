@@ -10,12 +10,12 @@ import io.qameta.allure.Step;
  * and provides methods for creating new build types from source URLs. It extends
  * CreateBasePage to inherit common creation functionality.
  * </p>
- * 
+ *
  * <p>
  * The class uses Selenide for web element interaction and implements the Page Object
  * Model pattern for maintainable UI automation.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -35,7 +35,7 @@ public class CreateBuildTypePage extends CreateBasePage {
      * a new CreateBuildTypePage instance. The page constructor will automatically
      * verify that the page has loaded completely.
      * </p>
-     * 
+     *
      * @param projectId the ID of the project to create the build type in
      * @return a new CreateBuildTypePage instance
      */
@@ -50,7 +50,7 @@ public class CreateBuildTypePage extends CreateBasePage {
      * This method uses the base creation logic to create a build type from a
      * source URL, including URL input, submission, and connection verification.
      * </p>
-     * 
+     *
      * @param url the source URL to create the build type from
      * @return this CreateBuildTypePage instance for method chaining
      */
@@ -66,7 +66,7 @@ public class CreateBuildTypePage extends CreateBasePage {
      * This method fills in the build type name field and submits the form
      * to complete the build type creation process.
      * </p>
-     * 
+     *
      * @param buildTypeName the name for the new build type
      * @return this CreateBuildTypePage instance for method chaining
      */

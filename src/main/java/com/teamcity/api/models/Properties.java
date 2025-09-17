@@ -18,13 +18,13 @@ import java.util.List;
  * It is used to wrap a list of Property objects for API responses that return
  * multiple properties or for setting multiple properties at once.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -46,7 +46,7 @@ public class Properties extends BaseModel {
      * This field contains a collection of Property objects representing key-value
      * pairs that can be configured for various TeamCity entities.
      * </p>
-     * 
+     *
      * <p>
      * This field is marked with @Parameterizable annotation, meaning it can be
      * populated with provided parameters during test data generation.

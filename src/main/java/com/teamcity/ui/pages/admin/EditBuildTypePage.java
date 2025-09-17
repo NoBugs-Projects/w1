@@ -21,12 +21,12 @@ import static io.qameta.allure.Allure.step;
  * and provides methods for editing build type configurations and extracting
  * build type IDs from the current URL.
  * </p>
- * 
+ *
  * <p>
  * The class extends BasePage and uses Selenide for web element interaction.
  * It implements the Page Object Model pattern for maintainable UI automation.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -42,7 +42,7 @@ public class EditBuildTypePage extends BasePage {
      * </p>
      */
     private final SelenideElement generalTab = $("#general_Tab");
-    
+
     /**
      * Header help icon element for page verification.
      * <p>
@@ -50,7 +50,7 @@ public class EditBuildTypePage extends BasePage {
      * completely. It is present in all states of the build type edit page,
      * regardless of the source or configuration.
      * </p>
-     * 
+     *
      * <p>
      * The element is located using a complex CSS selector that targets a span
      * element that is the first child of a div, which is a sibling of an h2 element.
@@ -84,7 +84,7 @@ public class EditBuildTypePage extends BasePage {
      * current page context. It is typically used when navigating from another
      * page that has already loaded the edit page.
      * </p>
-     * 
+     *
      * @return a new EditBuildTypePage instance
      */
     @Step("Open build type edit page")
@@ -99,7 +99,7 @@ public class EditBuildTypePage extends BasePage {
      * a regular expression. The extracted ID is added to the TestDataStorage
      * for cleanup purposes.
      * </p>
-     * 
+     *
      * @return the extracted build type ID, or null if not found
      */
     @Step("Get build type id")

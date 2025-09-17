@@ -16,14 +16,14 @@ import java.util.Properties;
  * file specifies field mappings and which fields should be compared for
  * each model class.
  * </p>
- * 
+ *
  * <p>
  * The configuration file format is:
  * <pre>
  * RequestClass=ResponseClass:field1=field1Response,field2=field2Response
  * </pre>
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -43,7 +43,7 @@ public final class ModelComparisonConfigLoader {
      * The file should be located in the classpath and contain comparison rules in the
      * format: RequestClass=ResponseClass:field1=field1Response,field2=field2Response
      * </p>
-     * 
+     *
      * @param configFile the name of the configuration file to load
      * @throws IllegalArgumentException if the config file is not found
      * @throws RuntimeException if there is an error loading the configuration
@@ -77,7 +77,7 @@ public final class ModelComparisonConfigLoader {
      * This method looks up the comparison rule for the given request class
      * and returns it if found, or null if no rule is configured for that class.
      * </p>
-     * 
+     *
      * @param requestClass the request class to get the rule for
      * @return the comparison rule for the class, or null if not found
      */
@@ -98,7 +98,7 @@ public final class ModelComparisonConfigLoader {
          * The simple name of the response class to compare against.
          */
         private final String responseClassSimpleName;
-        
+
         /**
          * Map of request field names to response field names.
          */
@@ -111,7 +111,7 @@ public final class ModelComparisonConfigLoader {
          * Each field pair can be in the format "requestField=responseField" or just
          * "fieldName" (which maps to itself).
          * </p>
-         * 
+         *
          * @param responseClassSimpleName the simple name of the response class
          * @param fieldPairs the list of field pairs to map
          */
@@ -132,7 +132,7 @@ public final class ModelComparisonConfigLoader {
 
         /**
          * Gets the simple name of the response class.
-         * 
+         *
          * @return the response class simple name
          */
         public String getResponseClassSimpleName() {
@@ -141,7 +141,7 @@ public final class ModelComparisonConfigLoader {
 
         /**
          * Gets the field mappings for this comparison rule.
-         * 
+         *
          * @return the map of request field names to response field names
          */
         public Map<String, String> getFieldMappings() {

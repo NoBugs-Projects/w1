@@ -7,12 +7,12 @@ package com.teamcity.api.models.comparison;
  * based on configurable field mappings. It uses the ModelComparisonConfigLoader to
  * determine which fields should be compared and how they should be mapped.
  * </p>
- * 
+ *
  * <p>
  * The comparison is performed using reflection to access field values and compare
  * them according to the rules defined in the model-comparison.properties file.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -25,7 +25,7 @@ public final class ModelAssertions {
      * The request model object to compare.
      */
     private final Object request;
-    
+
     /**
      * The response model object to compare against.
      */
@@ -36,7 +36,7 @@ public final class ModelAssertions {
      * <p>
      * Use the static factory method assertThatModels() to create instances.
      * </p>
-     * 
+     *
      * @param request the request model object
      * @param response the response model object
      */
@@ -51,7 +51,7 @@ public final class ModelAssertions {
      * This is the entry point for model comparison assertions. It returns a fluent
      * API that can be chained with the match() method to perform the comparison.
      * </p>
-     * 
+     *
      * @param request the request model object to compare
      * @param response the response model object to compare against
      * @return a new ModelAssertions instance
@@ -68,7 +68,7 @@ public final class ModelAssertions {
      * don't match, an AssertionError is thrown with detailed information about
      * the mismatches.
      * </p>
-     * 
+     *
      * @return this ModelAssertions instance for method chaining
      * @throws AssertionError if the model comparison fails or no rule is found
      */

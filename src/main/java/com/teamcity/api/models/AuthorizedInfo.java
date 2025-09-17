@@ -15,13 +15,13 @@ import lombok.extern.jackson.Jacksonized;
  * It is typically used to indicate whether a user or agent is authorized
  * to perform certain operations.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

@@ -15,13 +15,13 @@ import io.restassured.specification.RequestSpecification;
  * unvalidated API calls to TeamCity agent endpoints. It extends the base Request
  * class and implements agent-specific CRUD operations.
  * </p>
- * 
+ *
  * <p>
  * This requester is specialized for agent management operations and provides
  * methods for reading and updating agent information. Create and delete operations
  * are not supported for agents as they are managed by the TeamCity server.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

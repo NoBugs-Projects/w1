@@ -16,12 +16,12 @@ import static com.codeborne.selenide.Selenide.$;
  * is started for the first time. It provides methods for configuring the
  * server, selecting database type, and accepting the license agreement.
  * </p>
- * 
+ *
  * <p>
  * The class extends BasePage and uses Selenide for web element interaction.
  * It implements the Page Object Model pattern for maintainable UI automation.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -36,7 +36,7 @@ public class FirstStartPage extends BasePage {
      * </p>
      */
     private final SelenideElement restoreButton = $("#restoreButton");
-    
+
     /**
      * Proceed button element for navigation.
      * <p>
@@ -44,7 +44,7 @@ public class FirstStartPage extends BasePage {
      * </p>
      */
     private final SelenideElement proceedButton = $("#proceedButton");
-    
+
     /**
      * Database type selection element.
      * <p>
@@ -52,7 +52,7 @@ public class FirstStartPage extends BasePage {
      * </p>
      */
     private final SelenideElement dbTypeSelect = $("#dbType");
-    
+
     /**
      * License acceptance checkbox element.
      * <p>
@@ -60,7 +60,7 @@ public class FirstStartPage extends BasePage {
      * </p>
      */
     private final SelenideElement acceptLicenseCheckbox = $("#accept");
-    
+
     /**
      * Submit button element for completing setup.
      * <p>
@@ -88,7 +88,7 @@ public class FirstStartPage extends BasePage {
      * FirstStartPage instance. The page constructor will automatically
      * verify that the page has loaded completely.
      * </p>
-     * 
+     *
      * @return a new FirstStartPage instance
      */
     @Step("Open first start page")
@@ -103,7 +103,7 @@ public class FirstStartPage extends BasePage {
      * proceeding through the setup steps, selecting the database type,
      * accepting the license agreement, and submitting the form.
      * </p>
-     * 
+     *
      * @return this FirstStartPage instance for method chaining
      */
     @Step("Setup server on first start")

@@ -25,12 +25,12 @@ import static io.qameta.allure.Allure.step;
  * methods for interacting with projects and build types. It supports project
  * verification, build execution, and ID extraction functionality.
  * </p>
- * 
+ *
  * <p>
  * The class extends BasePage and uses Selenide for web element interaction.
  * It implements the Page Object Model pattern for maintainable UI automation.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -43,12 +43,12 @@ public class ProjectsPage extends BasePage {
      * The URL path for the projects page.
      */
     private static final String PROJECTS_URL = "/favorite/projects";
-    
+
     /**
      * The expected status text for successful builds.
      */
     private static final String SUCCESS_BUILD_STATUS = "Success";
-    
+
     /**
      * Main header element for page verification.
      * <p>
@@ -58,37 +58,37 @@ public class ProjectsPage extends BasePage {
     // Везде стараемся использовать достаточно простые css селекторы.
     // Понятно, что в идеале нужно иметь атрибуты test-data на этих элементах, но здесь мы не можем на это повлиять.
     private final SelenideElement header = $(".MainPanel__router--gF > div");
-    
+
     /**
      * Edit project link element for extracting project ID.
      */
     private final SelenideElement editProjectLink = $(".EditEntity__link--en");
-    
+
     /**
      * Run build button element.
      */
     private final SelenideElement runButton = $(byDataTest("run-build"));
-    
+
     /**
      * Build type link element.
      */
     private final SelenideElement buildType = $(".BuildTypeLine__link--MF");
-    
+
     /**
      * Build type header element for verification.
      */
     private final SelenideElement buildTypeHeader = $(".BuildTypePageHeader__heading--De");
-    
+
     /**
      * Build details button element.
      */
     private final SelenideElement buildDetailsButton = $(".BuildDetails__button--BC");
-    
+
     /**
      * Build status link element for extracting build ID.
      */
     private final SelenideElement buildStatusLink = $(".Build__status--bG > a");
-    
+
     /**
      * Collection of project elements.
      * <p>
@@ -118,7 +118,7 @@ public class ProjectsPage extends BasePage {
      * ProjectsPage instance. The page constructor will automatically verify
      * that the page has loaded completely.
      * </p>
-     * 
+     *
      * @return a new ProjectsPage instance
      */
     @Step("Open projects page")
@@ -136,7 +136,7 @@ public class ProjectsPage extends BasePage {
      * and verifies that the specified build type is present and the run button
      * is visible. It uses fluent assertions for readable test code.
      * </p>
-     * 
+     *
      * @param projectName the name of the project to verify
      * @param buildTypeName the name of the build type to verify
      * @return this ProjectsPage instance for method chaining
@@ -159,7 +159,7 @@ public class ProjectsPage extends BasePage {
      * waits for the build to complete with a success status. It uses the
      * long waiting duration to accommodate build execution time.
      * </p>
-     * 
+     *
      * @return this ProjectsPage instance for method chaining
      */
     @Step("Run build and wait until it is finished")
@@ -179,7 +179,7 @@ public class ProjectsPage extends BasePage {
      * the project ID using a regular expression. The extracted ID is added to
      * the TestDataStorage for cleanup purposes.
      * </p>
-     * 
+     *
      * @return the extracted project ID, or null if not found
      */
     @Step("Get project id")
@@ -201,7 +201,7 @@ public class ProjectsPage extends BasePage {
      * This method parses the href attribute of the build status link to extract
      * the build ID by taking the last part of the URL path after the final slash.
      * </p>
-     * 
+     *
      * @return the extracted build ID, or null if not found
      */
     @Step("Get build id")

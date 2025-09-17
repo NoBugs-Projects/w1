@@ -16,14 +16,14 @@ import java.util.Set;
  * and ensure they are properly cleaned up after tests complete. It uses a ThreadLocal
  * pattern to ensure thread safety in parallel test execution.
  * </p>
- * 
+ *
  * <p>
  * The storage maintains a mapping of endpoints to sets of entity IDs, allowing for
  * efficient cleanup operations. The cleanup order is guaranteed to follow the order
  * defined in the Endpoint enum, ensuring that dependent entities are deleted before
  * their dependencies.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -41,7 +41,7 @@ public final class TestDataStorage {
      * </p>
      */
     private static final ThreadLocal<TestDataStorage> TEST_DATA_STORAGE = ThreadLocal.withInitial(TestDataStorage::new);
-    
+
     /**
      * Map storing created entities with their corresponding endpoints.
      * <p>
@@ -49,7 +49,7 @@ public final class TestDataStorage {
      * The order of iteration is guaranteed to follow the order defined in
      * the Endpoint enum, which is important for proper cleanup order.
      * </p>
-     * 
+     *
      * <p>
      * For the Endpoint enum, the order is always:
      * BUILD_QUEUE > BUILDS > BUILD_TYPES > USERS > PROJECTS
@@ -79,7 +79,7 @@ public final class TestDataStorage {
      * This method returns the TestDataStorage instance associated with the current thread.
      * If no instance exists, a new one will be created automatically.
      * </p>
-     * 
+     *
      * @return the TestDataStorage instance for the current thread
      */
     public static TestDataStorage getStorage() {
@@ -93,7 +93,7 @@ public final class TestDataStorage {
      * Only non-null IDs are stored. If no set exists for the endpoint, a new
      * HashSet is created automatically.
      * </p>
-     * 
+     *
      * @param endpoint the endpoint associated with the created entity
      * @param id the ID of the created entity
      */
@@ -112,7 +112,7 @@ public final class TestDataStorage {
      * This method extracts the ID from the provided model and adds it to the storage.
      * It's a convenience method that combines ID extraction with storage addition.
      * </p>
-     * 
+     *
      * @param endpoint the endpoint associated with the created entity
      * @param model the model containing the entity to track
      */
@@ -127,12 +127,12 @@ public final class TestDataStorage {
      * the provided requester. The deletion order follows the Endpoint enum order,
      * ensuring that dependent entities are deleted before their dependencies.
      * </p>
-     * 
+     *
      * <p>
      * After deletion, the storage is cleared to prevent attempts to delete
      * already-deleted entities in subsequent test runs.
      * </p>
-     * 
+     *
      * @param uncheckedSuperUser the requester to use for deletion operations
      */
     public void deleteCreatedEntities(Requesters uncheckedSuperUser) {
@@ -150,7 +150,7 @@ public final class TestDataStorage {
      * and returns its string representation. This is necessary because not all
      * BaseModel subclasses have a public getter for the ID field.
      * </p>
-     * 
+     *
      * @param model the model to extract the ID from
      * @return the string representation of the model's ID, or null if not found
      * @throws IllegalStateException if the ID field cannot be accessed

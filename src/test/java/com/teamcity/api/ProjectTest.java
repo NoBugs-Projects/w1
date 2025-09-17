@@ -158,11 +158,11 @@ public class ProjectTest extends BaseApiTest {
         });
     }
 
-    @Test(description = "User should be able to create projects with various valid ID and name scenarios", 
+    @Test(description = "User should be able to create projects with various valid ID and name scenarios",
           groups = {"Regression"}, dataProvider = "validProjectScenarios")
     public void userCreatesProjectWithValidDataTest(String scenario, String customId, String customName) {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Create project with " + scenario, () -> {
             if (customId != null) {
                 testData.get().getNewProjectDescription().setId(customId);
@@ -178,28 +178,28 @@ public class ProjectTest extends BaseApiTest {
     @Test(description = "User should be able to create a copy of a project", groups = {"Regression"})
     public void userCreatesCopyOfProjectTest() {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Create original project", () -> {
             projectRequestWithS.get().create(testData.get().getNewProjectDescription());
         });
-        
+
         step("Create copy of existing project", () -> {
             var copyProjectData = generate();
             copyProjectData.getNewProjectDescription().setId("copy_of_" + testData.get().getNewProjectDescription().getId());
             copyProjectData.getNewProjectDescription().setName("Copy of " + testData.get().getNewProjectDescription().getName());
             copyProjectData.getNewProjectDescription().setParentProject(testData.get().getProject());
-            
+
             var copiedProject = projectRequestWithS.get().create(copyProjectData.getNewProjectDescription());
             ModelAssertions.assertThatModels(copyProjectData.getNewProjectDescription(), copiedProject).match();
         });
     }
 
 
-    @Test(description = "User should not be able to create projects with invalid ID scenarios", 
+    @Test(description = "User should not be able to create projects with invalid ID scenarios",
           groups = {"Regression"}, dataProvider = "invalidIdScenarios")
     public void userCannotCreateProjectWithInvalidIdTest(String scenario, String invalidId, int expectedStatusCode) {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Attempt to create project with " + scenario, () -> {
             testData.get().getNewProjectDescription().setId(invalidId);
             projectRequest.get().create(testData.get().getNewProjectDescription())
@@ -210,7 +210,7 @@ public class ProjectTest extends BaseApiTest {
     @Test(description = "User should not be able to create a project with empty name", groups = {"Regression"})
     public void userCannotCreateProjectWithEmptyNameTest() {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Attempt to create project with empty name", () -> {
             testData.get().getNewProjectDescription().setName("");
             projectRequest.get().create(testData.get().getNewProjectDescription())
@@ -221,7 +221,7 @@ public class ProjectTest extends BaseApiTest {
     @Test(description = "User should not be able to create a project with empty id and name", groups = {"Regression"})
     public void userCannotCreateProjectWithEmptyIdAndNameTest() {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Attempt to create project with empty ID and name", () -> {
             testData.get().getNewProjectDescription().setId("");
             testData.get().getNewProjectDescription().setName("");
@@ -233,7 +233,7 @@ public class ProjectTest extends BaseApiTest {
     @Test(description = "User should not be able to create a project with invalid id and empty name", groups = {"Regression"})
     public void userCannotCreateProjectWithInvalidIdAndEmptyNameTest() {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Attempt to create project with invalid ID and empty name", () -> {
             testData.get().getNewProjectDescription().setId("123Invalid");
             testData.get().getNewProjectDescription().setName("");
@@ -246,15 +246,15 @@ public class ProjectTest extends BaseApiTest {
     @Test(description = "User should not be able to create 2 projects with the same name", groups = {"Regression"})
     public void userCannotCreateTwoProjectsWithSameNameTest() {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Create first project with specific name", () -> {
             projectRequestWithS.get().create(testData.get().getNewProjectDescription());
         });
-        
+
         step("Attempt to create second project with same name", () -> {
             var secondTestData = generate();
             secondTestData.getNewProjectDescription().setName(testData.get().getNewProjectDescription().getName());
-            
+
             projectRequest.get().create(secondTestData.getNewProjectDescription())
                     .then().assertThat().spec(ResponseSpecs.requestReturnsBadRequestWithDuplicateName());
         });
@@ -263,13 +263,13 @@ public class ProjectTest extends BaseApiTest {
     @Test(description = "User should not be able to create a copy of non existing project", groups = {"Regression"})
     public void userCannotCreateCopyOfNonExistingProjectTest() {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Attempt to create copy of non-existing project", () -> {
             var copyProjectData = generate();
             copyProjectData.getNewProjectDescription().setId("copy_of_nonexistent");
             copyProjectData.getNewProjectDescription().setName("Copy of Nonexistent");
             copyProjectData.getNewProjectDescription().setParentProject(new Project("nonexistent", "Nonexistent", null));
-            
+
             projectRequest.get().create(copyProjectData.getNewProjectDescription())
                     .then().assertThat().spec(ResponseSpecs.requestReturnsNotFound());
         });
@@ -278,29 +278,29 @@ public class ProjectTest extends BaseApiTest {
     @Test(description = "User should not be able to create a copy with empty info about source project", groups = {"Regression"})
     public void userCannotCreateCopyWithEmptySourceProjectInfoTest() {
         superUserRequesterWithS.getRequest(USERS).create(testData.get().getUser());
-        
+
         step("Attempt to create copy with empty source project info", () -> {
             var copyProjectData = generate();
             copyProjectData.getNewProjectDescription().setId("copy_with_empty_source");
             copyProjectData.getNewProjectDescription().setName("Copy with Empty Source");
             copyProjectData.getNewProjectDescription().setParentProject(new Project("", "", null));
-            
+
             projectRequest.get().create(copyProjectData.getNewProjectDescription())
                     .then().assertThat().spec(ResponseSpecs.requestReturnsNotFound());
         });
     }
 
 
-    @Test(description = "Users with insufficient roles should not be able to create projects", 
+    @Test(description = "Users with insufficient roles should not be able to create projects",
           groups = {"Regression"}, dataProvider = "rolePermissionScenarios")
     public void userWithInsufficientRoleCannotCreateProjectTest(String roleName, UserRole userRole) {
         step("Create user with " + roleName + " role", () -> {
             var user = generate().getUser();
             user.setRoles(Roles.builder().role(List.of(Role.builder().roleId(userRole).scope("g").build())).build());
             superUserRequesterWithS.getRequest(USERS).create(user);
-            
+
             var projectRequest = new Requester(RequestSpecs.authSpec(user), PROJECTS);
-            
+
             step("Attempt to create project as " + roleName, () -> {
                 projectRequest.create(testData.get().getNewProjectDescription())
                         .then().assertThat().spec(ResponseSpecs.requestReturnsForbiddenWithAccessDenied());

@@ -21,12 +21,12 @@ import static com.teamcity.ui.Selectors.byDataTest;
  * interface and provides methods for creating new build steps, particularly
  * command line build steps with custom scripts.
  * </p>
- * 
+ *
  * <p>
  * The class extends BasePage and uses Selenide for web element interaction.
  * It implements the Page Object Model pattern for maintainable UI automation.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -43,12 +43,12 @@ public class CreateBuildTypeStepPage extends BasePage {
      * </p>
      */
     private static final String NEW_BUILD_STEP_URL = "/admin/editRunType.html?id=buildType:%s&runnerId=__NEW_RUNNER__";
-    
+
     /**
      * The runner type for command line build steps.
      */
     private static final String COMMAND_LINE_RUNNER_TYPE = "Command Line";
-    
+
     /**
      * Runner item filter input element.
      * <p>
@@ -56,7 +56,7 @@ public class CreateBuildTypeStepPage extends BasePage {
      * </p>
      */
     private final SelenideElement runnerItemFilterInput = $(byDataTest("runner-item-filter"));
-    
+
     /**
      * Build step name input field element.
      * <p>
@@ -64,7 +64,7 @@ public class CreateBuildTypeStepPage extends BasePage {
      * </p>
      */
     private final SelenideElement buildStepNameInput = $("#buildStepName");
-    
+
     /**
      * Custom script line element for CodeMirror editor.
      * <p>
@@ -72,7 +72,7 @@ public class CreateBuildTypeStepPage extends BasePage {
      * </p>
      */
     private final SelenideElement customScriptLine = $(".CodeMirror-code");
-    
+
     /**
      * Custom script input element for CodeMirror editor.
      * <p>
@@ -80,7 +80,7 @@ public class CreateBuildTypeStepPage extends BasePage {
      * </p>
      */
     private final SelenideElement customScriptInput = $(".CodeMirror textarea");
-    
+
     /**
      * Collection of available runner items.
      * <p>
@@ -108,7 +108,7 @@ public class CreateBuildTypeStepPage extends BasePage {
      * This static method navigates to the build type step creation page URL
      * and returns a new CreateBuildTypeStepPage instance.
      * </p>
-     * 
+     *
      * @param buildTypeId the ID of the build type to create a step for
      * @return a new CreateBuildTypeStepPage instance
      */
@@ -124,7 +124,7 @@ public class CreateBuildTypeStepPage extends BasePage {
      * name with a random value, and enters the custom script. It uses a complex
      * interaction pattern to work with the CodeMirror editor.
      * </p>
-     * 
+     *
      * @param customScript the custom script to execute in the build step
      * @return a new EditBuildTypePage instance after step creation
      */

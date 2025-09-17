@@ -9,13 +9,13 @@ import org.apache.commons.lang3.RandomStringUtils;
  * for use in test data. All generated strings are prefixed with "test_" to make
  * them easily identifiable as test data in logs and reports.
  * </p>
- * 
+ *
  * <p>
  * The class uses Apache Commons Lang's RandomStringUtils for secure random string
  * generation, ensuring that generated values are cryptographically secure and
  * suitable for testing purposes.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -31,7 +31,7 @@ public final class RandomData {
      * </p>
      */
     private static final int LENGTH = 10;
-    
+
     /**
      * Prefix added to all generated random strings.
      * <p>
@@ -56,7 +56,7 @@ public final class RandomData {
      * This method generates a random alphabetic string with the default length
      * (10 characters) plus the "test_" prefix, resulting in a total length of 15 characters.
      * </p>
-     * 
+     *
      * @return a random string prefixed with "test_"
      */
     public static String getString() {
@@ -70,7 +70,7 @@ public final class RandomData {
      * plus the "test_" prefix. The minimum length is guaranteed to be 10 characters
      * (excluding the prefix) to ensure sufficient randomness.
      * </p>
-     * 
+     *
      * @param length the desired length of the random part (excluding prefix)
      * @return a random string prefixed with "test_"
      */

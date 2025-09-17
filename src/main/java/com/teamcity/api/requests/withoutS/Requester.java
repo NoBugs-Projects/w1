@@ -17,12 +17,12 @@ import io.restassured.specification.RequestSpecification;
  * for making unvalidated API calls to TeamCity endpoints. It extends the base Request
  * class and implements all standard CRUD operations plus search functionality.
  * </p>
- * 
+ *
  * <p>
  * All methods return raw Response objects without automatic validation, allowing
  * for manual response handling and custom validation logic in test code.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

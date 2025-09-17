@@ -16,12 +16,12 @@ import static com.codeborne.selenide.Selenide.$;
  * across multiple creation pages in the TeamCity admin interface. It includes
  * common form elements, error handling, and base creation workflows.
  * </p>
- * 
+ *
  * <p>
  * The class extends BasePage and uses Selenide for web element interaction.
  * It implements the Page Object Model pattern for maintainable UI automation.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -38,7 +38,7 @@ public abstract class CreateBasePage extends BasePage {
      * </p>
      */
     protected static final String CREATE_URL = "/admin/createObjectMenu.html?projectId=%s&showMode=%s";
-    
+
     /**
      * Project name input field element.
      * <p>
@@ -46,7 +46,7 @@ public abstract class CreateBasePage extends BasePage {
      * </p>
      */
     protected final SelenideElement projectNameInput = $("#projectName");
-    
+
     /**
      * Build type name input field element.
      * <p>
@@ -54,7 +54,7 @@ public abstract class CreateBasePage extends BasePage {
      * </p>
      */
     protected final SelenideElement buildTypeNameInput = $("#buildTypeName");
-    
+
     /**
      * URL input field element.
      * <p>
@@ -62,7 +62,7 @@ public abstract class CreateBasePage extends BasePage {
      * </p>
      */
     private final SelenideElement urlInput = $("#url");
-    
+
     /**
      * Connection successful message element.
      * <p>
@@ -70,7 +70,7 @@ public abstract class CreateBasePage extends BasePage {
      * </p>
      */
     private final SelenideElement connectionSuccessfulMessage = $(".connectionSuccessful");
-    
+
     /**
      * Project name error message element.
      * <p>
@@ -78,7 +78,7 @@ public abstract class CreateBasePage extends BasePage {
      * </p>
      */
     private final SelenideElement projectNameError = $("#error_projectName");
-    
+
     /**
      * Build type name error message element.
      * <p>
@@ -105,7 +105,7 @@ public abstract class CreateBasePage extends BasePage {
      * This method must be implemented by subclasses to provide specific
      * creation logic for different types of entities.
      * </p>
-     * 
+     *
      * @param url the source URL to create from
      * @return this CreateBasePage instance for method chaining
      */
@@ -117,7 +117,7 @@ public abstract class CreateBasePage extends BasePage {
      * This method provides the common logic for creating entities from a URL,
      * including URL input, submission, and connection verification.
      * </p>
-     * 
+     *
      * @param url the source URL to create from
      */
     protected final void baseCreateFrom(String url) {
@@ -133,7 +133,7 @@ public abstract class CreateBasePage extends BasePage {
      * This method checks that the project name error element is visible
      * and contains the expected error text.
      * </p>
-     * 
+     *
      * @param error the expected error message
      * @return this CreateBasePage instance for method chaining
      */
@@ -150,7 +150,7 @@ public abstract class CreateBasePage extends BasePage {
      * This method checks that the build type name error element is visible
      * and contains the expected error text.
      * </p>
-     * 
+     *
      * @param error the expected error message
      * @return this CreateBasePage instance for method chaining
      */
