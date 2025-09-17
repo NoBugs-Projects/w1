@@ -1,1 +1,2 @@
 com.teamcity.common.AnnotationTransformerListener
+com.teamcity.ui.listeners.UserSessionListener
