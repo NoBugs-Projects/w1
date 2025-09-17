@@ -13,6 +13,32 @@ import org.apache.http.HttpStatus;
 
 import java.util.List;
 
+/**
+ * Implementation of validated API requester for TeamCity endpoints with automatic response validation.
+ * <p>
+ * This class provides concrete implementation of the CrudInterface and SearchInterface
+ * for making validated API calls to TeamCity endpoints. It extends the base Request
+ * class and implements all standard CRUD operations plus search functionality with
+ * automatic response validation and type-safe return values.
+ * </p>
+ * 
+ * <p>
+ * This implementation uses generics to provide type-safe responses and automatically
+ * validates HTTP status codes. All created entities are automatically tracked for
+ * cleanup during test teardown.
+ * </p>
+ * 
+ * @param <T> the type of BaseModel that this requester handles
+ * @author TeamCity Testing Framework
+ * @version 1.0
+ * @since 1.0
+ * @see Request
+ * @see CrudInterface
+ * @see SearchInterface
+ * @see BaseModel
+ * @see Endpoint
+ * @see TestDataStorage
+ */
 @SuppressWarnings("unchecked")
 // Реализация checked реквестов с помощью дженериков. Позволяет получать респонс с конкретным нужным типом модели
 public final class RequesterWithS<T extends BaseModel> extends Request implements CrudInterface, SearchInterface {

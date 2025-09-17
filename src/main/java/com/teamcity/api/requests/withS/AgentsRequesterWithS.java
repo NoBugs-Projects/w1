@@ -9,6 +9,30 @@ import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 
+/**
+ * Implementation of validated API requester for TeamCity agents with automatic response validation.
+ * <p>
+ * This class provides concrete implementation of the CrudInterface for making
+ * validated API calls to TeamCity agent endpoints. It extends the base Request
+ * class and implements agent-specific CRUD operations with automatic response
+ * validation and type-safe return values.
+ * </p>
+ * 
+ * <p>
+ * This requester is specialized for agent management operations and provides
+ * methods for reading and updating agent information with automatic status code
+ * validation. Create and delete operations are not supported for agents as they
+ * are managed by the TeamCity server.
+ * </p>
+ * 
+ * @author TeamCity Testing Framework
+ * @version 1.0
+ * @since 1.0
+ * @see Request
+ * @see CrudInterface
+ * @see BaseModel
+ * @see Agents
+ */
 public final class AgentsRequesterWithS extends Request implements CrudInterface {
 
     public AgentsRequesterWithS(RequestSpecification spec) {

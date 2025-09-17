@@ -8,6 +8,25 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
+/**
+ * Represents a TeamCity authentication module.
+ * <p>
+ * This class models an authentication module in the TeamCity system. Authentication
+ * modules define how users authenticate with the TeamCity server, such as through
+ * HTTP Basic authentication, LDAP, or other methods.
+ * </p>
+ * 
+ * <p>
+ * The class uses Lombok annotations for automatic generation of getters, setters,
+ * constructors, and other boilerplate code. It also uses Jackson annotations for
+ * JSON serialization/deserialization with the TeamCity API.
+ * </p>
+ * 
+ * @author TeamCity Testing Framework
+ * @version 1.0
+ * @since 1.0
+ * @see BaseModel
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +39,13 @@ import lombok.extern.jackson.Jacksonized;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthModule extends BaseModel {
 
+    /**
+     * The name of the authentication module.
+     * <p>
+     * This field specifies the type of authentication module being used.
+     * The default value is "HTTP-Basic" for basic HTTP authentication.
+     * </p>
+     */
     @Builder.Default
     private String name = "HTTP-Basic";
 
