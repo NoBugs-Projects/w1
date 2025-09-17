@@ -1,0 +1,107 @@
+{
+  "allure": {
+    "totalTests": 47,
+    "passedTests": 47,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "criticalFailures": 0,
+    "flakyTests": 0,
+    "passRate": 100.0,
+    "flakyRate": 0,
+    "avgDuration": 3,
+    "totalDuration": 149
+  },
+  "swagger": {
+    "totalOperations": 433,
+    "coveredOperations": 16,
+    "totalTags": 30,
+    "coveredTags": 6,
+    "totalConditions": 1885,
+    "coveredConditions": 6,
+    "apiCoverage": 3.6,
+    "conditionsCoverage": 3.6,
+    "fullCoverage": 0.462,
+    "partialCoverage": 1.848,
+    "emptyCoverage": 97.691,
+    "methodCoverage": {
+      "GET": {
+        "coverage": 85,
+        "total": 200
+      },
+      "POST": {
+        "coverage": 70,
+        "total": 150
+      },
+      "PUT": {
+        "coverage": 60,
+        "total": 50
+      },
+      "DELETE": {
+        "coverage": 40,
+        "total": 33
+      }
+    },
+    "statusCodeCoverage": {
+      "200": 15,
+      "400": 8,
+      "403": 5,
+      "404": 3,
+      "500": 2
+    }
+  },
+  "testCoverage": {
+    "javaFiles": 20,
+    "javaTestAnnotations": 39,
+    "javaLines": 1437,
+    "automatedTests": 39,
+    "manualTests": 0,
+    "coveragePercentage": 100.0
+  },
+  "performance": {
+    "medianDuration": 377,
+    "longestTests": [
+      {
+        "name": "User should be able to create project",
+        "duration": 70519
+      },
+      {
+        "name": "User should be able to create build type",
+        "duration": 65020
+      },
+      {
+        "name": "User should be able to create project",
+        "duration": 61138
+      },
+      {
+        "name": "User should not be able to create project without name",
+        "duration": 60036
+      },
+      {
+        "name": "User should be able to create build type",
+        "duration": 56991
+      },
+      {
+        "name": "User should not be able to create project without name",
+        "duration": 52040
+      },
+      {
+        "name": "User should be able to create build type step and start build",
+        "duration": 30095
+      },
+      {
+        "name": "User should be able to create build type step and start build",
+        "duration": 21348
+      },
+      {
+        "name": "User should not be able to create build type without name",
+        "duration": 19193
+      },
+      {
+        "name": "User should not be able to create build type without name",
+        "duration": 16054
+      }
+    ],
+    "parallelizationEfficiency": 85.0,
+    "redundancyIndex": 12.9
+  }
+}
