@@ -14,8 +14,40 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Utility class for generating test data using reflection and annotations.
+ * <p>
+ * This class provides methods for automatically generating test data objects
+ * based on field annotations and type information. It uses reflection to
+ * inspect model classes and generate appropriate test data based on the
+ * annotations present on each field.
+ * </p>
+ * 
+ * <p>
+ * The generator supports several annotation types for controlling data generation:
+ * <ul>
+ * <li>{@link Random} - generates random string values</li>
+ * <li>{@link Optional} - skips field generation</li>
+ * <li>{@link Parameterizable} - uses provided parameters</li>
+ * <li>{@link Dependent} - uses values from related models</li>
+ * </ul>
+ * </p>
+ * 
+ * @author TeamCity Testing Framework
+ * @version 1.0
+ * @since 1.0
+ * @see BaseModel
+ * @see TestData
+ * @see Random
+ * @see Optional
+ * @see Parameterizable
+ * @see Dependent
+ */
 public final class TestDataGenerator {
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private TestDataGenerator() {
     }
 
@@ -36,6 +68,36 @@ public final class TestDataGenerator {
     применяется только для пунктов 3 и 4. Например, если был сгенерирован Project, то передав его параметром
     generatedModels при генерации BuildType, он будет переиспользоваться при установке поля Project project,
     вместо генерации нового */
+    
+    /**
+     * Generates a test data object of the specified class using reflection and annotations.
+     * <p>
+     * This is the main method for generating test data. It processes fields in the following order:
+     * <ol>
+     * <li>If a field has the {@link Optional} annotation, it is skipped</li>
+     * <li>If a field has the {@link Parameterizable} annotation and parameters were provided,
+     *     the provided parameters are used in order of field appearance</li>
+     * <li>If a field has the {@link Dependent} annotation, its value is set from a field with
+     *     the same name in a related model from generatedModels</li>
+     * <li>If a field has the {@link Random} annotation and is a String, it is filled with random data</li>
+     * <li>If a field is a BaseModel subclass, it is generated recursively</li>
+     * <li>If a field is a List of BaseModel subclasses, it is set to a list containing one generated element</li>
+     * </ol>
+     * </p>
+     * 
+     * <p>
+     * The generatedModels parameter is used when generating multiple entities in a loop and contains
+     * entities generated in previous steps. This allows for reuse of previously generated entities
+     * when generating complex entities that contain other entities as fields.
+     * </p>
+     * 
+     * @param <T> the type of the model to generate
+     * @param generatedModels list of previously generated models for reuse
+     * @param generatorClass the class of the model to generate
+     * @param parameters optional parameters for Parameterizable fields
+     * @return a generated instance of the specified class
+     * @throws IllegalStateException if generation fails due to reflection errors
+     */
     public static <T extends BaseModel> T generate(List<BaseModel> generatedModels, Class<T> generatorClass,
                                                    Object... parameters) {
         try {
@@ -85,11 +147,35 @@ public final class TestDataGenerator {
         }
     }
 
+    /**
+     * Generates a single entity without any previously generated models.
+     * <p>
+     * This is a convenience method that calls the main generate method with an empty
+     * list of generated models.
+     * </p>
+     * 
+     * @param <T> the type of the model to generate
+     * @param generatorClass the class of the model to generate
+     * @param parameters optional parameters for Parameterizable fields
+     * @return a generated instance of the specified class
+     */
     // Метод, чтобы сгенерировать одну сущность. Передает пустой параметр generatedModels
     public static <T extends BaseModel> T generate(Class<T> generatorClass, Object... parameters) {
         return generate(Collections.emptyList(), generatorClass, parameters);
     }
 
+    /**
+     * Generates all entities based on all fields specified in TestData.
+     * <p>
+     * This method makes the TestData class the single point of scalability.
+     * It is sufficient to add a new field only there for a new object to start
+     * being generated in test data. The iteration goes in the order in which
+     * fields are defined in the file.
+     * </p>
+     * 
+     * @return a complete TestData instance with all fields populated
+     * @throws IllegalStateException if generation fails due to reflection errors
+     */
     /* Генерация всех сущностей, на основании всех полей, указанных в TestData. Делает класс TestData единственной
     точкой масштабируемости. Достаточно добавить новое поле только туда, чтобы новый объект начал генерироваться
     в тестовых данных. Перебор идет в порядке, в котором поля определены в файле */

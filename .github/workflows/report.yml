@@ -189,7 +189,7 @@ jobs:
             STATUS_TEXT="CANCELLED"
           fi
           
-          # Формируем сообщение
+          # Формируем сообщение (экранируем специальные символы для JSON)
           MESSAGE="🚀 *Test Execution Report* ${STATUS_EMOJI}
 
           *Status:* ${STATUS_TEXT}
@@ -197,21 +197,42 @@ jobs:
           *Repository:* ${{ github.repository }}
           *Branch:* ${{ github.ref_name }}
           *Commit:* \`${{ github.sha }}\`
-          
+
           📊 *Test Report:* https://nobugs-projects.github.io/w1/${RUN}/
-          
+
           🔗 *Allure Report:* https://nobugs-projects.github.io/w1/${RUN}/allure-report/
           🔍 *Swagger Coverage:* https://nobugs-projects.github.io/w1/${RUN}/swagger-coverage-report/
-          
+
           *Workflow:* ${{ github.workflow }}
           *Triggered by:* ${{ github.actor }}"
           
-          # Отправляем сообщение в Telegram
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          # Экранируем сообщение для JSON
+          ESCAPED_MESSAGE=$(echo "$MESSAGE" | sed 's/"/\\"/g' | sed 's/\\/\\\\/g')
+          
+          # Отправляем сообщение в Telegram с обработкой ошибок
+          echo "Sending Telegram notification..."
+          echo "Bot Token: ${{ secrets.TELEGRAM_BOT_TOKEN:0:10 }}..."
+          echo "Chat ID: ${{ secrets.TELEGRAM_CHAT_ID }}"
+          
+          RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "{
               \"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\",
-              \"text\": \"${MESSAGE}\",
+              \"text\": \"${ESCAPED_MESSAGE}\",
               \"parse_mode\": \"Markdown\",
               \"disable_web_page_preview\": false
-            }"
+            }" || echo "HTTPSTATUS:000")
+          
+          HTTP_STATUS=$(echo $RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          RESPONSE_BODY=$(echo $RESPONSE | sed -e 's/HTTPSTATUS:.*//g')
+          
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response: $RESPONSE_BODY"
+          
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ Telegram notification sent successfully"
+          else
+            echo "❌ Failed to send Telegram notification. HTTP Status: $HTTP_STATUS"
+            echo "Response: $RESPONSE_BODY"
+            exit 1
+          fi
