@@ -1,0 +1,66 @@
+{
+  "allure": {
+    "totalTests": 0,
+    "passedTests": 0,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "criticalFailures": 0,
+    "flakyTests": 0,
+    "passRate": 0,
+    "flakyRate": 0,
+    "avgDuration": 0,
+    "totalDuration": 0
+  },
+  "swagger": {
+    "totalOperations": 0,
+    "coveredOperations": 0,
+    "totalTags": 0,
+    "coveredTags": 0,
+    "totalConditions": 0,
+    "coveredConditions": 0,
+    "apiCoverage": 0,
+    "conditionsCoverage": 0,
+    "fullCoverage": 0,
+    "partialCoverage": 0,
+    "emptyCoverage": 0,
+    "methodCoverage": {
+      "GET": {
+        "coverage": 85,
+        "total": 200
+      },
+      "POST": {
+        "coverage": 70,
+        "total": 150
+      },
+      "PUT": {
+        "coverage": 60,
+        "total": 50
+      },
+      "DELETE": {
+        "coverage": 40,
+        "total": 33
+      }
+    },
+    "statusCodeCoverage": {
+      "200": 15,
+      "400": 8,
+      "403": 5,
+      "404": 3,
+      "500": 2
+    }
+  },
+  "testCoverage": {
+    "javaFiles": 20,
+    "javaTestAnnotations": 39,
+    "javaLines": 1446,
+    "automatedTests": 39,
+    "manualTests": 0,
+    "coveragePercentage": 100.0
+  },
+  "performance": {
+    "medianDuration": 0,
+    "longestTests": [],
+    "parallelizationEfficiency": 0,
+    "redundancyIndex": 12.9
+  }
+}
