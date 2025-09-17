@@ -25,7 +25,8 @@ public class CreateBuildTypeStepPage extends BasePage {
     private final ElementsCollection runnerItems = $$(byDataTest("runner-item"));
 
     public CreateBuildTypeStepPage() {
-        runnerItemFilterInput.shouldBe(visible, BASE_WAITING);
+        // Constructor should not perform page interactions
+        // Element checks should be done in methods that actually use the elements
     }
 
     @Step("Open build type step creation page")
@@ -35,6 +36,7 @@ public class CreateBuildTypeStepPage extends BasePage {
 
     @Step("Create command line build step")
     public EditBuildTypePage createCommandLineBuildStep(String customScript) {
+        runnerItemFilterInput.shouldBe(visible, BASE_WAITING);
         runnerItems.findBy(text(COMMAND_LINE_RUNNER_TYPE)).hover().$(byDataTest("ring-link")).click();
         buildStepNameInput.shouldBe(visible, BASE_WAITING).val(RandomData.getString());
         // Сложный элемент на UI для вставки кастомного скрипта, поэтому пришлось таким трудным путем его заполнять:

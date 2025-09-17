@@ -21,12 +21,14 @@ public abstract class CreateBasePage extends BasePage {
     private final SelenideElement buildTypeNameError = $("#error_buildTypeName");
 
     protected CreateBasePage() {
-        submitButton.shouldBe(visible, BASE_WAITING);
+        // Constructor should not perform page interactions
+        // Element checks should be done in methods that actually use the elements
     }
 
     protected abstract CreateBasePage createFrom(String url);
 
     protected final void baseCreateFrom(String url) {
+        submitButton.shouldBe(visible, BASE_WAITING);
         urlInput.val(url);
         submitButton.click();
         connectionSuccessfulMessage.should(appear, BASE_WAITING);
