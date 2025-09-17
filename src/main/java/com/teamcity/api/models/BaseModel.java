@@ -7,7 +7,7 @@ package com.teamcity.api.models;
  * It provides a common base for all model classes and can be extended to add common functionality
  * across all models in the future.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

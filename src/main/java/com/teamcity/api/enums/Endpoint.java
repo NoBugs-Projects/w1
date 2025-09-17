@@ -15,12 +15,12 @@ import lombok.Getter;
  * that represent the data returned by those endpoints. It serves as a central
  * configuration point for API request routing and response deserialization.
  * </p>
- * 
+ *
  * <p>
  * The order of enum constants is important and affects the TestDataStorage.createdEntitiesMap
  * ordering, which is used for proper cleanup of created entities during test teardown.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -32,7 +32,7 @@ public enum Endpoint {
 
     // Описываем соответствие между эндпоинтом и моделью, которую он возвращает
     // Порядок определения важен и влияет на TestDataStorage.createdEntitiesMap
-    
+
     /**
      * Endpoint for build queue operations.
      * <p>
@@ -41,7 +41,7 @@ public enum Endpoint {
      * </p>
      */
     BUILD_QUEUE("/app/rest/buildQueue", Build.class),
-    
+
     /**
      * Endpoint for build operations.
      * <p>
@@ -50,7 +50,7 @@ public enum Endpoint {
      * </p>
      */
     BUILDS("/app/rest/builds", Build.class),
-    
+
     /**
      * Endpoint for build type operations.
      * <p>
@@ -59,7 +59,7 @@ public enum Endpoint {
      * </p>
      */
     BUILD_TYPES("/app/rest/buildTypes", BuildType.class),
-    
+
     /**
      * Endpoint for user operations.
      * <p>
@@ -68,7 +68,7 @@ public enum Endpoint {
      * </p>
      */
     USERS("/app/rest/users", User.class),
-    
+
     /**
      * Endpoint for project operations.
      * <p>
@@ -86,7 +86,7 @@ public enum Endpoint {
      * </p>
      */
     private final String url;
-    
+
     /**
      * The model class associated with this endpoint.
      * <p>

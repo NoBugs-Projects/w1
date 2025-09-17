@@ -10,14 +10,14 @@ import io.restassured.specification.RequestSpecification;
  * testing framework. It encapsulates common functionality and state required
  * for making HTTP requests to the TeamCity API.
  * </p>
- * 
+ *
  * <p>
  * The class follows the principle of making all variables final by default,
  * unless the implementation specifically requires otherwise. Access modifiers
  * are kept private by default and expanded only when necessary to the minimum
  * required level.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -30,7 +30,7 @@ public abstract class Request {
     если реализация целенаправленно не требует обратного
     То же самое с модификаторами доступа: по умолчанию private,
     при необходимости расширяем доступ в минимально достаточной мере */
-    
+
     /**
      * The REST Assured request specification used for making HTTP requests.
      * <p>
@@ -40,7 +40,7 @@ public abstract class Request {
      * </p>
      */
     protected final RequestSpecification spec;
-    
+
     /**
      * The API endpoint that this request will target.
      * <p>
@@ -56,7 +56,7 @@ public abstract class Request {
      * This constructor initializes the request with the provided specification
      * and endpoint, which are required for all API operations.
      * </p>
-     * 
+     *
      * @param spec the REST Assured request specification
      * @param endpoint the API endpoint to target
      */

@@ -14,12 +14,12 @@ import static com.codeborne.selenide.Selenide.$;
  * common waiting durations, shared UI elements, and other utilities that help
  * maintain consistency across page implementations.
  * </p>
- * 
+ *
  * <p>
  * The class uses Selenide for web element interaction and provides a foundation
  * for implementing the Page Object Model pattern in UI tests.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -35,7 +35,7 @@ public abstract class BasePage {
      * </p>
      */
     protected static final Duration BASE_WAITING = Duration.ofSeconds(30);
-    
+
     /**
      * Long waiting duration for operations that may take more time.
      * <p>
@@ -44,7 +44,7 @@ public abstract class BasePage {
      * </p>
      */
     protected static final Duration LONG_WAITING = Duration.ofMinutes(3);
-    
+
     /**
      * Common submit button element used across multiple pages.
      * <p>
@@ -53,7 +53,7 @@ public abstract class BasePage {
      * submit button that is the first child of an element with class
      * "saveButtonsBlock".
      * </p>
-     * 
+     *
      * <p>
      * The Selenide.element method internally calls the $ method, and the
      * official documentation recommends using $ for more compact notation.

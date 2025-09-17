@@ -17,13 +17,13 @@ import lombok.extern.jackson.Jacksonized;
  * defines how builds should be executed, including build steps, triggers,
  * and other configuration settings.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -49,7 +49,7 @@ public class BuildType extends BaseModel {
      */
     @Random
     private String id;
-    
+
     /**
      * The display name of the build type.
      * <p>
@@ -59,17 +59,17 @@ public class BuildType extends BaseModel {
      */
     @Random
     private String name;
-    
+
     /**
      * The project that contains this build type.
      * <p>
      * Contains information about the parent project that owns this build configuration.
      * </p>
-     * 
+     *
      * @see Project
      */
     private Project project;
-    
+
     /**
      * The build steps associated with this build type.
      * <p>
@@ -77,7 +77,7 @@ public class BuildType extends BaseModel {
      * and is not required for basic build type creation. Contains the sequence
      * of build steps that will be executed when this build type is triggered.
      * </p>
-     * 
+     *
      * @see Steps
      */
     @Optional

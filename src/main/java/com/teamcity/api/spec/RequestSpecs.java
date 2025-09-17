@@ -24,12 +24,12 @@ import static com.github.viclovsky.swagger.coverage.SwaggerCoverageConstants.OUT
  * It includes support for unauthenticated requests, user authentication, super user
  * authentication, and mock server requests.
  * </p>
- * 
+ *
  * <p>
  * All request specifications include common filters for logging, Allure reporting,
  * and Swagger coverage analysis to ensure comprehensive test reporting.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -57,7 +57,7 @@ public final class RequestSpecs {
      * that do not require authentication, such as public endpoints or initial
      * server setup requests.
      * </p>
-     * 
+     *
      * @return a RequestSpecification configured for unauthenticated requests
      */
     public static RequestSpecification unauthSpec() {
@@ -73,7 +73,7 @@ public final class RequestSpecs {
      * authentication using the provided user's credentials. The authentication
      * is embedded in the URI for easy use with REST Assured.
      * </p>
-     * 
+     *
      * @param user the user whose credentials should be used for authentication
      * @return a RequestSpecification configured for user-authenticated requests
      * @see User
@@ -92,7 +92,7 @@ public final class RequestSpecs {
      * for authentication. This is typically used for administrative operations
      * that require elevated privileges.
      * </p>
-     * 
+     *
      * @return a RequestSpecification configured for super user-authenticated requests
      */
     public static RequestSpecification superUserSpec() {
@@ -108,7 +108,7 @@ public final class RequestSpecs {
      * to a local mock server, typically used for testing without a real
      * TeamCity server instance.
      * </p>
-     * 
+     *
      * @return a RequestSpecification configured for mock server requests
      */
     public static RequestSpecification mockSpec() {
@@ -125,7 +125,7 @@ public final class RequestSpecs {
      * filters for request/response logging, Allure reporting, and Swagger
      * coverage analysis.
      * </p>
-     * 
+     *
      * @return a configured RequestSpecBuilder
      */
     private static RequestSpecBuilder reqBuilder() {

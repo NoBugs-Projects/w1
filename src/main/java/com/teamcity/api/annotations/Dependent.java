@@ -16,12 +16,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * in a related model class. The related class must be generated earlier in the same
  * generation iteration.
  * </p>
- * 
+ *
  * <p>
  * This is useful for maintaining relationships between entities, such as when a BuildType
  * needs to reference a Project that was created earlier in the test data generation process.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -41,7 +41,7 @@ public @interface Dependent {
      * name as the annotated field. The value from that field will be copied to the
      * annotated field during test data generation.
      * </p>
-     * 
+     *
      * @return the related model class
      */
     Class<? extends BaseModel> relatedClass();

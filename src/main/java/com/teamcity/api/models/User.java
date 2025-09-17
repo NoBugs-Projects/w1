@@ -16,13 +16,13 @@ import lombok.extern.jackson.Jacksonized;
  * for authentication and authorization. It includes user identification, credentials,
  * and role assignments.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -46,7 +46,7 @@ public class User extends BaseModel {
      * </p>
      */
     private String id;
-    
+
     /**
      * The username for authentication.
      * <p>
@@ -56,7 +56,7 @@ public class User extends BaseModel {
      */
     @Random
     private String username;
-    
+
     /**
      * The email address associated with the user.
      * <p>
@@ -66,7 +66,7 @@ public class User extends BaseModel {
      */
     @Random
     private String email;
-    
+
     /**
      * The password for user authentication.
      * <p>
@@ -76,14 +76,14 @@ public class User extends BaseModel {
      */
     @Random
     private String password;
-    
+
     /**
      * The roles assigned to this user.
      * <p>
      * Contains information about the user's permissions and access levels within
      * the TeamCity system.
      * </p>
-     * 
+     *
      * @see Roles
      */
     private Roles roles;

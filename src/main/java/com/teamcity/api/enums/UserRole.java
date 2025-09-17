@@ -7,13 +7,13 @@ package com.teamcity.api.enums;
  * to users in the TeamCity system. Each role provides different levels of access
  * to various system resources and operations.
  * </p>
- * 
+ *
  * <p>
  * The enum constants are defined without additional parameters since the same
  * result can be obtained using the .toString() method, which returns the
  * constant name as a string.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -21,7 +21,7 @@ package com.teamcity.api.enums;
 public enum UserRole {
 
     // Убираем параметр с указанием "SYSTEM_ADMIN" и т.д., так как тот же результат можно получить методом .toString()
-    
+
     /**
      * System administrator role.
      * <p>
@@ -30,7 +30,7 @@ public enum UserRole {
      * </p>
      */
     SYSTEM_ADMIN,
-    
+
     /**
      * Project administrator role.
      * <p>
@@ -40,7 +40,7 @@ public enum UserRole {
      * </p>
      */
     PROJECT_ADMIN,
-    
+
     /**
      * Project developer role.
      * <p>
@@ -50,7 +50,7 @@ public enum UserRole {
      * </p>
      */
     PROJECT_DEVELOPER,
-    
+
     /**
      * Project viewer role.
      * <p>
@@ -60,7 +60,7 @@ public enum UserRole {
      * </p>
      */
     PROJECT_VIEWER,
-    
+
     /**
      * Agent manager role.
      * <p>

@@ -12,19 +12,19 @@ import org.hamcrest.Matchers;
  * objects for validating HTTP responses in the TeamCity API testing framework.
  * It includes specifications for both successful responses and various error scenarios.
  * </p>
- * 
+ *
  * <p>
  * All response specifications are designed to validate both status codes and response
  * body content where applicable, providing comprehensive validation for API responses.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
  * @see ResponseSpecification
  */
 public final class ResponseSpecs {
-    
+
     /**
      * Private constructor to prevent instantiation.
      */
@@ -36,7 +36,7 @@ public final class ResponseSpecs {
      * This method provides a common starting point for all response specifications,
      * ensuring consistency across different response validation scenarios.
      * </p>
-     * 
+     *
      * @return a new ResponseSpecBuilder instance
      */
     private static ResponseSpecBuilder defaultResponseBuilder() {
@@ -51,7 +51,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 201 Created status code,
      * which is typically returned when a new entity is successfully created via POST request.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for entity creation success
      */
     public static ResponseSpecification entityWasCreated() {
@@ -66,7 +66,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 200 OK status code,
      * which is typically returned for successful GET, PUT, and PATCH requests.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for successful requests
      */
     public static ResponseSpecification requestReturnsOK() {
@@ -82,7 +82,7 @@ public final class ResponseSpecs {
      * which is typically returned for successful DELETE requests or other operations
      * that don't return content.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for successful requests with no content
      */
     public static ResponseSpecification requestReturnsNoContent() {
@@ -99,7 +99,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 400 Bad Request status code,
      * which is typically returned when the request contains invalid data or parameters.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for bad request errors
      */
     public static ResponseSpecification requestReturnsBadRequest() {
@@ -114,7 +114,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 400 Bad Request status code
      * and contains a specific error key-value pair in the response body.
      * </p>
-     * 
+     *
      * @param errorKey the error key to validate in the response body
      * @param errorValue the expected error value for the specified key
      * @return a ResponseSpecification for bad request errors with specific content
@@ -132,7 +132,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 401 Unauthorized status code,
      * which is typically returned when authentication is required but not provided or invalid.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for unauthorized errors
      */
     public static ResponseSpecification requestReturnsUnauthorized() {
@@ -148,7 +148,7 @@ public final class ResponseSpecs {
      * which is typically returned when the request is valid but the user doesn't have
      * permission to perform the requested action.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for forbidden errors
      */
     public static ResponseSpecification requestReturnsForbidden() {
@@ -163,7 +163,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 403 Forbidden status code
      * and contains the "Access denied" message in the response body.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for forbidden errors with access denied message
      */
     public static ResponseSpecification requestReturnsForbiddenWithAccessDenied() {
@@ -179,7 +179,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 404 Not Found status code,
      * which is typically returned when the requested resource does not exist.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for not found errors
      */
     public static ResponseSpecification requestReturnsNotFound() {
@@ -194,7 +194,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 404 Not Found status code
      * and contains the "Could not find the entity requested" message in the response body.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for not found errors with entity not found message
      */
     public static ResponseSpecification requestReturnsNotFoundWithEntityNotFound() {
@@ -210,7 +210,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 500 Internal Server Error status code,
      * which is typically returned when an unexpected error occurs on the server side.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for internal server errors
      */
     public static ResponseSpecification requestReturnsInternalServerError() {
@@ -227,7 +227,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 400 Bad Request status code
      * and contains a message indicating that the ID is already used by another entity.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for duplicate entity ID errors
      */
     public static ResponseSpecification requestReturnsBadRequestWithDuplicateId() {
@@ -245,7 +245,7 @@ public final class ResponseSpecs {
      * This specification validates that the response has a 400 Bad Request status code
      * and contains a message indicating that a project with the same name already exists.
      * </p>
-     * 
+     *
      * @return a ResponseSpecification for duplicate project name errors
      */
     public static ResponseSpecification requestReturnsBadRequestWithDuplicateName() {

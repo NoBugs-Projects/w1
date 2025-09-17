@@ -13,12 +13,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * identify fields that should be populated with random values when generating test data.
  * Currently, only String fields are supported for random data generation.
  * </p>
- * 
+ *
  * <p>
  * When a field is marked with this annotation, the test data generator will automatically
  * generate random string values for that field, ensuring uniqueness across test runs.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

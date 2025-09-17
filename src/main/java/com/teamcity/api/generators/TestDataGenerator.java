@@ -22,7 +22,7 @@ import java.util.List;
  * inspect model classes and generate appropriate test data based on the
  * annotations present on each field.
  * </p>
- * 
+ *
  * <p>
  * The generator supports several annotation types for controlling data generation:
  * <ul>
@@ -32,7 +32,7 @@ import java.util.List;
  * <li>{@link Dependent} - uses values from related models</li>
  * </ul>
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -68,7 +68,7 @@ public final class TestDataGenerator {
     применяется только для пунктов 3 и 4. Например, если был сгенерирован Project, то передав его параметром
     generatedModels при генерации BuildType, он будет переиспользоваться при установке поля Project project,
     вместо генерации нового */
-    
+
     /**
      * Generates a test data object of the specified class using reflection and annotations.
      * <p>
@@ -84,13 +84,13 @@ public final class TestDataGenerator {
      * <li>If a field is a List of BaseModel subclasses, it is set to a list containing one generated element</li>
      * </ol>
      * </p>
-     * 
+     *
      * <p>
      * The generatedModels parameter is used when generating multiple entities in a loop and contains
      * entities generated in previous steps. This allows for reuse of previously generated entities
      * when generating complex entities that contain other entities as fields.
      * </p>
-     * 
+     *
      * @param <T> the type of the model to generate
      * @param generatedModels list of previously generated models for reuse
      * @param generatorClass the class of the model to generate
@@ -153,7 +153,7 @@ public final class TestDataGenerator {
      * This is a convenience method that calls the main generate method with an empty
      * list of generated models.
      * </p>
-     * 
+     *
      * @param <T> the type of the model to generate
      * @param generatorClass the class of the model to generate
      * @param parameters optional parameters for Parameterizable fields
@@ -172,7 +172,7 @@ public final class TestDataGenerator {
      * being generated in test data. The iteration goes in the order in which
      * fields are defined in the file.
      * </p>
-     * 
+     *
      * @return a complete TestData instance with all fields populated
      * @throws IllegalStateException if generation fails due to reflection errors
      */

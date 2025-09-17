@@ -13,13 +13,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * identify fields that should be skipped during automatic test data generation. Fields
  * marked with this annotation must be set manually in the test code.
  * </p>
- * 
+ *
  * <p>
  * This is useful for fields that require specific values or complex setup that cannot
  * be automatically generated, such as build steps or other configuration objects that
  * need to be created with specific parameters.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0

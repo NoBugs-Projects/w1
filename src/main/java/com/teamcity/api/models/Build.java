@@ -15,13 +15,13 @@ import lombok.extern.jackson.Jacksonized;
  * a single run of a build configuration and contains information about its
  * execution status, state, and associated build type.
  * </p>
- * 
+ *
  * <p>
  * The class uses Lombok annotations for automatic generation of getters, setters,
  * constructors, and other boilerplate code. It also uses Jackson annotations for
  * JSON serialization/deserialization with the TeamCity API.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
@@ -46,18 +46,18 @@ public class Build extends BaseModel {
      * </p>
      */
     private String id;
-    
+
     /**
      * The build type associated with this build.
      * <p>
      * Contains information about the build configuration that was executed
      * to create this build instance.
      * </p>
-     * 
+     *
      * @see BuildType
      */
     private BuildType buildType;
-    
+
     /**
      * The current status of the build.
      * <p>
@@ -66,7 +66,7 @@ public class Build extends BaseModel {
      * </p>
      */
     private String status;
-    
+
     /**
      * The current state of the build.
      * <p>

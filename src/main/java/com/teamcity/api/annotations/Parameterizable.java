@@ -14,12 +14,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * generation. If parameters are provided to the generator, they will be used to fill
  * fields marked with this annotation in the order they appear in the class.
  * </p>
- * 
+ *
  * <p>
  * This is useful for test scenarios where specific values need to be set for certain
  * fields, such as when testing with specific user roles or project configurations.
  * </p>
- * 
+ *
  * @author TeamCity Testing Framework
  * @version 1.0
  * @since 1.0
