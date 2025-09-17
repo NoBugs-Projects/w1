@@ -72,7 +72,7 @@ runs:
       shell: bash
       # Настройка сервера при первом запуске (принятие лицензии, выбор базы данных и т.д.), реализованная в виде теста
       # Также все версии зависимостей обновляются до последних
-      run: ./mvnw clean dependency:resolve versions:update-properties test -D test=SetupServerTest#setupTeamCityServerTest
+      run: ./mvnw clean dependency:resolve test -D test=SetupServerTest#setupTeamCityServerTest
 
     - name: Set up superUserToken environment variable
       shell: bash
