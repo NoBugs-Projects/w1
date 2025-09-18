@@ -64,6 +64,9 @@ else
     FAILED_TESTS_TEXT="$FAILED_TESTS"
 fi
 
+# Get run number from GITHUB_SHA or use a default
+RUN_NUMBER="${GITHUB_RUN_NUMBER:-latest}"
+
 # Build message
 MESSAGE="🚀 *CI/CD Pipeline Completed!*
 
@@ -74,10 +77,8 @@ MESSAGE="🚀 *CI/CD Pipeline Completed!*
 • Success rate: ${SUCCESS_RATE}%
 • API coverage: ${API_PERCENT}%
 
-🔗 *Links:*
-• Repository: https://github.com/$GITHUB_REPOSITORY
-• Commit: https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA
-• Report: https://$GITHUB_REPOSITORY_OWNER.github.io/$GITHUB_EVENT_REPOSITORY_NAME/
+🔗 *Dashboard:*
+• https://$GITHUB_REPOSITORY_OWNER.github.io/$GITHUB_EVENT_REPOSITORY_NAME/$RUN_NUMBER/
 
 📦 *Docker Hub:*
 • Repository: https://hub.docker.com/r/$DOCKER_USERNAME/nbank/tags
