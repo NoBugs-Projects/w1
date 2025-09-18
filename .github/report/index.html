@@ -520,21 +520,31 @@
       
       let showNotice = false;
       
-      // Check if links are still showing placeholder values
-      if (allureLink && (allureLink.href.includes('$ALLURE_REPORT_URL') || allureLink.href === window.location.href)) {
+      // Check if links are still showing placeholder values or are empty
+      if (allureLink && (allureLink.href.includes('$ALLURE_REPORT_URL') || allureLink.href === window.location.href || !allureLink.href || allureLink.href === '#')) {
         allureLink.href = '#';
         allureLink.textContent = 'Allure Report Not Available';
         allureLink.style.opacity = '0.6';
         allureLink.style.pointerEvents = 'none';
         showNotice = true;
+      } else if (allureLink) {
+        // Link is valid, ensure it's clickable
+        allureLink.style.opacity = '1';
+        allureLink.style.pointerEvents = 'auto';
+        allureLink.textContent = 'View Allure Report';
       }
       
-      if (swaggerLink && (swaggerLink.href.includes('$SWAGGER_REPORT_URL') || swaggerLink.href === window.location.href)) {
+      if (swaggerLink && (swaggerLink.href.includes('$SWAGGER_REPORT_URL') || swaggerLink.href === window.location.href || !swaggerLink.href || swaggerLink.href === '#')) {
         swaggerLink.href = '#';
         swaggerLink.textContent = 'Swagger Report Not Available';
         swaggerLink.style.opacity = '0.6';
         swaggerLink.style.pointerEvents = 'none';
         showNotice = true;
+      } else if (swaggerLink) {
+        // Link is valid, ensure it's clickable
+        swaggerLink.style.opacity = '1';
+        swaggerLink.style.pointerEvents = 'auto';
+        swaggerLink.textContent = 'View Swagger Coverage';
       }
       
       // Show CI notice if needed
