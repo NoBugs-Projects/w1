@@ -32,14 +32,6 @@ jobs:
       package: ui
       browser: firefox
 
-  report:
-    needs: [ automation-api, automation-ui, automation-ui-firefox, docker-push ]
-    if: always()
-    uses: ./.github/workflows/report.yml
-    with:
-      parent_run_number: ${{ github.run_number }}
-      docker_pushed: ${{ needs.docker-push.result == 'success' }}
-
   # Build and push Docker image only if all tests pass
   docker-push:
     needs: [ automation-api, automation-ui, automation-ui-firefox ]
@@ -52,6 +44,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Debug secrets
+        run: |
+          echo "🔍 Debug Docker secrets:"
+          echo "   - DOCKER_USERNAME: ${DOCKER_USERNAME:+SET}"
+          echo "   - DOCKER_PASSWORD: ${DOCKER_PASSWORD:+SET}"
+          echo "   - Username length: ${#DOCKER_USERNAME}"
+          echo "   - Password length: ${#DOCKER_PASSWORD}"
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -63,6 +66,14 @@ jobs:
 
       - name: Push Docker image
         run: docker push nobugsme/wtf-tests:${{ github.sha }}
+
+  report:
+    needs: [ automation-api, automation-ui, automation-ui-firefox, docker-push ]
+    if: always()
+    uses: ./.github/workflows/report.yml
+    with:
+      parent_run_number: ${{ github.run_number }}
+      docker_pushed: ${{ needs.docker-push.result == 'success' }}
 
   # Необходим мануальный апрув, чтобы задеплоить бэкенд и фронтенд на прод
   # Нужно настроить prod environment. Инструкция: https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment
