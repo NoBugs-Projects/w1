@@ -10,7 +10,7 @@ A comprehensive testing framework for TeamCity API and UI automation, built with
 
 ## 🏗️ Architecture
 
-![Framework Architecture](docs/about/architecture_diagram.png)
+![Framework Architecture](docs/about/architecture_diagram.svg)
 
 ### Framework Layers
 
@@ -37,6 +37,17 @@ A comprehensive testing framework for TeamCity API and UI automation, built with
 - Maven 3.8+
 - Docker and Docker Compose
 
+### Configuration
+
+Create `src/main/resources/config.properties`:
+
+```properties
+host=localhost:8111
+superUserToken=your-super-user-token
+browser=chrome
+remote=http://localhost:4444/wd/hub
+```
+
 ### Quick Start
 
 ```bash
@@ -52,17 +63,6 @@ mvn test
 
 # 4. View reports
 mvn allure:serve
-```
-
-### Configuration
-
-Create `src/main/resources/config.properties`:
-
-```properties
-host=localhost:8111
-superUserToken=your-super-user-token
-browser=chrome
-remote=http://localhost:4444/wd/hub
 ```
 
 ## 🏃‍♂️ Running Tests
@@ -128,15 +128,6 @@ mvn test -Dparallel=methods -DthreadCount=4
 
 ### Test Groups
 - Regression, Smoke, API, UI
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
 
 ---
 

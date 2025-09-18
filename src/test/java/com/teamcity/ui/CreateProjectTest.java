@@ -25,9 +25,8 @@ public class CreateProjectTest extends BaseUiTest {
 
     @Test(description = "User should be able to create project", groups = {"Regression"})
     @Browsers({"chrome", "firefox"})
+    @UserSession
     public void userCreatesProject(String ignoredBrowser) {
-        loginAs(testData.get().getUser());
-
         step("Create project from Git repository", () -> {
             CreateProjectPage.open(testData.get().getNewProjectDescription().getParentProject().getLocator())
                     .createFrom(GIT_URL)
@@ -61,9 +60,8 @@ public class CreateProjectTest extends BaseUiTest {
 
     @Test(description = "User should not be able to create project without name", groups = {"Regression"})
     @Browsers({"chrome"})
+    @UserSession
     public void userCreatesProjectWithoutName(String ignoredBrowser) {
-        loginAs(testData.get().getUser());
-
         step("Attempt to create project with empty name", () -> {
             CreateProjectPage.open(testData.get().getNewProjectDescription().getParentProject().getLocator())
                     .createFrom(GIT_URL)

@@ -1,0 +1,154 @@
+Plain UML Diagram for TeamCity Testing Framework Architecture
+
+@startuml
+!theme plain
+
+package "Test Layer" {
+  class TestNGTests {
+    + ProjectTest
+    + BuildTypeTest
+    + CreateProjectTest
+    + CreateBuildTypeTest
+  }
+  
+  class BaseTest {
+    + setup()
+    + teardown()
+  }
+  
+  class BaseUiTest {
+    + loginAs()
+    + handleUserSession()
+  }
+  
+  class BaseApiTest {
+    + setupApi()
+    + cleanupApi()
+  }
+}
+
+package "Page Object Layer" {
+  class BasePage {
+    + submitButton
+    + waitForPageLoad()
+  }
+  
+  class AdminPages {
+    + CreateProjectPage
+    + CreateBuildTypePage
+    + EditBuildTypePage
+  }
+  
+  class UserPages {
+    + LoginPage
+    + ProjectsPage
+    + FirstStartPage
+  }
+}
+
+package "API Layer" {
+  class RequesterWithS {
+    + get()
+    + post()
+    + put()
+    + delete()
+  }
+  
+  class Requester {
+    + get()
+    + post()
+    + put()
+    + delete()
+  }
+  
+  class Models {
+    + Project
+    + BuildType
+    + User
+    + Agent
+  }
+  
+  class BaseModel {
+    + id
+    + name
+  }
+}
+
+package "Utilities Layer" {
+  class TestDataGenerator {
+    + generateUser()
+    + generateProject()
+    + generateBuildType()
+  }
+  
+  class TestDataStorage {
+    + addEntity()
+    + deleteEntities()
+  }
+  
+  class RequestSpecs {
+    + authSpec()
+    + unauthSpec()
+  }
+  
+  class ResponseSpecs {
+    + requestReturnsOk()
+    + requestReturnsBadRequest()
+  }
+  
+  class ModelAssertions {
+    + assertThatModels()
+    + match()
+  }
+}
+
+package "Infrastructure Layer" {
+  class Selenide {
+    + open()
+    + $(selector)
+  }
+  
+  class RESTAssured {
+    + given()
+    + when()
+    + then()
+  }
+  
+  class Allure {
+    + step()
+    + attachment()
+  }
+  
+  class Docker {
+    + TeamCity Server
+    + Selenoid
+  }
+}
+
+' Relationships
+TestNGTests --|> BaseTest
+TestNGTests --|> BaseUiTest
+TestNGTests --|> BaseApiTest
+
+BaseUiTest --|> BasePage
+AdminPages --|> BasePage
+UserPages --|> BasePage
+
+BaseApiTest --> RequesterWithS
+BaseApiTest --> Requester
+RequesterWithS --> Models
+Requester --> Models
+Models --|> BaseModel
+
+BaseTest --> TestDataGenerator
+BaseTest --> TestDataStorage
+BaseTest --> RequestSpecs
+BaseTest --> ResponseSpecs
+BaseTest --> ModelAssertions
+
+BaseUiTest --> Selenide
+BaseApiTest --> RESTAssured
+BaseTest --> Allure
+BaseTest --> Docker
+
+@enduml
