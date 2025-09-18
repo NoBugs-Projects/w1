@@ -9,7 +9,7 @@
     "passRate": 97.8,
     "flakyRate": 0,
     "avgDuration": 1,
-    "totalDuration": 91
+    "totalDuration": 90
   },
   "swagger": {
     "totalOperations": 433,
@@ -58,47 +58,47 @@
     "coveragePercentage": 100.0
   },
   "performance": {
-    "medianDuration": 384,
+    "medianDuration": 387,
     "longestTests": [
       {
         "name": "User should be able to create project",
-        "duration": 74307
+        "duration": 73915
       },
       {
         "name": "User should be able to create build type",
-        "duration": 69002
+        "duration": 68091
       },
       {
         "name": "User should be able to create project",
-        "duration": 62234
+        "duration": 61831
       },
       {
         "name": "User should be able to create build type",
-        "duration": 57825
+        "duration": 57479
       },
       {
         "name": "User should not be able to create project without name",
-        "duration": 52952
+        "duration": 52079
       },
       {
         "name": "User should not be able to create project without name",
-        "duration": 40999
+        "duration": 44198
       },
       {
         "name": "User should be able to create build type step and start build",
-        "duration": 27179
+        "duration": 25984
       },
       {
         "name": "User should be able to create build type step and start build",
-        "duration": 20286
+        "duration": 20458
       },
       {
         "name": "User should not be able to create build type without name",
-        "duration": 19968
+        "duration": 17294
       },
       {
         "name": "User should not be able to create build type without name",
-        "duration": 16462
+        "duration": 15648
       }
     ],
     "parallelizationEfficiency": 85.0,
