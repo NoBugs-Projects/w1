@@ -212,13 +212,39 @@ jobs:
           # Отправляем сообщение в Telegram с обработкой ошибок
           echo "Sending Telegram notification..."
           TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          echo "Bot Token: ${TELEGRAM_BOT_TOKEN:0:10}..."
-          echo "Chat ID: ${{ secrets.TELEGRAM_CHAT_ID }}"
+          TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
           
-          RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          # Validate required secrets
+          if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+            echo "❌ TELEGRAM_BOT_TOKEN secret is not set"
+            exit 1
+          fi
+          
+          if [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "❌ TELEGRAM_CHAT_ID secret is not set"
+            exit 1
+          fi
+          
+          echo "Bot Token: ${TELEGRAM_BOT_TOKEN:0:10}..."
+          echo "Chat ID: $TELEGRAM_CHAT_ID"
+          
+          # Test bot token first
+          echo "Testing bot token..."
+          BOT_TEST_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe" || echo "HTTPSTATUS:000")
+          BOT_TEST_HTTP_STATUS=$(echo $BOT_TEST_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          
+          if [ "$BOT_TEST_HTTP_STATUS" -ne 200 ]; then
+            echo "❌ Bot token is invalid. HTTP Status: $BOT_TEST_HTTP_STATUS"
+            echo "Response: $(echo $BOT_TEST_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
+            exit 1
+          fi
+          
+          echo "✅ Bot token is valid"
+          
+          RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "{
-              \"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\",
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
               \"text\": \"${ESCAPED_MESSAGE}\",
               \"parse_mode\": \"Markdown\",
               \"disable_web_page_preview\": false
