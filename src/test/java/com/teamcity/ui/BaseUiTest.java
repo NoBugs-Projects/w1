@@ -48,46 +48,6 @@ public abstract class BaseUiTest extends BaseTest {
                 .includeSelenideSteps(true));
     }
 
-    @BeforeMethod(alwaysRun = true)
-    public void handleUserSession() {
-        // This runs after BaseTest's @BeforeMethod, so testData should be available
-        if (testData.get() != null) {
-            // Check if the current test method has @UserSession annotation
-            try {
-                // Get the current test method name from the stack trace
-                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-                String testMethodName = null;
-                for (StackTraceElement element : stackTrace) {
-                    if (element.getClassName().contains("Test") &&
-                        !element.getClassName().contains("BaseTest") &&
-                        !element.getMethodName().equals("handleUserSession")) {
-                        testMethodName = element.getMethodName();
-                        break;
-                    }
-                }
-
-                if (testMethodName != null) {
-                    // Check if the test method has @UserSession annotation
-                    Class<?> testClass = this.getClass();
-                    try {
-                        java.lang.reflect.Method testMethod = testClass.getMethod(testMethodName, String.class);
-                        if (testMethod.isAnnotationPresent(UserSession.class)) {
-                            logger.info("Found @UserSession annotation on method: {}", testMethodName);
-                            // Create user and perform login
-                            AdminSteps.createUser(testData.get().getUser());
-                            LoginPage.open().login(testData.get().getUser());
-                            logger.info("User created and logged in for @UserSession method: {}", testMethodName);
-                        }
-                    } catch (NoSuchMethodException e) {
-                        // Method not found, continue without @UserSession handling
-                    }
-                }
-            } catch (Exception e) {
-                logger.warn("Error checking for @UserSession annotation: {}", e.getMessage());
-            }
-        }
-    }
-
     @AfterMethod(alwaysRun = true)
     public void closeWebDriver() {
         // Перезапускаем браузер после каждого теста

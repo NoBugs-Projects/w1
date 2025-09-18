@@ -2,6 +2,7 @@
 <suite name="UI tests" parallel="methods" thread-count="3">
     <listeners>
         <listener class-name="com.teamcity.ui.listeners.UserSessionListener"/>
+        <listener class-name="com.teamcity.ui.listeners.BrowserTestListener"/>
     </listeners>
     <test name="UI tests">
         <groups>
