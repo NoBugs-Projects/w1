@@ -20,7 +20,6 @@ public class CreateBuildTypeTest extends BaseUiTest {
 
     @Test(description = "User should be able to create build type", groups = {"Regression"})
     @Browsers({"chrome", "firefox"})
-    @UserSession
     public void userCreatesBuildTypeTest(String ignoredBrowser) {
         step("Create project for build type", () -> {
             superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
@@ -45,8 +44,9 @@ public class CreateBuildTypeTest extends BaseUiTest {
 
     @Test(description = "User should not be able to create build type without name", groups = {"Regression"})
     @Browsers({"chrome", "firefox"})
-    @UserSession
     public void userCreatesBuildTypeWithoutName(String ignoredBrowser) {
+        loginAs(testData.get().getUser());
+
         step("Create project for build type", () -> {
             superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
         });

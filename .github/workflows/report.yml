@@ -175,11 +175,12 @@ jobs:
           JOB_STATUS: ${{ job.status }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_EVENT_REPOSITORY_NAME: ${{ github.event.repository.name }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: "8187716552:AAFFKyxYMSm-sA7lymOXSXubHYDwBThUfm8"
+          TELEGRAM_CHAT_ID: "6068728833"
         run: |
           chmod +x .github/scripts/send-telegram-notification.sh
           ./.github/scripts/send-telegram-notification.sh
