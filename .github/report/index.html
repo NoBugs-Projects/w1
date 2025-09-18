@@ -494,10 +494,18 @@
     }
 
     function loadMetrics(){
-      fetch('metrics.json')
+      // Try to get the current run number from the URL or use 'latest'
+      const pathParts = window.location.pathname.split('/');
+      const runNumber = pathParts[pathParts.length - 2] || 'latest';
+      
+      // Try to fetch metrics from the specific run directory
+      fetch(`./${runNumber}/metrics.json`)
         .then(function(r){ if(!r.ok) throw new Error('no metrics'); return r.json(); })
         .then(applyMetrics)
-        .catch(function(){ /* keep placeholders if metrics missing */ });
+        .catch(function(){ 
+          console.log('No metrics found for run', runNumber, 'showing sample data');
+          /* keep placeholders if metrics missing */ 
+        });
     }
 
     function handleRunNumber(){
@@ -518,33 +526,45 @@
       const swaggerLink = document.getElementById('swagger-link');
       const ciNotice = document.getElementById('ci-notice');
       
+      // Get the current run number from the URL
+      const pathParts = window.location.pathname.split('/');
+      const runNumber = pathParts[pathParts.length - 2] || 'latest';
+      
       let showNotice = false;
       
-      // Check if links are still showing placeholder values or are empty
-      if (allureLink && (allureLink.href.includes('$ALLURE_REPORT_URL') || allureLink.href === window.location.href || !allureLink.href || allureLink.href === '#')) {
-        allureLink.href = '#';
-        allureLink.textContent = 'Allure Report Not Available';
-        allureLink.style.opacity = '0.6';
-        allureLink.style.pointerEvents = 'none';
-        showNotice = true;
-      } else if (allureLink) {
-        // Link is valid, ensure it's clickable
-        allureLink.style.opacity = '1';
-        allureLink.style.pointerEvents = 'auto';
-        allureLink.textContent = 'View Allure Report';
+      // Set the correct URLs based on run number
+      if (allureLink) {
+        if (runNumber === 'latest') {
+          // For latest, try to find the most recent run
+          allureLink.href = '#';
+          allureLink.textContent = 'Allure Report Not Available';
+          allureLink.style.opacity = '0.6';
+          allureLink.style.pointerEvents = 'none';
+          showNotice = true;
+        } else {
+          // Set the correct URL for the specific run
+          allureLink.href = `./${runNumber}/allure-report/`;
+          allureLink.textContent = 'View Allure Report';
+          allureLink.style.opacity = '1';
+          allureLink.style.pointerEvents = 'auto';
+        }
       }
       
-      if (swaggerLink && (swaggerLink.href.includes('$SWAGGER_REPORT_URL') || swaggerLink.href === window.location.href || !swaggerLink.href || swaggerLink.href === '#')) {
-        swaggerLink.href = '#';
-        swaggerLink.textContent = 'Swagger Report Not Available';
-        swaggerLink.style.opacity = '0.6';
-        swaggerLink.style.pointerEvents = 'none';
-        showNotice = true;
-      } else if (swaggerLink) {
-        // Link is valid, ensure it's clickable
-        swaggerLink.style.opacity = '1';
-        swaggerLink.style.pointerEvents = 'auto';
-        swaggerLink.textContent = 'View Swagger Coverage';
+      if (swaggerLink) {
+        if (runNumber === 'latest') {
+          // For latest, try to find the most recent run
+          swaggerLink.href = '#';
+          swaggerLink.textContent = 'Swagger Report Not Available';
+          swaggerLink.style.opacity = '0.6';
+          swaggerLink.style.pointerEvents = 'none';
+          showNotice = true;
+        } else {
+          // Set the correct URL for the specific run
+          swaggerLink.href = `./${runNumber}/swagger-coverage-report/`;
+          swaggerLink.textContent = 'View Swagger Coverage';
+          swaggerLink.style.opacity = '1';
+          swaggerLink.style.pointerEvents = 'auto';
+        }
       }
       
       // Show CI notice if needed
