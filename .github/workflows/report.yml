@@ -172,8 +172,8 @@ jobs:
       - name: Send Telegram notification
         if: always()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || '' }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -215,19 +215,29 @@ jobs:
           # Отправляем сообщение в Telegram с обработкой ошибок
           echo "Sending Telegram notification..."
           
+          # Debug: Check if secrets are available
+          echo "Debug: Checking secrets..."
+          echo "TELEGRAM_BOT_TOKEN length: ${#TELEGRAM_BOT_TOKEN}"
+          echo "TELEGRAM_CHAT_ID length: ${#TELEGRAM_CHAT_ID}"
+          echo "TELEGRAM_BOT_TOKEN first 10 chars: ${TELEGRAM_BOT_TOKEN:0:10}"
+          echo "TELEGRAM_CHAT_ID: $TELEGRAM_CHAT_ID"
+          
           # Validate required secrets
-          if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
-            echo "❌ TELEGRAM_BOT_TOKEN secret is not set"
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ "$TELEGRAM_BOT_TOKEN" = "" ]; then
+            echo "❌ TELEGRAM_BOT_TOKEN secret is not set or empty"
+            echo "Available environment variables:"
+            env | grep -i telegram || echo "No TELEGRAM variables found"
             exit 1
           fi
           
-          if [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo "❌ TELEGRAM_CHAT_ID secret is not set"
+          if [ -z "$TELEGRAM_CHAT_ID" ] || [ "$TELEGRAM_CHAT_ID" = "" ]; then
+            echo "❌ TELEGRAM_CHAT_ID secret is not set or empty"
+            echo "Available environment variables:"
+            env | grep -i telegram || echo "No TELEGRAM variables found"
             exit 1
           fi
           
-          echo "Bot Token: ${TELEGRAM_BOT_TOKEN:0:10}..."
-          echo "Chat ID: $TELEGRAM_CHAT_ID"
+          echo "✅ Both secrets are available"
           
           # Test bot token first
           echo "Testing bot token..."
