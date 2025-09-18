@@ -4,6 +4,7 @@ import com.teamcity.api.models.BuildType;
 import com.teamcity.api.models.comparison.ModelAssertions;
 import com.teamcity.api.requests.withS.RequesterWithS;
 import com.teamcity.api.spec.RequestSpecs;
+import com.teamcity.ui.annotations.Browsers;
 import com.teamcity.ui.annotations.UserSession;
 import com.teamcity.ui.pages.admin.CreateBuildTypePage;
 import com.teamcity.ui.pages.admin.EditBuildTypePage;
@@ -18,8 +19,10 @@ import static io.qameta.allure.Allure.step;
 public class CreateBuildTypeTest extends BaseUiTest {
 
     @Test(description = "User should be able to create build type", groups = {"Regression"})
-    @UserSession
+    @Browsers({"chrome", "firefox"})
     public void userCreatesBuildTypeTest(String ignoredBrowser) {
+        loginAs(testData.get().getUser());
+
         step("Create project for build type", () -> {
             superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
         });
@@ -42,8 +45,10 @@ public class CreateBuildTypeTest extends BaseUiTest {
     }
 
     @Test(description = "User should not be able to create build type without name", groups = {"Regression"})
-    @UserSession
+    @Browsers({"chrome", "firefox"})
     public void userCreatesBuildTypeWithoutName(String ignoredBrowser) {
+        loginAs(testData.get().getUser());
+
         step("Create project for build type", () -> {
             superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
         });

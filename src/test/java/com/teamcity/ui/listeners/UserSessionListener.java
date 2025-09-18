@@ -3,6 +3,8 @@ package com.teamcity.ui.listeners;
 import com.teamcity.BaseTest;
 import com.teamcity.api.generators.TestDataGenerator;
 import com.teamcity.api.models.User;
+import com.teamcity.api.requests.RequestersWithS;
+import com.teamcity.api.spec.RequestSpecs;
 import com.teamcity.api.steps.AdminSteps;
 import com.teamcity.ui.annotations.UserSession;
 import com.teamcity.ui.pages.LoginPage;
@@ -11,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.testng.IInvokedMethod;
 import org.testng.IInvokedMethodListener;
 import org.testng.ITestResult;
+
+import static com.teamcity.api.enums.Endpoint.USERS;
 
 /**
  * TestNG listener that automatically handles user login when @UserSession annotation is present.
