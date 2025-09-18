@@ -68,14 +68,7 @@ fi
 RUN_NUMBER="${GITHUB_RUN_NUMBER:-latest}"
 
 # Build message
-MESSAGE="🚀 *CI/CD Pipeline Completed!*
-
-📊 *Test Statistics:*
-• Total tests: $TOTAL_TESTS_TEXT
-• Passed: $PASSED_TESTS_TEXT ✅
-• Failed: $FAILED_TESTS_TEXT ❌
-• Success rate: ${SUCCESS_RATE}%
-• API coverage: ${API_PERCENT}%
+MESSAGE="🚀 *WTF Pipeline completed!*
 
 🔗 *Dashboard:*
 • https://$GITHUB_REPOSITORY_OWNER.github.io/$GITHUB_EVENT_REPOSITORY_NAME/$RUN_NUMBER/
