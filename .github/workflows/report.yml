@@ -6,6 +6,10 @@ on:
       parent_run_number:
         required: false
         type: string
+      docker_pushed:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   report:
@@ -179,6 +183,7 @@ jobs:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_EVENT_REPOSITORY_NAME: ${{ github.event.repository.name }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PUSHED: ${{ inputs.docker_pushed }}
           TELEGRAM_BOT_TOKEN: "8187716552:AAFFKyxYMSm-sA7lymOXSXubHYDwBThUfm8"
           TELEGRAM_CHAT_ID: "6068728833"
         run: |

@@ -71,11 +71,18 @@ RUN_NUMBER="${GITHUB_RUN_NUMBER:-latest}"
 MESSAGE="🚀 *WTF Pipeline completed!*
 
 🔗 *Dashboard:*
-• https://$GITHUB_REPOSITORY_OWNER.github.io/$GITHUB_EVENT_REPOSITORY_NAME/$RUN_NUMBER/
+• https://$GITHUB_REPOSITORY_OWNER.github.io/$GITHUB_EVENT_REPOSITORY_NAME/$RUN_NUMBER/"
+
+# Add Docker Hub section only if Docker was pushed
+if [ "${DOCKER_PUSHED:-false}" = "true" ]; then
+    MESSAGE="$MESSAGE
 
 📦 *Docker Hub:*
-• Repository: https://hub.docker.com/r/$DOCKER_USERNAME/nbank/tags
-• Tag: $GITHUB_SHA
+• Repository: https://hub.docker.com/r/nobugsme/wtf-tests/tags
+• Tag: $GITHUB_SHA"
+fi
+
+MESSAGE="$MESSAGE
 
 $STATUS_COLOR *Status:* $STATUS_TEXT"
 

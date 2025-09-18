@@ -33,11 +33,36 @@ jobs:
       browser: firefox
 
   report:
-    needs: [ automation-api, automation-ui, automation-ui-firefox ]
+    needs: [ automation-api, automation-ui, automation-ui-firefox, docker-push ]
     if: always()
     uses: ./.github/workflows/report.yml
     with:
       parent_run_number: ${{ github.run_number }}
+      docker_pushed: ${{ needs.docker-push.result == 'success' }}
+
+  # Build and push Docker image only if all tests pass
+  docker-push:
+    needs: [ automation-api, automation-ui, automation-ui-firefox ]
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: docker build -t nobugsme/wtf-tests:${{ github.sha }} .
+
+      - name: Push Docker image
+        run: docker push nobugsme/wtf-tests:${{ github.sha }}
 
   # Необходим мануальный апрув, чтобы задеплоить бэкенд и фронтенд на прод
   # Нужно настроить prod environment. Инструкция: https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment
