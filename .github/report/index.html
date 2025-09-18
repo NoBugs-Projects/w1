@@ -582,24 +582,66 @@
       const pathParts = window.location.pathname.split('/');
       const runNumber = pathParts[pathParts.length - 2];
       
+      console.log('🔍 Dashboard Debug Information:');
+      console.log('   - Current URL:', window.location.href);
+      console.log('   - Path parts:', pathParts);
+      console.log('   - Detected run number:', runNumber);
+      console.log('   - User agent:', navigator.userAgent);
+      
       if (runNumber && runNumber !== 'latest' && !isNaN(runNumber)) {
         // We're viewing a specific run, try to fetch its metrics
-        fetch(`./${runNumber}/metrics.json`)
-          .then(function(r){ if(!r.ok) throw new Error('no metrics'); return r.json(); })
-          .then(applyMetrics)
-          .catch(function(){ 
-            console.log('No metrics found for run', runNumber, 'showing sample data');
-            /* keep placeholders if metrics missing */ 
+        const metricsUrl = `./${runNumber}/metrics.json`;
+        console.log('   - Fetching metrics from:', metricsUrl);
+        
+        fetch(metricsUrl)
+          .then(function(r){ 
+            console.log('   - Fetch response status:', r.status, r.statusText);
+            if(!r.ok) throw new Error('no metrics'); 
+            return r.json(); 
+          })
+          .then(function(data) {
+            console.log('   - Metrics loaded successfully:', data);
+            applyMetrics(data);
+            hideSampleDataWarning();
+          })
+          .catch(function(error){ 
+            console.log('   - No metrics found for run', runNumber, 'Error:', error.message);
+            showSampleDataWarning();
           });
       } else {
         // We're on the main dashboard, try to fetch metrics from current directory
-        fetch('./metrics.json')
-          .then(function(r){ if(!r.ok) throw new Error('no metrics'); return r.json(); })
-          .then(applyMetrics)
-          .catch(function(){ 
-            console.log('No metrics found in current directory, showing sample data');
-            /* keep placeholders if metrics missing */ 
+        const metricsUrl = './metrics.json';
+        console.log('   - Fetching metrics from:', metricsUrl);
+        
+        fetch(metricsUrl)
+          .then(function(r){ 
+            console.log('   - Fetch response status:', r.status, r.statusText);
+            if(!r.ok) throw new Error('no metrics'); 
+            return r.json(); 
+          })
+          .then(function(data) {
+            console.log('   - Metrics loaded successfully:', data);
+            applyMetrics(data);
+            hideSampleDataWarning();
+          })
+          .catch(function(error){ 
+            console.log('   - No metrics found in current directory, Error:', error.message);
+            showSampleDataWarning();
           });
+      }
+    }
+    
+    function hideSampleDataWarning() {
+      const ciNotice = document.getElementById('ci-notice');
+      if (ciNotice) {
+        ciNotice.style.display = 'none';
+      }
+    }
+    
+    function showSampleDataWarning() {
+      const ciNotice = document.getElementById('ci-notice');
+      if (ciNotice) {
+        ciNotice.style.display = 'block';
       }
     }
 
@@ -619,23 +661,19 @@
     function handleReportLinks(){
       const allureLink = document.getElementById('allure-link');
       const swaggerLink = document.getElementById('swagger-link');
-      const ciNotice = document.getElementById('ci-notice');
       
       // Get the current run number from the URL
       const pathParts = window.location.pathname.split('/');
       const runNumber = pathParts[pathParts.length - 2] || 'latest';
       
-      let showNotice = false;
-      
       // Set the correct URLs based on run number
       if (allureLink) {
-        if (runNumber === 'latest') {
-          // For latest, try to find the most recent run
+        if (runNumber === 'latest' || runNumber === '' || isNaN(runNumber)) {
+          // For main dashboard, try to find the most recent run
           allureLink.href = '#';
           allureLink.textContent = 'Allure Report Not Available';
           allureLink.style.opacity = '0.6';
           allureLink.style.pointerEvents = 'none';
-          showNotice = true;
         } else {
           // Set the correct URL for the specific run
           allureLink.href = `./${runNumber}/allure-report/`;
@@ -646,13 +684,12 @@
       }
       
       if (swaggerLink) {
-        if (runNumber === 'latest') {
-          // For latest, try to find the most recent run
+        if (runNumber === 'latest' || runNumber === '' || isNaN(runNumber)) {
+          // For main dashboard, try to find the most recent run
           swaggerLink.href = '#';
           swaggerLink.textContent = 'Swagger Report Not Available';
           swaggerLink.style.opacity = '0.6';
           swaggerLink.style.pointerEvents = 'none';
-          showNotice = true;
         } else {
           // Set the correct URL for the specific run
           swaggerLink.href = `./${runNumber}/swagger-coverage-report/`;
@@ -660,11 +697,6 @@
           swaggerLink.style.opacity = '1';
           swaggerLink.style.pointerEvents = 'auto';
         }
-      }
-      
-      // Show CI notice if needed
-      if (ciNotice && showNotice) {
-        ciNotice.style.display = 'block';
       }
     }
 

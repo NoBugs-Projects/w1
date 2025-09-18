@@ -172,7 +172,36 @@ jobs:
           git commit -m "Publish Allure (/allure-report), Swagger and dashboard for run ${RUN}" || echo "Nothing to commit"
           git push
 
-      # 12) Отправляем уведомление в Telegram
+      # 12) Debug metrics and file locations
+      - name: Debug metrics and file locations
+        if: always()
+        run: |
+          echo "🔍 Debug Information for Run ${{ github.run_number }}:"
+          echo "📁 Current working directory: $(pwd)"
+          echo "📁 GitHub workspace: ${{ github.workspace }}"
+          echo "📁 Run number: ${{ github.run_number }}"
+          echo ""
+          echo "📁 Checking metrics files:"
+          echo "   - Main dashboard metrics: $(ls -la gh-pages/metrics.json 2>/dev/null || echo 'NOT FOUND')"
+          echo "   - Run-specific metrics: $(ls -la gh-pages/${{ github.run_number }}/metrics.json 2>/dev/null || echo 'NOT FOUND')"
+          echo ""
+          echo "📁 Checking dashboard files:"
+          echo "   - Main dashboard: $(ls -la gh-pages/index.html 2>/dev/null || echo 'NOT FOUND')"
+          echo "   - Run-specific dashboard: $(ls -la gh-pages/${{ github.run_number }}/index.html 2>/dev/null || echo 'NOT FOUND')"
+          echo ""
+          echo "📁 Directory structure:"
+          find gh-pages -name "*.json" -o -name "*.html" | head -20 || echo "No files found"
+          echo ""
+          if [ -f "gh-pages/metrics.json" ]; then
+            echo "✅ Main metrics.json content preview:"
+            head -10 gh-pages/metrics.json || echo "Could not read file"
+          fi
+          if [ -f "gh-pages/${{ github.run_number }}/metrics.json" ]; then
+            echo "✅ Run-specific metrics.json content preview:"
+            head -10 "gh-pages/${{ github.run_number }}/metrics.json" || echo "Could not read file"
+          fi
+
+      # 13) Отправляем уведомление в Telegram
       - name: Send Telegram notification
         if: always()
         env:

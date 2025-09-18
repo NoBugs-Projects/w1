@@ -57,6 +57,7 @@ extract_allure_metrics() {
   local summary="$allure_dir/widgets/summary.json"
 
   local total=0 passed=0 failed=0 broken=0 skipped=0 duration_ms=0
+  local flaky=0 critical=0 retries=0
   if [ -f "$summary" ] && command -v jq >/dev/null 2>&1; then
     total=$(jq -r '.statistic.total // 0'   "$summary" 2>/dev/null || true);     total="$(to_int "$total")"
     passed=$(jq -r '.statistic.passed // 0' "$summary" 2>/dev/null || true);     passed="$(to_int "$passed")"
@@ -64,6 +65,22 @@ extract_allure_metrics() {
     broken=$(jq -r '.statistic.broken // 0' "$summary" 2>/dev/null || true);     broken="$(to_int "$broken")"
     skipped=$(jq -r '.statistic.skipped // 0' "$summary" 2>/dev/null || true);   skipped="$(to_int "$skipped")"
     duration_ms=$(jq -r '.time.duration // 0' "$summary" 2>/dev/null || true);   duration_ms="$(to_int "$duration_ms")"
+    
+    # Try to extract additional metrics from test results
+    local results_dir="$allure_dir/data"
+    if [ -d "$results_dir" ]; then
+      # Count flaky tests (tests with retries)
+      flaky=$(find "$results_dir" -name "*.json" -exec jq -r '.retries // 0' {} \; 2>/dev/null | grep -v '^0$' | wc -l | tr -d '[:space:]' || echo 0)
+      flaky="$(to_int "$flaky")"
+      
+      # Count critical tests that failed
+      critical=$(find "$results_dir" -name "*.json" -exec jq -r 'select(.status == "failed" or .status == "broken") | .labels[]? | select(.name == "critical") | .value' {} \; 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+      critical="$(to_int "$critical")"
+      
+      # Count total retries
+      retries=$(find "$results_dir" -name "*.json" -exec jq -r '.retries // 0' {} \; 2>/dev/null | awk '{sum += $1} END {print sum+0}' || echo 0)
+      retries="$(to_int "$retries")"
+    fi
   else
     echo -e "${YELLOW}⚠️  No $summary or jq missing — defaulting Allure metrics to zeros${NC}"
   fi
@@ -83,6 +100,13 @@ extract_allure_metrics() {
   local avg_seconds=0
   if [ "$total" -gt 0 ]; then avg_seconds=$(( total_seconds / total )); fi
 
+  local flaky_rate=0
+  if [ "$total" -gt 0 ] && command -v bc >/dev/null 2>&1; then
+    flaky_rate="$(echo "scale=1; $flaky*100/$total" | bc -l 2>/dev/null || echo 0)"
+  elif [ "$total" -gt 0 ]; then
+    flaky_rate=$(( flaky*100/total ))
+  fi
+
   cat > "$metrics_file" <<EOF
 {
   "allure": {
@@ -90,16 +114,29 @@ extract_allure_metrics() {
     "passedTests": $passed,
     "failedTests": $failed_like,
     "skippedTests": $skipped,
-    "criticalFailures": 0,
-    "flakyTests": 0,
+    "criticalFailures": $critical,
+    "flakyTests": $flaky,
     "passRate": $pass_rate,
-    "flakyRate": 0,
+    "flakyRate": $flaky_rate,
     "avgDuration": $avg_seconds,
-    "totalDuration": $total_seconds
+    "totalDuration": $total_seconds,
+    "retries": $retries
   }
 }
 EOF
   echo -e "${GREEN}✅ Allure metrics extracted${NC}"
+  echo "📊 Allure Metrics Summary:"
+  echo "  • Total Tests: $total"
+  echo "  • Passed: $passed"
+  echo "  • Failed: $failed_like"
+  echo "  • Skipped: $skipped"
+  echo "  • Critical Failures: $critical"
+  echo "  • Flaky Tests: $flaky"
+  echo "  • Pass Rate: ${pass_rate}%"
+  echo "  • Flaky Rate: ${flaky_rate}%"
+  echo "  • Total Duration: ${total_seconds}s"
+  echo "  • Average Duration: ${avg_seconds}s"
+  echo "  • Total Retries: $retries"
 }
 
 # ---------------- Swagger metrics (from HTML) ----------------
@@ -200,6 +237,16 @@ EOF
   fi
 
   echo -e "${GREEN}✅ Swagger metrics extracted${NC}"
+  echo "🔎 Swagger Metrics Summary:"
+  echo "  • Total Operations: $total_ops"
+  echo "  • Covered Operations: $covered_ops"
+  echo "  • API Coverage: ${api_coverage}%"
+  echo "  • Total Tags: $total_tags"
+  echo "  • Covered Tags: $covered_tags"
+  echo "  • Tags Coverage: $(( covered_tags*100/total_tags ))%"
+  echo "  • Full Coverage: ${full_pct}%"
+  echo "  • Partial Coverage: ${partial_pct}%"
+  echo "  • Empty Coverage: ${empty_pct}%"
 }
 
 # ---------------- Optional: append Java test metrics safely ----------------
@@ -466,17 +513,40 @@ $SWAGGER_COVERED_TAGS $SWAGGER_TOTAL_TAGS \
 $TEST_COVERAGE_PERCENTAGE $TEST_COVERAGE_AUTOMATED $TEST_COVERAGE_MANUAL \
 $PERFORMANCE_MEDIAN_DURATION $PERFORMANCE_PARALLELIZATION_EFFICIENCY $PERFORMANCE_REDUNDANCY_INDEX $PERFORMANCE_LONGEST_TESTS'
 
-  if command -v envsubst >/dev/null 2>&1; then
-    local tmp; tmp="$(mktemp)"
-    envsubst "$SUBST_VARS" < "$final_file" > "$tmp" && mv "$tmp" "$final_file"
-  else
-    # Minimal fallback: links + run number only
-    sed -i.bak \
-      -e "s|\$ALLURE_REPORT_URL|$ALLURE_REPORT_URL|g" \
-      -e "s|\$SWAGGER_REPORT_URL|$SWAGGER_REPORT_URL|g" \
-      -e "s|\$RUN_NUMBER|$RUN_NUMBER|g" \
-      "$final_file"
-  fi
+  # Use sed for reliable substitution
+  sed -i.bak \
+    -e "s|\$ALLURE_REPORT_URL|$ALLURE_REPORT_URL|g" \
+    -e "s|\$SWAGGER_REPORT_URL|$SWAGGER_REPORT_URL|g" \
+    -e "s|\$RUN_NUMBER|$RUN_NUMBER|g" \
+    -e "s|\$ALLURE_PASS_RATE|$ALLURE_PASS_RATE|g" \
+    -e "s|\$ALLURE_TOTAL_TESTS|$ALLURE_TOTAL_TESTS|g" \
+    -e "s|\$ALLURE_PASSED_TESTS|$ALLURE_PASSED_TESTS|g" \
+    -e "s|\$ALLURE_FAILED_TESTS|$ALLURE_FAILED_TESTS|g" \
+    -e "s|\$ALLURE_SKIPPED_TESTS|$ALLURE_SKIPPED_TESTS|g" \
+    -e "s|\$ALLURE_FLAKY_TESTS|$ALLURE_FLAKY_TESTS|g" \
+    -e "s|\$ALLURE_FLAKY_RATE|$ALLURE_FLAKY_RATE|g" \
+    -e "s|\$ALLURE_CRITICAL_FAILURES|$ALLURE_CRITICAL_FAILURES|g" \
+    -e "s|\$ALLURE_AVG_DURATION|$ALLURE_AVG_DURATION|g" \
+    -e "s|\$ALLURE_TOTAL_DURATION|$ALLURE_TOTAL_DURATION|g" \
+    -e "s|\$SWAGGER_API_COVERAGE|$SWAGGER_API_COVERAGE|g" \
+    -e "s|\$SWAGGER_CONDITIONS_COVERAGE|$SWAGGER_CONDITIONS_COVERAGE|g" \
+    -e "s|\$SWAGGER_FULL_COVERAGE|$SWAGGER_FULL_COVERAGE|g" \
+    -e "s|\$SWAGGER_PARTIAL_COVERAGE|$SWAGGER_PARTIAL_COVERAGE|g" \
+    -e "s|\$SWAGGER_EMPTY_COVERAGE|$SWAGGER_EMPTY_COVERAGE|g" \
+    -e "s|\$SWAGGER_OPERATIONS_COVERAGE|$SWAGGER_OPERATIONS_COVERAGE|g" \
+    -e "s|\$SWAGGER_COVERED_OPERATIONS|$SWAGGER_COVERED_OPERATIONS|g" \
+    -e "s|\$SWAGGER_TOTAL_OPERATIONS|$SWAGGER_TOTAL_OPERATIONS|g" \
+    -e "s|\$SWAGGER_TAGS_COVERAGE|$SWAGGER_TAGS_COVERAGE|g" \
+    -e "s|\$SWAGGER_COVERED_TAGS|$SWAGGER_COVERED_TAGS|g" \
+    -e "s|\$SWAGGER_TOTAL_TAGS|$SWAGGER_TOTAL_TAGS|g" \
+    -e "s|\$TEST_COVERAGE_PERCENTAGE|$TEST_COVERAGE_PERCENTAGE|g" \
+    -e "s|\$TEST_COVERAGE_AUTOMATED|$TEST_COVERAGE_AUTOMATED|g" \
+    -e "s|\$TEST_COVERAGE_MANUAL|$TEST_COVERAGE_MANUAL|g" \
+    -e "s|\$PERFORMANCE_MEDIAN_DURATION|$PERFORMANCE_MEDIAN_DURATION|g" \
+    -e "s|\$PERFORMANCE_PARALLELIZATION_EFFICIENCY|$PERFORMANCE_PARALLELIZATION_EFFICIENCY|g" \
+    -e "s|\$PERFORMANCE_REDUNDANCY_INDEX|$PERFORMANCE_REDUNDANCY_INDEX|g" \
+    -e "s|\$PERFORMANCE_LONGEST_TESTS|$(echo "$PERFORMANCE_LONGEST_TESTS" | tr '\n' ' ')|g" \
+    "$final_file"
 
   echo -e "${GREEN}✅ Final index.html ready: $final_file${NC}"
 }
@@ -505,8 +575,35 @@ main() {
     if [ -d "$main_dashboard_dir" ]; then
       cp "$METRICS_FILE" "$main_dashboard_dir/" && echo "📁 Metrics also copied to main dashboard: $main_dashboard_dir/$METRICS_FILE"
     fi
+    
+    # Print complete metrics.json file
+    echo -e "${BLUE}📄 Complete metrics.json file:${NC}"
+    echo "=========================================="
+    if command -v jq >/dev/null 2>&1; then
+      jq . "$METRICS_FILE" 2>/dev/null || cat "$METRICS_FILE"
+    else
+      cat "$METRICS_FILE"
+    fi
+    echo "=========================================="
   fi
 
+  # Debug logging for CI
+  echo -e "${BLUE}🔍 Debug Information:${NC}"
+  echo "📁 Current working directory: $(pwd)"
+  echo "📁 Metrics file location: $(realpath "$METRICS_FILE" 2>/dev/null || echo "$METRICS_FILE")"
+  echo "📁 Output directory: $(realpath "$OUTPUT_DIR" 2>/dev/null || echo "$OUTPUT_DIR")"
+  echo "📁 Main dashboard directory: $(realpath "gh-pages" 2>/dev/null || echo "gh-pages")"
+  
+  if [ -f "$METRICS_FILE" ]; then
+    echo "✅ Metrics file exists and contains:"
+    echo "   - File size: $(wc -c < "$METRICS_FILE") bytes"
+    echo "   - Allure total tests: $(jq -r '.allure.totalTests // "N/A"' "$METRICS_FILE" 2>/dev/null || echo "N/A")"
+    echo "   - Swagger API coverage: $(jq -r '.swagger.apiCoverage // "N/A"' "$METRICS_FILE" 2>/dev/null || echo "N/A")"
+    echo "   - Performance median duration: $(jq -r '.performance.medianDuration // "N/A"' "$METRICS_FILE" 2>/dev/null || echo "N/A")"
+  else
+    echo "❌ Metrics file does not exist: $METRICS_FILE"
+  fi
+  
   echo -e "${GREEN}✅ Done${NC}"
 }
 
