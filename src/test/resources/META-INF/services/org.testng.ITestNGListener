@@ -1,2 +1,3 @@
 com.teamcity.common.AnnotationTransformerListener
 com.teamcity.ui.listeners.UserSessionListener
+com.teamcity.ui.listeners.BrowserTestListener

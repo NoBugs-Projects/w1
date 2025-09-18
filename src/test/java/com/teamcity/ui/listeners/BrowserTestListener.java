@@ -1,7 +1,8 @@
 package com.teamcity.ui.listeners;
 
 import com.teamcity.ui.annotations.Browsers;
-import org.testng.ITestListener;
+import org.testng.IInvokedMethodListener;
+import org.testng.IInvokedMethod;
 import org.testng.ITestResult;
 import org.testng.SkipException;
 
@@ -15,19 +16,20 @@ import java.util.logging.Logger;
  * Tests annotated with @Browsers will only run if the configured browser
  * matches one of the specified browsers.
  */
-public class BrowserTestListener implements ITestListener {
+public class BrowserTestListener implements IInvokedMethodListener {
 
     private static final Logger logger = Logger.getLogger(BrowserTestListener.class.getName());
     private static final String BROWSER_PROPERTY = "browser";
     private static final String DEFAULT_BROWSER = "chrome";
 
     @Override
-    public void onTestStart(ITestResult result) {
+    public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
         String configuredBrowser = getConfiguredBrowser();
-        Browsers browsersAnnotation = getBrowsersAnnotation(result);
+        Browsers browsersAnnotation = getBrowsersAnnotation(method, testResult);
 
         if (browsersAnnotation == null) {
             // No @Browsers annotation, test can run on any browser
+            logger.info("No @Browsers annotation found for method: " + method.getTestMethod().getMethodName() + ". Test will run.");
             return;
         }
 
@@ -37,12 +39,20 @@ public class BrowserTestListener implements ITestListener {
 
         if (!isSupported) {
             String supportedBrowsersList = String.join(", ", supportedBrowsers);
-            String reason = String.format("Test can be run on %s browser only, but configured browser is: %s",
-                supportedBrowsersList, configuredBrowser);
+            String reason = String.format("Test can be run on %s browser(s) only, but configured browser is: %s. Skipping test: %s",
+                supportedBrowsersList, configuredBrowser, method.getTestMethod().getMethodName());
 
-            logger.info(reason);
+            logger.warning(reason);
             throw new SkipException(reason);
+        } else {
+            logger.info(String.format("Configured browser '%s' is supported for test: %s. Test will run.",
+                configuredBrowser, method.getTestMethod().getMethodName()));
         }
+    }
+
+    @Override
+    public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
+        // No action needed after invocation for this listener
     }
 
     /**
@@ -76,12 +86,13 @@ public class BrowserTestListener implements ITestListener {
     /**
      * Gets the @Browsers annotation from the test method or class.
      *
-     * @param result the test result
+     * @param method the invoked method
+     * @param testResult the test result
      * @return the @Browsers annotation or null if not found
      */
-    private Browsers getBrowsersAnnotation(ITestResult result) {
+    private Browsers getBrowsersAnnotation(IInvokedMethod method, ITestResult testResult) {
         // First check the test method
-        Browsers annotation = result.getMethod().getConstructorOrMethod().getMethod()
+        Browsers annotation = method.getTestMethod().getConstructorOrMethod().getMethod()
                 .getAnnotation(Browsers.class);
 
         if (annotation != null) {
@@ -89,6 +100,6 @@ public class BrowserTestListener implements ITestListener {
         }
 
         // Then check the test class
-        return result.getTestClass().getRealClass().getAnnotation(Browsers.class);
+        return testResult.getTestClass().getRealClass().getAnnotation(Browsers.class);
     }
 }

@@ -31,7 +31,10 @@ public class UserSessionListener implements IInvokedMethodListener {
     @Override
     public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
         logger.info("UserSessionListener.beforeInvocation called for method: {}", method.getTestMethod().getMethodName());
-        // We'll handle @UserSession in the BaseUiTest @BeforeMethod instead
+        
+        if (shouldLogin(method, testResult)) {
+            performLogin(testResult);
+        }
     }
 
     @Override
@@ -56,8 +59,14 @@ public class UserSessionListener implements IInvokedMethodListener {
         if (testInstance instanceof BaseTest baseTest) {
             User user = baseTest.testData.get().getUser();
             logger.info("Performing login for user: {}", user.getUsername());
+            
+            // Create user via API first
+            AdminSteps.createUser(user);
+            logger.info("User created via API: {}", user.getUsername());
+            
+            // Then perform UI login
             LoginPage.open().login(user);
-            logger.info("Logged in as user: {}", user.getUsername());
+            logger.info("Logged in via UI as user: {}", user.getUsername());
         } else {
             logger.warn("Cannot perform login - test instance is not BaseTest: {}", testInstance.getClass().getName());
         }
