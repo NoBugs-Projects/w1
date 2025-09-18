@@ -20,8 +20,9 @@ import static com.teamcity.api.enums.Endpoint.PROJECTS;
 public class StartBuildTest extends BaseUiTest {
 
     @Test(description = "User should be able to create build type step and start build", groups = {"Regression"})
-    @UserSession
     public void userCreatesBuildTypeStepAndStartsBuildTest(String ignoredBrowser) {
+        loginAs(testData.get().getUser());
+
         step("Create project and build type via API", () -> {
             superUserRequesterWithS.getRequest(PROJECTS).create(testData.get().getNewProjectDescription());
             superUserRequesterWithS.getRequest(BUILD_TYPES).create(testData.get().getBuildType());
