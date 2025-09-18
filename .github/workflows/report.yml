@@ -171,6 +171,9 @@ jobs:
       # 12) Отправляем уведомление в Telegram
       - name: Send Telegram notification
         if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         shell: bash
         run: |
           set -euo pipefail
@@ -213,22 +216,22 @@ jobs:
           echo "Sending Telegram notification..."
           
           # Validate required secrets
-          if [ -z "${{ secrets.TELEGRAM_BOT_TOKEN }}" ]; then
+          if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
             echo "❌ TELEGRAM_BOT_TOKEN secret is not set"
             exit 1
           fi
           
-          if [ -z "${{ secrets.TELEGRAM_CHAT_ID }}" ]; then
+          if [ -z "$TELEGRAM_CHAT_ID" ]; then
             echo "❌ TELEGRAM_CHAT_ID secret is not set"
             exit 1
           fi
           
-          echo "Bot Token: ${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          echo "Chat ID: ${{ secrets.TELEGRAM_CHAT_ID }}"
+          echo "Bot Token: ${TELEGRAM_BOT_TOKEN:0:10}..."
+          echo "Chat ID: $TELEGRAM_CHAT_ID"
           
           # Test bot token first
           echo "Testing bot token..."
-          BOT_TEST_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/getMe" || echo "HTTPSTATUS:000")
+          BOT_TEST_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe" || echo "HTTPSTATUS:000")
           BOT_TEST_HTTP_STATUS=$(echo $BOT_TEST_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
           
           if [ "$BOT_TEST_HTTP_STATUS" -ne 200 ]; then
@@ -239,10 +242,10 @@ jobs:
           
           echo "✅ Bot token is valid"
           
-          RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "{
-              \"chat_id\": \"${{ secrets.TELEGRAM_CHAT_ID }}\",
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
               \"text\": \"${ESCAPED_MESSAGE}\",
               \"parse_mode\": \"Markdown\",
               \"disable_web_page_preview\": false
