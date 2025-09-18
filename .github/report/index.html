@@ -578,18 +578,29 @@
     }
 
     function loadMetrics(){
-      // Try to get the current run number from the URL or use 'latest'
+      // Try to get the current run number from the URL
       const pathParts = window.location.pathname.split('/');
-      const runNumber = pathParts[pathParts.length - 2] || 'latest';
+      const runNumber = pathParts[pathParts.length - 2];
       
-      // Try to fetch metrics from the specific run directory
-      fetch(`./${runNumber}/metrics.json`)
-        .then(function(r){ if(!r.ok) throw new Error('no metrics'); return r.json(); })
-        .then(applyMetrics)
-        .catch(function(){ 
-          console.log('No metrics found for run', runNumber, 'showing sample data');
-          /* keep placeholders if metrics missing */ 
-        });
+      if (runNumber && runNumber !== 'latest' && !isNaN(runNumber)) {
+        // We're viewing a specific run, try to fetch its metrics
+        fetch(`./${runNumber}/metrics.json`)
+          .then(function(r){ if(!r.ok) throw new Error('no metrics'); return r.json(); })
+          .then(applyMetrics)
+          .catch(function(){ 
+            console.log('No metrics found for run', runNumber, 'showing sample data');
+            /* keep placeholders if metrics missing */ 
+          });
+      } else {
+        // We're on the main dashboard, try to fetch metrics from current directory
+        fetch('./metrics.json')
+          .then(function(r){ if(!r.ok) throw new Error('no metrics'); return r.json(); })
+          .then(applyMetrics)
+          .catch(function(){ 
+            console.log('No metrics found in current directory, showing sample data');
+            /* keep placeholders if metrics missing */ 
+          });
+      }
     }
 
     function handleRunNumber(){

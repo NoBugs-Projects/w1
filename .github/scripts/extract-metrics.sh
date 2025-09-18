@@ -499,6 +499,12 @@ main() {
 
   if [ -f "$METRICS_FILE" ]; then
     cp "$METRICS_FILE" "$OUTPUT_DIR/" && echo "📁 Metrics copied to: $OUTPUT_DIR/$METRICS_FILE"
+    
+    # Also copy to main dashboard directory for latest metrics
+    local main_dashboard_dir="gh-pages"
+    if [ -d "$main_dashboard_dir" ]; then
+      cp "$METRICS_FILE" "$main_dashboard_dir/" && echo "📁 Metrics also copied to main dashboard: $main_dashboard_dir/$METRICS_FILE"
+    fi
   fi
 
   echo -e "${GREEN}✅ Done${NC}"
