@@ -544,4 +544,54 @@ body {
         white-space: normal;
         word-break: break-word;
     }
+}
+
+/* Test Status Container - Original Layout */
+.test-status-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.status-metric {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+    text-align: center;
+}
+
+.status-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.status-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #007bff;
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.status-breakdown {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 12px;
+}
+
+.status-details {
+    font-size: 11px;
+    color: #6c757d;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.status-details small {
+    display: block;
+    margin-bottom: 4px;
 } 
