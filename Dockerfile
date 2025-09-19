@@ -1,5 +1,5 @@
 # Multi-stage build for TeamCity Testing Framework
-FROM openjdk:11-jdk-slim as builder
+FROM openjdk:11-jdk-slim AS builder
 
 # Set working directory
 WORKDIR /app
@@ -45,11 +45,9 @@ COPY --from=builder /app/.mvn ./.mvn
 
 # Copy configuration files
 COPY config ./config
-COPY docker-compose.yml ./
-COPY docker-manage.sh ./
 
 # Set permissions
-RUN chmod +x mvnw docker-manage.sh
+RUN chmod +x mvnw
 
 # Create reports directory
 RUN mkdir -p reports
