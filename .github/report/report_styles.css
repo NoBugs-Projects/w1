@@ -684,6 +684,23 @@ body {
     font-weight: 600;
 }
 
+/* Metric explanation styling for KPI cards */
+.metric-explanation {
+    font-size: 11px;
+    color: #6c757d;
+    line-height: 1.4;
+    background: #f8f9fa;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border-left: 3px solid #6c757d;
+    margin-top: 8px;
+}
+
+.metric-explanation strong {
+    color: #495057;
+    font-weight: 600;
+}
+
 /* API Coverage specific styles */
 .enhanced-metrics-grid .metric-card.api-coverage {
     border-left-color: #3498db;
