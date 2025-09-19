@@ -1,29 +1,28 @@
 {
   "allure": {
-    "totalTests": 47,
-    "passedTests": 46,
+    "totalTests": 0,
+    "passedTests": 0,
     "failedTests": 0,
-    "skippedTests": 1,
+    "skippedTests": 0,
     "criticalFailures": 0,
     "flakyTests": 0,
-    "passRate": 97.8,
+    "passRate": 0,
     "flakyRate": 0,
-    "avgDuration": 5,
-    "totalDuration": 253,
-    "retries": 0
+    "avgDuration": 0,
+    "totalDuration": 0
   },
   "swagger": {
-    "totalOperations": 433,
-    "coveredOperations": 16,
-    "totalTags": 30,
-    "coveredTags": 6,
-    "totalConditions": 1885,
-    "coveredConditions": 6,
-    "apiCoverage": 3.6,
-    "conditionsCoverage": 3.6,
-    "fullCoverage": 0.462,
-    "partialCoverage": 1.848,
-    "emptyCoverage": 97.691,
+    "totalOperations": 0,
+    "coveredOperations": 0,
+    "totalTags": 0,
+    "coveredTags": 0,
+    "totalConditions": 0,
+    "coveredConditions": 0,
+    "apiCoverage": 0,
+    "conditionsCoverage": 0,
+    "fullCoverage": 0,
+    "partialCoverage": 0,
+    "emptyCoverage": 0,
     "methodCoverage": {
       "GET": {
         "coverage": 85,
@@ -52,57 +51,16 @@
   },
   "testCoverage": {
     "javaFiles": 20,
-    "javaTestAnnotations": 39,
-    "javaLines": 1434,
-    "automatedTests": 39,
+    "javaTestAnnotations": 40,
+    "javaLines": 1339,
+    "automatedTests": 40,
     "manualTests": 0,
     "coveragePercentage": 100.0
   },
   "performance": {
-    "medianDuration": 376,
-    "longestTests": [
-      {
-        "name": "User should be able to create project",
-        "duration": 76702
-      },
-      {
-        "name": "User should be able to create build type",
-        "duration": 70867
-      },
-      {
-        "name": "User should be able to create project",
-        "duration": 64177
-      },
-      {
-        "name": "User should be able to create build type",
-        "duration": 59864
-      },
-      {
-        "name": "User should not be able to create project without name",
-        "duration": 53741
-      },
-      {
-        "name": "User should not be able to create project without name",
-        "duration": 44533
-      },
-      {
-        "name": "User should be able to create build type step and start build",
-        "duration": 27151
-      },
-      {
-        "name": "User should be able to create build type step and start build",
-        "duration": 20323
-      },
-      {
-        "name": "User should not be able to create build type without name",
-        "duration": 19278
-      },
-      {
-        "name": "User should not be able to create build type without name",
-        "duration": 15362
-      }
-    ],
-    "parallelizationEfficiency": 85.0,
-    "redundancyIndex": 12.9
+    "medianDuration": 0,
+    "longestTests": [],
+    "parallelizationEfficiency": 0,
+    "redundancyIndex": 12.5
   }
 }
