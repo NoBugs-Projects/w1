@@ -593,10 +593,14 @@
         setBarWidth('operations-coverage-fill', Number(data.swagger.apiCoverage||0));
         
         // Update Tags Coverage
-        document.getElementById('tags-coverage-value').textContent = (data.swagger.tagsCoverage||0) + '%';
-        setBarWidth('tags-coverage-fill', Number(data.swagger.tagsCoverage||0));
-        document.getElementById('covered-tags').textContent = data.swagger.coveredTags||0;
-        document.getElementById('total-tags').textContent = data.swagger.totalTags||0;
+        const coveredTags = Number(data.swagger.coveredTags||0);
+        const totalTags = Number(data.swagger.totalTags||0);
+        const tagsCoverage = totalTags > 0 ? Math.round((coveredTags / totalTags) * 100) : 0;
+        
+        document.getElementById('tags-coverage-value').textContent = tagsCoverage + '%';
+        setBarWidth('tags-coverage-fill', tagsCoverage);
+        document.getElementById('covered-tags').textContent = coveredTags;
+        document.getElementById('total-tags').textContent = totalTags;
         
         createMethodCoverageChart(data.swagger);
         createStatusCodeChart(data.swagger);
