@@ -27,6 +27,59 @@
         .gauge{width:90px;height:90px;border-radius:50%;margin:0 auto 8px;position:relative;background:conic-gradient(var(--gauge-color) 0deg,var(--gauge-color) calc(var(--percentage)*3.6deg),#f0f0f0 calc(var(--percentage)*3.6deg),#f0f0f0 360deg)}
         .gauge::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:#fff;border-radius:50%}
         .gauge-value{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-weight:700}
+        
+        /* Test Status Line Styles */
+        .test-status-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .status-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .status-value {
+            font-weight: 700;
+            color: #007bff;
+            font-size: 16px;
+        }
+        
+        .status-details {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .mini-progress {
+            width: 40px;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .mini-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
         .reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
         .report-card{background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
         .btn{display:inline-block;margin-top:8px;padding:8px 12px;border-radius:6px;background:#0d6efd;color:#fff;text-decoration:none}
@@ -57,88 +110,43 @@
     <div class="chart-container">
         <h2 class="chart-title">📊 Test Execution Status</h2>
 
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-            <div class="kpi-card" id="pass-rate-card">
-                <div class="kpi-label">Pass Rate</div>
-                <div class="kpi-value" id="pass-rate-value">$ALLURE_PASS_RATE%</div>
-                <div class="coverage-bar">
-                    <div class="coverage-fill" id="pass-rate-fill" style="width: $ALLURE_PASS_RATE%"></div>
-                </div>
-                <div class="metric-calculation">
-                    <small>📊 Calculated: (Passed Tests / Total Tests) × 100%<br>
-                    📍 Source: Allure test execution results</small>
+        <!-- Test Execution Status - Single Line -->
+        <div class="test-status-line">
+            <div class="status-item">
+                <span class="status-label">Pass Rate:</span>
+                <span class="status-value" id="pass-rate-value">$ALLURE_PASS_RATE%</span>
+                <div class="mini-progress">
+                    <div class="mini-progress-fill" id="pass-rate-fill" style="width: $ALLURE_PASS_RATE%"></div>
                 </div>
             </div>
-
-            <div class="kpi-card" id="total-tests-card">
-                <div class="kpi-label">Total Tests</div>
-                <div class="kpi-value" id="total-tests-value">$ALLURE_TOTAL_TESTS</div>
-                <div class="coverage-bar">
-                    <div class="coverage-fill" id="total-tests-fill" style="width: 100%"></div>
-                </div>
-                <div class="metric-details">
-                    <span id="passed-tests">$ALLURE_PASSED_TESTS passed</span>
-                    <span id="failed-tests">$ALLURE_FAILED_TESTS failed</span>
-                </div>
-                <div class="metric-calculation">
-                    <small>📊 Calculated: Sum of all test methods with @Test annotation<br>
-                    📍 Source: Allure test execution summary</small>
-                </div>
+            
+            <div class="status-item">
+                <span class="status-label">Total Tests:</span>
+                <span class="status-value" id="total-tests-value">$ALLURE_TOTAL_TESTS</span>
+                <span class="status-details">(<span id="passed-tests">$ALLURE_PASSED_TESTS</span> passed, <span id="failed-tests">$ALLURE_FAILED_TESTS</span> failed)</span>
             </div>
-
-            <div class="kpi-card" id="avg-duration-card">
-                <div class="kpi-label">Average Duration</div>
-                <div class="kpi-value" id="avg-duration-value">$ALLURE_AVG_DURATION</div>
-                <div class="coverage-bar">
-                    <div class="coverage-fill" id="avg-duration-fill" style="width: 0%"></div>
-                </div>
-                <div class="metric-details">Total: <span id="total-duration">$ALLURE_TOTAL_DURATION</span></div>
-                <div class="metric-calculation">
-                    <small>📊 Calculated: Total Duration / Total Tests<br>
-                    📍 Source: Allure test timing data</small>
-                </div>
+            
+            <div class="status-item">
+                <span class="status-label">Duration:</span>
+                <span class="status-value" id="avg-duration-value">$ALLURE_AVG_DURATION</span>
+                <span class="status-details">(Total: <span id="total-duration">$ALLURE_TOTAL_DURATION</span>)</span>
             </div>
-
-            <div class="kpi-card" id="critical-failures-card">
-                <div class="kpi-label">Critical Failures</div>
-                <div class="kpi-value" id="critical-failures-value">$ALLURE_CRITICAL_FAILURES</div>
-                <div class="coverage-bar">
-                    <div class="coverage-fill" id="critical-failures-fill" style="width: 0%"></div>
-                </div>
-                <div class="metric-details"><span id="flaky-tests">$ALLURE_FLAKY_TESTS flaky</span></div>
-                <div class="metric-calculation">
-                    <small>📊 Calculated: Tests marked as critical that failed<br>
-                    📍 Source: Allure test execution results with critical tags</small>
-                </div>
+            
+            <div class="status-item">
+                <span class="status-label">Critical:</span>
+                <span class="status-value" id="critical-failures-value">$ALLURE_CRITICAL_FAILURES</span>
+                <span class="status-details">(<span id="flaky-tests">$ALLURE_FLAKY_TESTS</span> flaky)</span>
             </div>
-
-            <div class="kpi-card" id="skipped-tests-card">
-                <div class="kpi-label">Skipped Tests</div>
-                <div class="kpi-value" id="skipped-tests">$ALLURE_SKIPPED_TESTS</div>
-                <div class="coverage-bar">
-                    <div class="coverage-fill" id="skipped-tests-fill" style="width: 0%"></div>
-                </div>
-                <div class="metric-calculation">
-                    <small>📊 Calculated: Tests that were skipped during execution<br>
-                    📍 Source: Allure test execution results</small>
-                </div>
+            
+            <div class="status-item">
+                <span class="status-label">Skipped:</span>
+                <span class="status-value" id="skipped-tests">$ALLURE_SKIPPED_TESTS</span>
             </div>
-
-            <div class="kpi-card" id="test-coverage-card">
-                <div class="kpi-label">Test Coverage</div>
-                <div class="kpi-value" id="test-coverage-value">$TEST_COVERAGE_PERCENTAGE%</div>
-                <div class="coverage-bar">
-                    <div class="coverage-fill" id="test-coverage-fill" style="width: $TEST_COVERAGE_PERCENTAGE%"></div>
-                </div>
-                <div class="metric-details">
-                    <span id="automated-tests">$TEST_COVERAGE_AUTOMATED automated</span>
-                    <span id="manual-tests">$TEST_COVERAGE_MANUAL manual</span>
-                </div>
-                <div class="metric-calculation">
-                    <small>📊 Calculated: (Automated Tests / Total Tests) × 100%<br>
-                    📍 Source: Test source code analysis (@Test annotations)</small>
-                </div>
+            
+            <div class="status-item">
+                <span class="status-label">Coverage:</span>
+                <span class="status-value" id="test-coverage-value">$TEST_COVERAGE_PERCENTAGE%</span>
+                <span class="status-details">(<span id="automated-tests">$TEST_COVERAGE_AUTOMATED</span> automated, <span id="manual-tests">$TEST_COVERAGE_MANUAL</span> manual)</span>
             </div>
         </div>
 
@@ -526,6 +534,13 @@
         
         document.getElementById('operations-coverage-value').textContent = (data.swagger.apiCoverage||0) + '%';
         setBarWidth('operations-coverage-fill', Number(data.swagger.apiCoverage||0));
+        
+        // Update Tags Coverage
+        document.getElementById('tags-coverage-value').textContent = (data.swagger.tagsCoverage||0) + '%';
+        setBarWidth('tags-coverage-fill', Number(data.swagger.tagsCoverage||0));
+        document.getElementById('covered-tags').textContent = data.swagger.coveredTags||0;
+        document.getElementById('total-tags').textContent = data.swagger.totalTags||0;
+        
         createMethodCoverageChart(data.swagger);
         createStatusCodeChart(data.swagger);
       }
