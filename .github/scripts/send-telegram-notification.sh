@@ -71,7 +71,10 @@ RUN_NUMBER="${GITHUB_RUN_NUMBER:-latest}"
 MESSAGE="🚀 *WTF Pipeline completed!*
 
 🔗 *Dashboard:*
-• https://$GITHUB_REPOSITORY_OWNER.github.io/$GITHUB_EVENT_REPOSITORY_NAME/$RUN_NUMBER/"
+• https://$GITHUB_REPOSITORY_OWNER.github.io/$GITHUB_EVENT_REPOSITORY_NAME/$RUN_NUMBER/
+
+🔧 *GitHub Actions:*
+• Run #$RUN_NUMBER: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
 # Add Docker Hub section only if Docker was pushed
 if [ "${DOCKER_PUSHED:-false}" = "true" ]; then
