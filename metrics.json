@@ -8,8 +8,8 @@
     "flakyTests": 0,
     "passRate": 97.8,
     "flakyRate": 0,
-    "avgDuration": 3,
-    "totalDuration": 161,
+    "avgDuration": 2,
+    "totalDuration": 106,
     "retries": 0
   },
   "swagger": {
@@ -52,54 +52,54 @@
   },
   "testCoverage": {
     "javaFiles": 20,
-    "javaTestAnnotations": 39,
-    "javaLines": 1434,
+    "javaTestAnnotations": 43,
+    "javaLines": 1675,
     "automatedTests": 39,
-    "manualTests": 0,
-    "coveragePercentage": 100.0
+    "manualTests": 4,
+    "coveragePercentage": 90.6
   },
   "performance": {
-    "medianDuration": 354,
+    "medianDuration": 378,
     "longestTests": [
       {
         "name": "User should be able to create project",
-        "duration": 73292
+        "duration": 79166
       },
       {
         "name": "User should be able to create build type",
-        "duration": 67697
+        "duration": 72632
       },
       {
         "name": "User should be able to create project",
-        "duration": 63244
+        "duration": 63176
       },
       {
         "name": "User should be able to create build type",
-        "duration": 58941
+        "duration": 58417
       },
       {
         "name": "User should not be able to create project without name",
-        "duration": 53545
+        "duration": 53056
       },
       {
         "name": "User should not be able to create project without name",
-        "duration": 43029
+        "duration": 41655
       },
       {
         "name": "User should be able to create build type step and start build",
-        "duration": 26995
+        "duration": 33367
       },
       {
         "name": "User should be able to create build type step and start build",
-        "duration": 21140
+        "duration": 20531
       },
       {
         "name": "User should not be able to create build type without name",
-        "duration": 19378
+        "duration": 20491
       },
       {
         "name": "User should not be able to create build type without name",
-        "duration": 15389
+        "duration": 15266
       }
     ],
     "parallelizationEfficiency": 85.0,
