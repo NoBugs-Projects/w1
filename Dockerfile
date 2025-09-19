@@ -9,8 +9,8 @@ RUN apt-get update && \
     apt-get install -y maven && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy Maven wrapper and pom.xml
-COPY mvnw mvnw.cmd pom.xml ./
+# Copy Maven wrapper, pom.xml, and checkstyle configuration
+COPY mvnw mvnw.cmd pom.xml checkstyle.xml ./
 COPY .mvn .mvn
 
 # Download dependencies
@@ -40,6 +40,7 @@ RUN apt-get update && \
 COPY --from=builder /app/target ./target
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/pom.xml ./
+COPY --from=builder /app/checkstyle.xml ./
 COPY --from=builder /app/mvnw ./
 COPY --from=builder /app/.mvn ./.mvn
 
