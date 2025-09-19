@@ -8,8 +8,8 @@
     "flakyTests": 0,
     "passRate": 97.8,
     "flakyRate": 0,
-    "avgDuration": 1,
-    "totalDuration": 90,
+    "avgDuration": 2,
+    "totalDuration": 103,
     "retries": 0
   },
   "swagger": {
@@ -59,47 +59,47 @@
     "coveragePercentage": 100.0
   },
   "performance": {
-    "medianDuration": 400,
+    "medianDuration": 354,
     "longestTests": [
       {
         "name": "User should be able to create project",
-        "duration": 73202
+        "duration": 75228
       },
       {
         "name": "User should be able to create build type",
-        "duration": 67776
+        "duration": 69494
       },
       {
         "name": "User should be able to create project",
-        "duration": 63703
+        "duration": 63557
       },
       {
         "name": "User should be able to create build type",
-        "duration": 59003
+        "duration": 58667
       },
       {
         "name": "User should not be able to create project without name",
-        "duration": 53903
+        "duration": 53809
       },
       {
         "name": "User should not be able to create project without name",
-        "duration": 39995
+        "duration": 43731
       },
       {
         "name": "User should be able to create build type step and start build",
-        "duration": 26439
-      },
-      {
-        "name": "User should not be able to create build type without name",
-        "duration": 21201
+        "duration": 26167
       },
       {
         "name": "User should be able to create build type step and start build",
-        "duration": 20348
+        "duration": 21584
       },
       {
         "name": "User should not be able to create build type without name",
-        "duration": 16448
+        "duration": 19698
+      },
+      {
+        "name": "User should not be able to create build type without name",
+        "duration": 15854
       }
     ],
     "parallelizationEfficiency": 85.0,
