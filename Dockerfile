@@ -1,5 +1,5 @@
 # Multi-stage build for TeamCity Testing Framework
-FROM openjdk:21 AS builder
+FROM eclipse-temurin:21-jdk AS builder
 
 # Set working directory
 WORKDIR /app
@@ -23,7 +23,7 @@ COPY src ./src
 RUN ./mvnw clean compile test-compile -B
 
 # Runtime stage
-FROM openjdk:21
+FROM eclipse-temurin:21-jre
 
 # Set working directory
 WORKDIR /app
