@@ -106,78 +106,106 @@
         <p id="run-info">Comprehensive Test Reports Dashboard - Run #<span id="run-number">$RUN_NUMBER</span></p>
     </div>
 
-    <!-- 📊 1. Test Status Overview -->
-    <div class="chart-container">
-        <h2 class="chart-title">📊 Test Execution Status</h2>
+        <!-- 📊 1. Test Status Overview -->
+        <div class="chart-container">
+            <h2 class="chart-title">📊 Test Execution Status</h2>
 
-        <!-- Test Execution Status - Original Layout -->
-        <div class="test-status-container">
-            <div class="status-metric">
-                <div class="status-label">Pass Rate</div>
-                <div class="status-value" id="pass-rate-value">$ALLURE_PASS_RATE%</div>
-                <div class="status-details">
-                    <small>📊 Calculated: (Passed Tests / Total Tests) × 100%<br>
-                    📍 Source: Allure test execution results</small>
+            <!-- Test Execution Status - Enhanced Layout -->
+            <div class="enhanced-metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">📊</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Pass Rate</div>
+                        <div class="metric-value" id="pass-rate-value">$ALLURE_PASS_RATE%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="pass-rate-fill" style="width: $ALLURE_PASS_RATE%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> (Passed Tests / Total Tests) × 100%<br>
+                            <strong>📍 Source:</strong> Allure test execution results
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">🧪</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Total Tests</div>
+                        <div class="metric-value" id="total-tests-value">$ALLURE_TOTAL_TESTS</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="total-tests-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> Sum of all test methods with @Test annotation<br>
+                            <strong>📍 Source:</strong> Allure test execution summary<br>
+                            <strong>📈 Breakdown:</strong> <span id="passed-tests">$ALLURE_PASSED_TESTS</span> passed, <span id="failed-tests">$ALLURE_FAILED_TESTS</span> failed
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">⏱️</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Average Duration</div>
+                        <div class="metric-value" id="avg-duration-value">$ALLURE_AVG_DURATION</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="avg-duration-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> Total Duration / Total Tests<br>
+                            <strong>📍 Source:</strong> Allure test timing data<br>
+                            <strong>📈 Total:</strong> <span id="total-duration">$ALLURE_TOTAL_DURATION</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">⚠️</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Critical Failures</div>
+                        <div class="metric-value" id="critical-failures-value">$ALLURE_CRITICAL_FAILURES</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="critical-failures-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> Tests marked as critical that failed<br>
+                            <strong>📍 Source:</strong> Allure test execution results with critical tags<br>
+                            <strong>📈 Flaky:</strong> <span id="flaky-tests">$ALLURE_FLAKY_TESTS</span> tests
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">⏭️</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Skipped Tests</div>
+                        <div class="metric-value" id="skipped-tests">$ALLURE_SKIPPED_TESTS</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="skipped-tests-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> Tests that were skipped during execution<br>
+                            <strong>📍 Source:</strong> Allure test execution results
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">📈</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Test Coverage</div>
+                        <div class="metric-value" id="test-coverage-value">$TEST_COVERAGE_PERCENTAGE%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="test-coverage-fill" style="width: $TEST_COVERAGE_PERCENTAGE%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> (Automated Tests / Total Tests) × 100%<br>
+                            <strong>📍 Source:</strong> Test source code analysis (@Test annotations)<br>
+                            <strong>📈 Breakdown:</strong> <span id="automated-tests">$TEST_COVERAGE_AUTOMATED</span> automated, <span id="manual-tests">$TEST_COVERAGE_MANUAL</span> manual
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="status-metric">
-                <div class="status-label">Total Tests</div>
-                <div class="status-value" id="total-tests-value">$ALLURE_TOTAL_TESTS</div>
-                <div class="status-breakdown">
-                    <span id="passed-tests">$ALLURE_PASSED_TESTS</span> passed <span id="failed-tests">$ALLURE_FAILED_TESTS</span> failed
-                </div>
-                <div class="status-details">
-                    <small>📊 Calculated: Sum of all test methods with @Test annotation<br>
-                    📍 Source: Allure test execution summary</small>
-                </div>
-            </div>
-
-            <div class="status-metric">
-                <div class="status-label">Average Duration</div>
-                <div class="status-value" id="avg-duration-value">$ALLURE_AVG_DURATION</div>
-                <div class="status-breakdown">
-                    Total: <span id="total-duration">$ALLURE_TOTAL_DURATION</span>
-                </div>
-                <div class="status-details">
-                    <small>📊 Calculated: Total Duration / Total Tests<br>
-                    📍 Source: Allure test timing data</small>
-                </div>
-            </div>
-
-            <div class="status-metric">
-                <div class="status-label">Critical Failures</div>
-                <div class="status-value" id="critical-failures-value">$ALLURE_CRITICAL_FAILURES</div>
-                <div class="status-breakdown">
-                    <span id="flaky-tests">$ALLURE_FLAKY_TESTS</span> flaky
-                </div>
-                <div class="status-details">
-                    <small>📊 Calculated: Tests marked as critical that failed<br>
-                    📍 Source: Allure test execution results with critical tags</small>
-                </div>
-            </div>
-
-            <div class="status-metric">
-                <div class="status-label">Skipped Tests</div>
-                <div class="status-value" id="skipped-tests">$ALLURE_SKIPPED_TESTS</div>
-                <div class="status-details">
-                    <small>📊 Calculated: Tests that were skipped during execution<br>
-                    📍 Source: Allure test execution results</small>
-                </div>
-            </div>
-
-            <div class="status-metric">
-                <div class="status-label">Test Coverage</div>
-                <div class="status-value" id="test-coverage-value">$TEST_COVERAGE_PERCENTAGE%</div>
-                <div class="status-breakdown">
-                    <span id="automated-tests">$TEST_COVERAGE_AUTOMATED</span> automated <span id="manual-tests">$TEST_COVERAGE_MANUAL</span> manual
-                </div>
-                <div class="status-details">
-                    <small>📊 Calculated: (Automated Tests / Total Tests) × 100%<br>
-                    📍 Source: Test source code analysis (@Test annotations)</small>
-                </div>
-            </div>
-        </div>
 
         <!-- Donut (70% height of width) -->
         <div class="charts-grid">
