@@ -1,0 +1,725 @@
+<!-- .github/report/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Web Test Framework - Reports Dashboard</title>
+
+    <!-- External styles (cache-busted by run number) -->
+    <link rel="stylesheet" href="report_styles.css?v=$RUN_NUMBER">
+    <link rel="icon" type="image/png" href="logo_icon.png">
+
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Layout basics (keep your full CSS in report_styles.css) */
+        .dashboard-container{max-width:1200px;margin:0 auto;padding:8px}
+        .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:10px}
+        .kpi-card{background:#fff;border-radius:6px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.1);border-left:3px solid #007bff}
+        .chart-container{background:#fff;border-radius:6px;padding:8px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+        .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+        .coverage-bar{background:#f0f0f0;border-radius:6px;height:12px;margin:5px 0;overflow:hidden}
+        .coverage-fill{height:100%;border-radius:10px}
+        .coverage-low{background:#dc3545}.coverage-medium{background:#ffc107}.coverage-high{background:#28a745}
+        .gauge-container{text-align:center;padding:8px}
+        .gauge{width:90px;height:90px;border-radius:50%;margin:0 auto 8px;position:relative;background:conic-gradient(var(--gauge-color) 0deg,var(--gauge-color) calc(var(--percentage)*3.6deg),#f0f0f0 calc(var(--percentage)*3.6deg),#f0f0f0 360deg)}
+        .gauge::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:#fff;border-radius:50%}
+        .gauge-value{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-weight:700}
+        
+        /* Test Status Line Styles */
+        .test-status-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .status-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .status-value {
+            font-weight: 700;
+            color: #007bff;
+            font-size: 16px;
+        }
+        
+        .status-details {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .mini-progress {
+            width: 40px;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .mini-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+        .report-card{background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+        .btn{display:inline-block;margin-top:8px;padding:8px 12px;border-radius:6px;background:#0d6efd;color:#fff;text-decoration:none}
+        .btn.pink{background:#e91e63}
+
+        /* Ensure donut height is strictly limited to 270px maximum */
+        #testStatusChart{width:100% !important;height:270px !important;max-height:270px !important;}
+        
+        /* Ensure HTTP Method Coverage and Status Code Coverage charts are strictly limited to 270px maximum */
+        #methodCoverageChart{width:100% !important;height:270px !important;max-height:270px !important;}
+        #statusCodeChart{width:100% !important;height:270px !important;max-height:270px !important;}
+        
+        /* Test coverage bar styling */
+        #test-coverage-fill{transition:width 0.3s ease}
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo"><img src="logo_icon.png" alt="NoBugs Logo" /></div>
+            <h1>Web Test Framework<br>Analytics Dashboard</h1>
+        </div>
+        <p id="run-info">Comprehensive Test Reports Dashboard - Run #<span id="run-number">$RUN_NUMBER</span></p>
+    </div>
+
+        <!-- 📊 1. Test Status Overview -->
+        <div class="chart-container">
+            <h2 class="chart-title">📊 Test Execution Status</h2>
+
+            <!-- Test Execution Status - Enhanced Layout -->
+            <div class="enhanced-metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">📊</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Pass Rate</div>
+                        <div class="metric-value" id="pass-rate-value">$ALLURE_PASS_RATE%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="pass-rate-fill" style="width: $ALLURE_PASS_RATE%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> (Passed Tests / Total Tests) × 100%<br>
+                            <strong>📍 Source:</strong> Allure test execution results
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">🧪</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Total Tests</div>
+                        <div class="metric-value" id="total-tests-value">$ALLURE_TOTAL_TESTS</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="total-tests-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> Sum of all test methods with @Test annotation<br>
+                            <strong>📍 Source:</strong> Allure test execution summary<br>
+                            <strong>📈 Breakdown:</strong> <span id="passed-tests">$ALLURE_PASSED_TESTS</span> passed, <span id="failed-tests">$ALLURE_FAILED_TESTS</span> failed
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">⏱️</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Average Duration</div>
+                        <div class="metric-value" id="avg-duration-value">$ALLURE_AVG_DURATION</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="avg-duration-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> Total Duration / Total Tests<br>
+                            <strong>📍 Source:</strong> Allure test timing data<br>
+                            <strong>📈 Total:</strong> <span id="total-duration">$ALLURE_TOTAL_DURATION</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">⚠️</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Critical Failures</div>
+                        <div class="metric-value" id="critical-failures-value">$ALLURE_CRITICAL_FAILURES</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="critical-failures-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> Tests marked as critical that failed<br>
+                            <strong>📍 Source:</strong> Allure test execution results with critical tags<br>
+                            <strong>📈 Flaky:</strong> <span id="flaky-tests">$ALLURE_FLAKY_TESTS</span> tests
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">⏭️</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Skipped Tests</div>
+                        <div class="metric-value" id="skipped-tests">$ALLURE_SKIPPED_TESTS</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="skipped-tests-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> Tests that were skipped during execution<br>
+                            <strong>📍 Source:</strong> Allure test execution results
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">📈</div>
+                    <div class="metric-content">
+                        <div class="metric-label">Test Coverage</div>
+                        <div class="metric-value" id="test-coverage-value">$TEST_COVERAGE_PERCENTAGE%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="test-coverage-fill" style="width: $TEST_COVERAGE_PERCENTAGE%"></div>
+                        </div>
+                        <div class="metric-details">
+                            <strong>📊 Calculated:</strong> (Automated Tests / Total Tests) × 100%<br>
+                            <strong>📍 Source:</strong> Test source code analysis (@Test annotations)<br>
+                            <strong>📈 Breakdown:</strong> <span id="automated-tests">$TEST_COVERAGE_AUTOMATED</span> automated, <span id="manual-tests">$TEST_COVERAGE_MANUAL</span> manual
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Donut (70% height of width) -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Test Status Distribution</h3>
+                <canvas id="testStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚙️ 2. API Coverage Analysis -->
+    <div class="chart-container">
+        <h2 class="chart-title">⚙️ API Coverage Analysis</h2>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">API Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="api-coverage-gauge">
+                        <div class="gauge-value" id="api-coverage-value">$SWAGGER_API_COVERAGE%</div>
+                    </div>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Covered Operations / Total Operations) × 100%<br>
+                    📍 Source: Swagger coverage analysis</small>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Conditions Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="conditions-coverage-gauge">
+                        <div class="gauge-value" id="conditions-coverage-value">$SWAGGER_CONDITIONS_COVERAGE%</div>
+                    </div>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Covered Conditions / Total Conditions) × 100%<br>
+                    📍 Source: Swagger conditions analysis</small>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Full Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="full-coverage-gauge">
+                        <div class="gauge-value" id="full-coverage-value">$SWAGGER_FULL_COVERAGE%</div>
+                    </div>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Fully covered endpoints / Total endpoints) × 100%<br>
+                    📍 Source: Swagger coverage analysis</small>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Partial Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="partial-coverage-gauge">
+                        <div class="gauge-value" id="partial-coverage-value">$SWAGGER_PARTIAL_COVERAGE%</div>
+                    </div>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Partially covered endpoints / Total endpoints) × 100%<br>
+                    📍 Source: Swagger coverage analysis</small>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Empty Coverage</div>
+                <div class="gauge-container">
+                    <div class="gauge" id="empty-coverage-gauge">
+                        <div class="gauge-value" id="empty-coverage-value">$SWAGGER_EMPTY_COVERAGE%</div>
+                    </div>
+                </div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Uncovered endpoints / Total endpoints) × 100%<br>
+                    📍 Source: Swagger coverage analysis</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Operations Coverage</div>
+                <div class="kpi-value" id="operations-coverage-value">$SWAGGER_OPERATIONS_COVERAGE%</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="operations-coverage-fill" style="width: $SWAGGER_OPERATIONS_COVERAGE%"></div>
+                </div>
+                <div class="metric-details">
+                    <span>Covered: <span id="covered-operations">$SWAGGER_COVERED_OPERATIONS</span></span>
+                    <span>Total: <span id="total-operations">$SWAGGER_TOTAL_OPERATIONS</span></span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Tags Coverage</div>
+                <div class="kpi-value" id="tags-coverage-value">$SWAGGER_TAGS_COVERAGE%</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="tags-coverage-fill" style="width: $SWAGGER_TAGS_COVERAGE%"></div>
+                </div>
+                <div class="metric-details">
+                    <span>Covered: <span id="covered-tags">$SWAGGER_COVERED_TAGS</span></span>
+                    <span>Total: <span id="total-tags">$SWAGGER_TOTAL_TAGS</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>HTTP Method Coverage</h3>
+                <canvas id="methodCoverageChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Status Code Coverage</h3>
+                <canvas id="statusCodeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚡ 3. Performance & Parallelization Analysis -->
+    <div class="chart-container">
+        <h2 class="chart-title">⚡ Performance & Parallelization Analysis</h2>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Median Test Duration</div>
+                <div class="kpi-value" id="median-duration-value">$PERFORMANCE_MEDIAN_DURATION ms</div>
+                <div class="metric-details">Central tendency of test execution time</div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: Middle value of sorted test durations<br>
+                    📍 Source: Allure test result files (.json)</small>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Parallelization Efficiency</div>
+                <div class="kpi-value" id="parallelization-efficiency-value">$PERFORMANCE_PARALLELIZATION_EFFICIENCY%</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="parallelization-efficiency-fill" style="width: $PERFORMANCE_PARALLELIZATION_EFFICIENCY%"></div>
+                </div>
+                <div class="metric-details">How evenly tests are distributed across shards</div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: Based on TestNG thread configuration & distribution<br>
+                    📍 Source: TestNG parallel settings + test execution analysis</small>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Redundancy Index</div>
+                <div class="kpi-value" id="redundancy-index-value">$PERFORMANCE_REDUNDANCY_INDEX%</div>
+                <div class="coverage-bar">
+                    <div class="coverage-fill" id="redundancy-index-fill" style="width: $PERFORMANCE_REDUNDANCY_INDEX%"></div>
+                </div>
+                <div class="metric-details">Duplicate test patterns detected</div>
+                <div class="metric-calculation">
+                    <small>📊 Calculated: (Duplicate patterns / Total patterns) × 100%<br>
+                    📍 Source: Test source code analysis (@Test descriptions)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>Longest 10 Tests (Bottlenecks)</h3>
+            <div id="longest-tests-container">
+                <p class="no-data">Loading test duration data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports links -->
+    <div class="reports-section">
+        <h2>📋 Detailed Reports</h2>
+        <div class="reports-grid">
+            <div class="report-card">
+                <div class="report-icon">📊</div>
+                <h3>Allure Test Report</h3>
+                <p>Comprehensive test execution results with detailed analytics.</p>
+                <a href="$ALLURE_REPORT_URL" id="allure-link" class="btn" target="_blank">View Allure Report</a>
+            </div>
+
+            <div class="report-card">
+                <div class="report-icon pink">🔍</div>
+                <h3>Swagger Coverage Report</h3>
+                <p>API endpoint coverage analysis and testing status.</p>
+                <a href="$SWAGGER_REPORT_URL" id="swagger-link" class="btn pink" target="_blank">View Swagger Coverage</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Built with <strong style="color:#08fc04;">NoBugs</strong> ❤️ for quality assurance</p>
+    </div>
+</div>
+
+<script>
+    let charts = {};
+
+    function getCoverageColor(p){ if(p<20) return '#dc3545'; if(p<70) return '#ffc107'; return '#28a745'; }
+    function setGauge(id, p){
+      var g=document.getElementById(id); if(!g) return;
+      var v=g.querySelector('.gauge-value'); var c=getCoverageColor(p);
+      g.style.setProperty('--percentage', p); g.style.setProperty('--gauge-color', c);
+      v.textContent = p + '%'; v.style.color=c;
+    }
+    function setBarWidth(id, p){
+      var f=document.getElementById(id); if(!f) return;
+      var c=getCoverageColor(p); f.style.width = p + '%';
+      f.className = 'coverage-fill ' + (p<20?'coverage-low':(p<70?'coverage-medium':'coverage-high'));
+    }
+
+    function createTestStatusChart(data){
+      var ctx=document.getElementById('testStatusChart').getContext('2d');
+      if(charts.testStatus) charts.testStatus.destroy();
+      
+      var passed = data.passedTests||0;
+      var failed = data.failedTests||0;
+      var skipped = data.skippedTests||0;
+      var flaky = data.flakyTests||0;
+      var critical = data.criticalFailures||0;
+      
+      // Only show categories that have data
+      var labels = [];
+      var values = [];
+      var colors = [];
+      
+      if(passed > 0) { labels.push('Passed'); values.push(passed); colors.push('#28a745'); }
+      if(failed > 0) { labels.push('Failed'); values.push(failed); colors.push('#dc3545'); }
+      if(skipped > 0) { labels.push('Skipped'); values.push(skipped); colors.push('#6c757d'); }
+      if(flaky > 0) { labels.push('Flaky'); values.push(flaky); colors.push('#ffc107'); }
+      if(critical > 0) { labels.push('Critical'); values.push(critical); colors.push('#dc3545'); }
+      
+      // If no data, show placeholder
+      if(values.length === 0) {
+        labels = ['No Data'];
+        values = [1];
+        colors = ['#e9ecef'];
+      }
+      
+      charts.testStatus=new Chart(ctx,{
+        type:'doughnut',
+        data:{
+          labels: labels,
+          datasets:[{
+            data: values,
+            backgroundColor: colors,
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          layout:{ padding:{ top:3, bottom:3, left:3, right:3 } },
+          plugins:{ 
+            legend:{ 
+              position:'bottom', 
+              labels:{ 
+                padding:3, 
+                font:{ size:10 }, 
+                boxWidth:10, 
+                boxHeight:10 
+              } 
+            } 
+          }
+        }
+      });
+    }
+
+    function createMethodCoverageChart(d){
+      var ctx=document.getElementById('methodCoverageChart').getContext('2d');
+      if(charts.methodCoverage) charts.methodCoverage.destroy();
+      var m=d.methodCoverage||{}, keys=Object.keys(m), vals=keys.map(function(k){ return m[k].coverage||0; });
+      
+      if(keys.length === 0) {
+        // Show sample data if no real data
+        keys = ['GET', 'POST', 'PUT', 'DELETE'];
+        vals = [85, 70, 60, 40];
+      }
+      
+      charts.methodCoverage=new Chart(ctx,{
+        type:'bar',
+        data:{ 
+          labels:keys, 
+          datasets:[{ 
+            label:'Coverage %', 
+            data:vals, 
+            backgroundColor:vals.map(getCoverageColor), 
+            borderColor:vals.map(getCoverageColor), 
+            borderWidth:1 
+          }] 
+        },
+        options:{ 
+          responsive:true, 
+          maintainAspectRatio:false, 
+          scales:{ 
+            y:{ beginAtZero:true, max:100 } 
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    function createStatusCodeChart(d){
+      var ctx=document.getElementById('statusCodeChart').getContext('2d');
+      if(charts.statusCode) charts.statusCode.destroy();
+      var s=d.statusCodeCoverage||{}, codes=Object.keys(s), cnt=codes.map(function(k){ return s[k]||0; });
+      
+      if(codes.length === 0) {
+        // Show sample data if no real data
+        codes = ['200', '400', '403', '404', '500'];
+        cnt = [15, 8, 5, 3, 2];
+      }
+      
+      charts.statusCode=new Chart(ctx,{
+        type:'bar',
+        data:{ 
+          labels:codes, 
+          datasets:[{ 
+            label:'Coverage Count', 
+            data:cnt, 
+            backgroundColor:'#007bff', 
+            borderColor:'#0056b3', 
+            borderWidth:1 
+          }] 
+        },
+        options:{ 
+          responsive:true, 
+          maintainAspectRatio:false, 
+          scales:{ 
+            y:{ beginAtZero:true } 
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    function applyMetrics(data){
+      if(data.allure){
+        document.getElementById('pass-rate-value').textContent = (data.allure.passRate||0) + '%';
+        setBarWidth('pass-rate-fill', Number(data.allure.passRate||0));
+        
+        document.getElementById('total-tests-value').textContent = data.allure.totalTests||0;
+        setBarWidth('total-tests-fill', 100); // Always 100% for total tests
+        
+        document.getElementById('passed-tests').textContent = (data.allure.passedTests||0) + ' passed';
+        document.getElementById('failed-tests').textContent = (data.allure.failedTests||0) + ' failed';
+        
+        // Set progress bars for duration and failure metrics
+        const avgDuration = Number(data.allure.avgDuration||0);
+        const totalTests = Number(data.allure.totalTests||0);
+        if (totalTests > 0) {
+          // Normalize average duration to a 0-100 scale (assuming 30s is 100%)
+          const durationPercent = Math.min((avgDuration / 30) * 100, 100);
+          setBarWidth('avg-duration-fill', durationPercent);
+        }
+        
+        // Set critical failures progress bar (0-100% based on total tests)
+        const criticalFailures = Number(data.allure.criticalFailures||0);
+        const criticalPercent = totalTests > 0 ? (criticalFailures / totalTests) * 100 : 0;
+        setBarWidth('critical-failures-fill', criticalPercent);
+        
+        // Set skipped tests progress bar
+        const skippedTests = Number(data.allure.skippedTests||0);
+        const skippedPercent = totalTests > 0 ? (skippedTests / totalTests) * 100 : 0;
+        setBarWidth('skipped-tests-fill', skippedPercent);
+        
+        createTestStatusChart(data.allure);
+      }
+      if(data.swagger){
+        setGauge('api-coverage-gauge', Number(data.swagger.apiCoverage||0));
+        setGauge('conditions-coverage-gauge', Number(data.swagger.conditionsCoverage||0));
+        setGauge('full-coverage-gauge', Number(data.swagger.fullCoverage||0));
+        setGauge('partial-coverage-gauge', Number(data.swagger.partialCoverage||0));
+        setGauge('empty-coverage-gauge', Number(data.swagger.emptyCoverage||0));
+        
+        document.getElementById('operations-coverage-value').textContent = (data.swagger.apiCoverage||0) + '%';
+        setBarWidth('operations-coverage-fill', Number(data.swagger.apiCoverage||0));
+        
+        // Update Tags Coverage
+        document.getElementById('tags-coverage-value').textContent = (data.swagger.tagsCoverage||0) + '%';
+        setBarWidth('tags-coverage-fill', Number(data.swagger.tagsCoverage||0));
+        document.getElementById('covered-tags').textContent = data.swagger.coveredTags||0;
+        document.getElementById('total-tags').textContent = data.swagger.totalTags||0;
+        
+        createMethodCoverageChart(data.swagger);
+        createStatusCodeChart(data.swagger);
+      }
+      if(data.testCoverage){
+        document.getElementById('test-coverage-value').textContent = (data.testCoverage.coveragePercentage||0) + '%';
+        setBarWidth('test-coverage-fill', Number(data.testCoverage.coveragePercentage||0));
+        document.getElementById('automated-tests').textContent = (data.testCoverage.automatedTests||0) + ' automated';
+        document.getElementById('manual-tests').textContent = (data.testCoverage.manualTests||0) + ' manual';
+      }
+      if(data.performance){
+        document.getElementById('median-duration-value').textContent = (data.performance.medianDuration||0) + ' ms';
+        document.getElementById('parallelization-efficiency-value').textContent = (data.performance.parallelizationEfficiency||0) + '%';
+        setBarWidth('parallelization-efficiency-fill', Number(data.performance.parallelizationEfficiency||0));
+        document.getElementById('redundancy-index-value').textContent = (data.performance.redundancyIndex||0) + '%';
+        setBarWidth('redundancy-index-fill', Number(data.performance.redundancyIndex||0));
+        
+        // Display longest tests
+        displayLongestTests(data.performance.longestTests||[]);
+      }
+    }
+
+    function displayLongestTests(longestTests){
+      const container = document.getElementById('longest-tests-container');
+      if (!container) return;
+      
+      if (!Array.isArray(longestTests) || longestTests.length === 0) {
+        container.innerHTML = '<p class="no-data">No test duration data available</p>';
+        return;
+      }
+      
+      let html = '<div class="longest-tests-list" style="max-height: 300px; overflow-y: auto;">';
+      longestTests.forEach((test, index) => {
+        const rank = index + 1;
+        const durationMs = test.duration || 0;
+        const durationSec = (durationMs / 1000).toFixed(1);
+        const testName = test.name || 'Unknown Test';
+        const durationColor = durationMs > 60000 ? '#dc3545' : durationMs > 30000 ? '#ffc107' : '#28a745';
+        html += `<div class="test-duration-item" style="display: flex; justify-content: space-between; align-items: center; padding: 8px; margin: 4px 0; background: #f8f9fa; border-radius: 4px; border-left: 3px solid ${durationColor};">
+          <span class="rank" style="font-weight: bold; color: #6c757d;">#${rank}</span>
+          <span class="test-name" style="flex: 1; margin: 0 12px; font-size: 14px;">${testName}</span>
+          <span class="duration" style="font-weight: bold; color: ${durationColor};">${durationSec}s</span>
+          <span class="duration-ms" style="font-size: 12px; color: #6c757d;">(${durationMs}ms)</span>
+        </div>`;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function loadMetrics(){
+      console.log('🚀 Starting loadMetrics...');
+      fetch('metrics.json')
+        .then(function(r){ 
+          console.log('📊 Fetch response:', r.status, r.statusText);
+          if(!r.ok) throw new Error('no metrics'); 
+          return r.json(); 
+        })
+        .then(function(data) {
+          console.log('✅ Metrics loaded:', data);
+          applyMetrics(data);
+        })
+        .catch(function(error){ 
+          console.log('❌ Error loading metrics:', error);
+        });
+    }
+    
+
+    function handleRunNumber(){
+      const runNumberSpan = document.getElementById('run-number');
+      if (runNumberSpan) {
+        const runNumber = runNumberSpan.textContent;
+        // If RUN_NUMBER is not replaced (still shows $RUN_NUMBER), set a fallback
+        if (runNumber === '$RUN_NUMBER' || !runNumber || runNumber.trim() === '') {
+          runNumberSpan.textContent = 'Latest';
+          runNumberSpan.style.color = '#6c757d';
+          runNumberSpan.style.fontStyle = 'italic';
+        }
+      }
+    }
+
+    function handleReportLinks(){
+      const allureLink = document.getElementById('allure-link');
+      const swaggerLink = document.getElementById('swagger-link');
+      
+      // Get the current run number from the URL
+      const pathParts = window.location.pathname.split('/');
+      const runNumber = pathParts[pathParts.length - 2] || 'latest';
+      
+      // Set the correct URLs based on run number
+      if (allureLink) {
+        if (runNumber === 'latest' || runNumber === '' || isNaN(runNumber)) {
+          // For main dashboard, try to find the most recent run
+          allureLink.href = '#';
+          allureLink.textContent = 'Allure Report Not Available';
+          allureLink.style.opacity = '0.6';
+          allureLink.style.pointerEvents = 'none';
+        } else {
+          // Set the correct URL for the specific run
+          allureLink.href = `./${runNumber}/allure-report/`;
+          allureLink.textContent = 'View Allure Report';
+          allureLink.style.opacity = '1';
+          allureLink.style.pointerEvents = 'auto';
+        }
+      }
+      
+      if (swaggerLink) {
+        if (runNumber === 'latest' || runNumber === '' || isNaN(runNumber)) {
+          // For main dashboard, try to find the most recent run
+          swaggerLink.href = '#';
+          swaggerLink.textContent = 'Swagger Report Not Available';
+          swaggerLink.style.opacity = '0.6';
+          swaggerLink.style.pointerEvents = 'none';
+        } else {
+          // Set the correct URL for the specific run
+          swaggerLink.href = `./${runNumber}/swagger-coverage-report/`;
+          swaggerLink.textContent = 'View Swagger Coverage';
+          swaggerLink.style.opacity = '1';
+          swaggerLink.style.pointerEvents = 'auto';
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMetrics);
+</script>
+</body>
+</html>
