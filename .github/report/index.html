@@ -312,9 +312,6 @@
 
     <!-- Reports links -->
     <div class="reports-section">
-        <div id="ci-notice" style="display: none;" class="ci-notice">
-            <p>⚠️ This dashboard is showing sample data. For real-time metrics, please run the CI/CD pipeline.</p>
-        </div>
         <h2>📋 Detailed Reports</h2>
         <div class="reports-grid">
             <div class="report-card">
@@ -578,72 +575,22 @@
     }
 
     function loadMetrics(){
-      // Try to get the current run number from the URL
-      const pathParts = window.location.pathname.split('/');
-      const runNumber = pathParts[pathParts.length - 2];
-      
-      console.log('🔍 Dashboard Debug Information:');
-      console.log('   - Current URL:', window.location.href);
-      console.log('   - Path parts:', pathParts);
-      console.log('   - Detected run number:', runNumber);
-      console.log('   - User agent:', navigator.userAgent);
-      
-      if (runNumber && runNumber !== 'latest' && !isNaN(runNumber)) {
-        // We're viewing a specific run, try to fetch its metrics
-        const metricsUrl = `./${runNumber}/metrics.json`;
-        console.log('   - Fetching metrics from:', metricsUrl);
-        
-        fetch(metricsUrl)
-          .then(function(r){ 
-            console.log('   - Fetch response status:', r.status, r.statusText);
-            if(!r.ok) throw new Error('no metrics'); 
-            return r.json(); 
-          })
-          .then(function(data) {
-            console.log('   - Metrics loaded successfully:', data);
-            applyMetrics(data);
-            hideSampleDataWarning();
-          })
-          .catch(function(error){ 
-            console.log('   - No metrics found for run', runNumber, 'Error:', error.message);
-            showSampleDataWarning();
-          });
-      } else {
-        // We're on the main dashboard, try to fetch metrics from current directory
-        const metricsUrl = './metrics.json';
-        console.log('   - Fetching metrics from:', metricsUrl);
-        
-        fetch(metricsUrl)
-          .then(function(r){ 
-            console.log('   - Fetch response status:', r.status, r.statusText);
-            if(!r.ok) throw new Error('no metrics'); 
-            return r.json(); 
-          })
-          .then(function(data) {
-            console.log('   - Metrics loaded successfully:', data);
-            applyMetrics(data);
-            hideSampleDataWarning();
-          })
-          .catch(function(error){ 
-            console.log('   - No metrics found in current directory, Error:', error.message);
-            showSampleDataWarning();
-          });
-      }
+      console.log('🚀 Starting loadMetrics...');
+      fetch('metrics.json')
+        .then(function(r){ 
+          console.log('📊 Fetch response:', r.status, r.statusText);
+          if(!r.ok) throw new Error('no metrics'); 
+          return r.json(); 
+        })
+        .then(function(data) {
+          console.log('✅ Metrics loaded:', data);
+          applyMetrics(data);
+        })
+        .catch(function(error){ 
+          console.log('❌ Error loading metrics:', error);
+        });
     }
     
-    function hideSampleDataWarning() {
-      const ciNotice = document.getElementById('ci-notice');
-      if (ciNotice) {
-        ciNotice.style.display = 'none';
-      }
-    }
-    
-    function showSampleDataWarning() {
-      const ciNotice = document.getElementById('ci-notice');
-      if (ciNotice) {
-        ciNotice.style.display = 'block';
-      }
-    }
 
     function handleRunNumber(){
       const runNumberSpan = document.getElementById('run-number');
@@ -700,11 +647,7 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', function(){
-      loadMetrics();
-      handleRunNumber();
-      handleReportLinks();
-    });
+    document.addEventListener('DOMContentLoaded', loadMetrics);
 </script>
 </body>
 </html>
